@@ -1,0 +1,27 @@
+function exec(cmdline) {
+  console.log("+ " + cmdline);
+  args = cmdline.split(/\s+/);
+  return os.system.apply(null, args);
+}
+
+aster.watch(/.+\.go$/, function(files) {
+  // build
+  if (exec("go get -t -v ./...")) {
+    aster.notify("failure", "build", "failure");
+    return;
+  }
+  aster.notify("success", "build", "success");
+
+  // test
+  if (exec("go test -v -cover -coverprofile cover.out")) {
+    aster.notify("failure", "test", "failure");
+    return;
+  }
+  aster.notify("success", "test", "success");
+
+  // coverage
+  exec("go tool cover -func cover.out");
+  exec("go tool cover -html cover.out -o coverage.html");
+
+  console.log("--");
+});

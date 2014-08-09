@@ -1,0 +1,87 @@
+//
+// aster :: otto.go
+//
+//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//
+//   Permission is hereby granted, free of charge, to any person
+//   obtaining a copy of this software and associated documentation files
+//   (the "Software"), to deal in the Software without restriction,
+//   including without limitation the rights to use, copy, modify, merge,
+//   publish, distribute, sublicense, and/or sell copies of the Software,
+//   and to permit persons to whom the Software is furnished to do so,
+//   subject to the following conditions:
+//
+//   The above copyright notice and this permission notice shall be
+//   included in all copies or substantial portions of the Software.
+//
+//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+//   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+//   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+//   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//   SOFTWARE.
+//
+
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+
+	"github.com/robertkrimen/otto"
+	"github.com/robertkrimen/otto/parser"
+)
+
+func newVM() *otto.Otto {
+	vm := otto.New()
+	// os object
+	os, _ := vm.Object(`os = {}`)
+	os.Set("system", os_system)
+
+	return vm
+}
+
+func throw(value otto.Value, _ error) otto.Value {
+	panic(value)
+}
+
+func ottoError(err error) error {
+	switch e := err.(type) {
+	case *otto.Error:
+		return fmt.Errorf(strings.TrimSpace(e.String()))
+	case parser.ErrorList:
+		var b bytes.Buffer
+		for _, pe := range e {
+			fmt.Fprintf(&b, "Asterfile:%d:%d: %s", pe.Position.Line, pe.Position.Column, pe.Message)
+			if pe.Message == "Unexpected end of input" {
+				break
+			}
+		}
+		return fmt.Errorf(b.String())
+	}
+	return err
+}
+
+func os_system(call otto.FunctionCall) otto.Value {
+	var args []string
+	for _, a := range call.ArgumentList {
+		s, _ := a.ToString()
+		args = append(args, s)
+	}
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			return otto.TrueValue()
+		}
+		return throw(otto.ToValue(err.Error()))
+	}
+	return otto.UndefinedValue()
+}
