@@ -98,9 +98,10 @@ func (w *Watcher) WaitEvent() {
 func (w *Watcher) Loop() {
 	var mu sync.Mutex
 	files := make(map[string]int)
-	running := false
 	fire := make(chan bool, 1)
 	done := make(chan bool, 1)
+
+	done <- true
 	for {
 		select {
 		case name := <-w.qc:
@@ -122,18 +123,15 @@ func (w *Watcher) Loop() {
 			}
 		case <-fire:
 			go func() {
-				if running {
-					select {
-					case <-done:
-					case fire <- true:
-						// retry
-						return
-					default:
-						return
-					}
+				select {
+				case <-done:
+				case fire <- true:
+					// retry
+					return
+				default:
+					return
 				}
 
-				running = true
 				mu.Lock()
 				// process
 				w.af.OnChange(files)
@@ -143,7 +141,6 @@ func (w *Watcher) Loop() {
 				}
 				mu.Unlock()
 				done <- true
-				running = false
 			}()
 		}
 	}
