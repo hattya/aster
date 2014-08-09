@@ -29,6 +29,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -95,6 +96,7 @@ func (w *Watcher) WaitEvent() {
 }
 
 func (w *Watcher) Loop() {
+	var mu sync.Mutex
 	files := make(map[string]int)
 	running := false
 	fire := make(chan bool, 1)
@@ -102,6 +104,7 @@ func (w *Watcher) Loop() {
 	for {
 		select {
 		case name := <-w.qc:
+			mu.Lock()
 			files[name]++
 		squash:
 			for {
@@ -112,6 +115,7 @@ func (w *Watcher) Loop() {
 					files[name]++
 				}
 			}
+			mu.Unlock()
 			select {
 			case fire <- true:
 			default:
@@ -128,13 +132,16 @@ func (w *Watcher) Loop() {
 						return
 					}
 				}
-				// process
+
 				running = true
+				mu.Lock()
+				// process
 				w.af.OnChange(files)
 				// clear
 				for n := range files {
 					delete(files, n)
 				}
+				mu.Unlock()
 				done <- true
 				running = false
 			}()
