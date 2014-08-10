@@ -35,7 +35,9 @@ import (
 
 func TestWatch(t *testing.T) {
 	err := sandbox(func() {
-		js := `aster.watch(/.+\.go$/, function(files) {})`
+		js := `aster.watch(/.+\.go$/, function(files) {
+  //console.log(files);
+})`
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}
@@ -52,8 +54,10 @@ func TestWatch(t *testing.T) {
 
 		go watcher.Watch()
 		touch("a.go")
-		os.Rename("a.go", "b.go")
-		os.Remove("b.go")
+		touch("b.go")
+		os.Rename("b.go", "_b.go")
+		os.Remove("_b.go")
+		touch("c.go")
 		time.Sleep(1201 * time.Millisecond)
 	})
 	if err != nil {

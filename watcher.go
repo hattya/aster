@@ -107,16 +107,18 @@ func (w *Watcher) Loop() {
 		case name := <-w.qc:
 			mu.Lock()
 			files[name]++
+			mu.Unlock()
 		squash:
 			for {
 				select {
 				case <-time.After(1 * time.Second):
 					break squash
 				case name := <-w.qc:
+					mu.Lock()
 					files[name]++
+					mu.Unlock()
 				}
 			}
-			mu.Unlock()
 			select {
 			case fire <- true:
 			default:
@@ -132,14 +134,16 @@ func (w *Watcher) Loop() {
 					return
 				}
 
+				// create snapshot & clear
 				mu.Lock()
-				// process
-				w.af.OnChange(files)
-				// clear
-				for n := range files {
+				ss := make(map[string]int)
+				for n, c := range files {
+					ss[n] = c
 					delete(files, n)
 				}
 				mu.Unlock()
+				// process
+				w.af.OnChange(ss)
 				done <- true
 			}()
 		}
