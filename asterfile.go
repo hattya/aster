@@ -108,6 +108,7 @@ func (a *Aster) OnChange(files map[string]int) {
 			if err != nil {
 				warn(err)
 			}
+			return
 		}
 	}
 }
