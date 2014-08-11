@@ -94,16 +94,16 @@ func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
 
 func (a *Aster) OnChange(files map[string]int) {
 	for re, co := range a.watch {
-		var changes []interface{}
+		var cl []interface{}
 		for n := range files {
 			v, _ := re.Call("test", n)
 			test, _ := v.ToBoolean()
 			if test {
-				changes = append(changes, n)
+				cl = append(cl, n)
 			}
 		}
-		if 0 < len(changes) {
-			ary, _ := a.vm.Call(`new Array`, nil, changes...)
+		if 0 < len(cl) {
+			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := co.Call("call", nil, ary)
 			if err != nil {
 				warn(err)

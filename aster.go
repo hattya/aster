@@ -59,5 +59,6 @@ options:
 
   -h                  show this help message and exit
   -g[=<host:port>]    notify to Growl (default: localhost:23053)
+
 `, prog())
 }
