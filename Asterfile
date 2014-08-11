@@ -1,9 +1,3 @@
-function exec(cmdline) {
-  console.log("+ " + cmdline);
-  args = cmdline.split(/\s+/);
-  return os.system.apply(null, args);
-}
-
 aster.watch(/.+\.go$/, function(files) {
   // build
   if (exec("go get -t -v ./...")) {
@@ -22,6 +16,30 @@ aster.watch(/.+\.go$/, function(files) {
   // coverage
   exec("go tool cover -func cover.out");
   exec("go tool cover -html cover.out -o coverage.html");
-
-  console.log("--");
 });
+
+aster.watch(/.+\.rst$/, function(files) {
+  files.forEach(rst2html);
+  aster.notify("success", "rst2html.py", files.join("\n"));
+});
+
+// exec
+function exec(cmdline) {
+  console.log("+ " + cmdline);
+  return os.system.apply(null, cmdline.split(/\s+/));
+}
+
+// rst2html
+var rst2html_py = [];
+if (os.whence("py") === undefined) {
+  rst2html_py.push("rst2html.py");
+} else {
+  rst2html_py.push("py");
+  rst2html_py.push(os.whence("rst2html.py"));
+}
+
+function rst2html(rst) {
+  var html = rst.slice(0, -4) + ".html";
+  console.log("+ rst2html.py " + rst + " " + html);
+  return os.system.apply(null, rst2html_py.concat(rst, html));
+}
