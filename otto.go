@@ -42,6 +42,7 @@ func newVM() *otto.Otto {
 	// os object
 	os, _ := vm.Object(`os = {}`)
 	os.Set("system", os_system)
+	os.Set("whence", os_whence)
 
 	return vm
 }
@@ -81,7 +82,19 @@ func os_system(call otto.FunctionCall) otto.Value {
 		if _, ok := err.(*exec.ExitError); ok {
 			return otto.TrueValue()
 		}
-		return throw(otto.ToValue(err.Error()))
+		return throw(call.Otto.ToValue(err.Error()))
+	}
+	return otto.UndefinedValue()
+}
+
+func os_whence(call otto.FunctionCall) otto.Value {
+	if 0 < len(call.ArgumentList) {
+		s, _ := call.Argument(0).ToString()
+		path, err := exec.LookPath(s)
+		if err == nil {
+			v, _ := call.Otto.ToValue(path)
+			return v
+		}
 	}
 	return otto.UndefinedValue()
 }

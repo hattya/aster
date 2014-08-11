@@ -61,6 +61,26 @@ func TestOSSystem(t *testing.T) {
 	}
 }
 
+func TestOSWhence(t *testing.T) {
+	vm := newVM()
+
+	src := `os.whence()`
+	switch v, err := vm.Run(src); {
+	case err != nil:
+		t.Error(err)
+	case !v.IsUndefined():
+		t.Errorf("expected undefined, got %v", v)
+	}
+
+	src = `os.whence("go")`
+	switch v, err := vm.Run(src); {
+	case err != nil:
+		t.Error(err)
+	case !v.IsString():
+		t.Errorf("expected string, got %v", v)
+	}
+}
+
 func isTrue(v otto.Value) error {
 	if !v.IsBoolean() {
 		return fmt.Errorf("expected boolean, got %v", v)
