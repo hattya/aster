@@ -86,7 +86,12 @@ func (w *Watcher) WaitEvent() {
 			case fsnotify.Chmod, fsnotify.Rename:
 				continue
 			}
-			w.qc <- ev.Name
+			name := ev.Name
+			// remove "./" prefix
+			if 2 < len(name) && name[0] == '.' && os.IsPathSeparator(name[1]) {
+				name = name[2:]
+			}
+			w.qc <- name
 		case err := <-w.watcher.Errors:
 			if err != nil {
 				warn(err)
