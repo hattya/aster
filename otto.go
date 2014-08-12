@@ -69,15 +69,54 @@ func ottoError(err error) error {
 }
 
 func os_system(call otto.FunctionCall) otto.Value {
+	// defaults
+	stdout := os.Stdout
+	stderr := os.Stderr
+	// args
+	v, _ := call.Argument(0).Export()
+	ary, ok := v.([]interface{})
+	if !ok {
+		return otto.UndefinedValue()
+	}
 	var args []string
-	for _, a := range call.ArgumentList {
-		s, _ := a.ToString()
+	for _, a := range ary {
+		s, ok := a.(string)
+		if !ok {
+			return otto.UndefinedValue()
+		}
 		args = append(args, s)
 	}
+	// options
+	v, _ = call.Argument(1).Export()
+	options, ok := v.(map[string]interface{})
+	if ok {
+		var err error
+		// stdout
+		if v, ok := options["stdout"]; ok {
+			if s, ok := v.(string); ok {
+				stdout, err = os.Create(s)
+				if err != nil {
+					return throw(call.Otto.ToValue(err.Error()))
+				}
+				defer stdout.Close()
+			}
+		}
+		// stderr
+		if v, ok := options["stderr"]; ok {
+			if s, ok := v.(string); ok {
+				stderr, err = os.Create(s)
+				if err != nil {
+					return throw(call.Otto.ToValue(err.Error()))
+				}
+				defer stderr.Close()
+			}
+		}
+	}
+
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
 			return otto.TrueValue()

@@ -28,9 +28,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/robertkrimen/otto"
@@ -39,25 +41,73 @@ import (
 func TestOSSystem(t *testing.T) {
 	prog := filepath.ToSlash(os.Args[0])
 	vm := newVM()
+	tmpl := `os.system(["%s", "-test.run=TestProcess", "%d"])`
 
-	src := fmt.Sprintf(`os.system("%s", "-test.run=TestProcess", "0")`, prog)
-	switch v, err := vm.Run(src); {
+	src := fmt.Sprintf(tmpl, prog, 0)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(tmpl, prog, 1)
+	switch b, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
-	case !v.IsUndefined():
-		t.Errorf("expected undefined, got %v", v)
+	case !b:
+		t.Errorf("expected true, got %v", b)
 	}
 
-	src = fmt.Sprintf(`os.system("%s", "-test.run=TestProcess", "1")`, prog)
-	if v, err := vm.Run(src); err != nil {
-		t.Error(err)
-	} else if err = isTrue(v); err != nil {
-		t.Error(err)
-	}
-
-	src = fmt.Sprintf(`os.system(1)`)
+	// invalid args
+	src = fmt.Sprintf(`os.system(["1"])`)
 	if _, err := vm.Run(src); err == nil {
 		t.Errorf("expected error")
+	}
+
+	// invalid args
+	src = fmt.Sprintf(`os.system("1")`)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	// invalid args
+	src = fmt.Sprintf(`os.system([1])`)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestOSSystemRedir(t *testing.T) {
+	f, err := mktemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+	defer f.Close()
+
+	prog := filepath.ToSlash(os.Args[0])
+	name := filepath.ToSlash(f.Name())
+	vm := newVM()
+	tmpl := `os.system(["%s", "-test.run=TestRedirection", "%[2]s"], {"%[2]s": "%s"})`
+
+	for _, redir := range []string{"stdout", "stderr"} {
+		src := fmt.Sprintf(tmpl, prog, redir, name)
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
+		f.Seek(0, os.SEEK_SET)
+		data, err := ioutil.ReadAll(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		list := strings.SplitN(string(data), "\n", 2)
+		if g, e := list[0], redir; g != e {
+			t.Errorf("expected %v, got %v", e, g)
+		}
+
+		// invalid args
+		src = fmt.Sprintf(tmpl, prog, redir, ".")
+		if _, err := vm.Run(src); err == nil {
+			t.Error("expected error")
+		}
 	}
 }
 
@@ -65,33 +115,14 @@ func TestOSWhence(t *testing.T) {
 	vm := newVM()
 
 	src := `os.whence()`
-	switch v, err := vm.Run(src); {
-	case err != nil:
+	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
-	case !v.IsUndefined():
-		t.Errorf("expected undefined, got %v", v)
 	}
 
 	src = `os.whence("go")`
-	switch v, err := vm.Run(src); {
-	case err != nil:
+	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
-	case !v.IsString():
-		t.Errorf("expected string, got %v", v)
 	}
-}
-
-func isTrue(v otto.Value) error {
-	if !v.IsBoolean() {
-		return fmt.Errorf("expected boolean, got %v", v)
-	}
-	switch b, err := v.ToBoolean(); {
-	case err != nil:
-		return err
-	case !b:
-		return fmt.Errorf("expected true, got %v", b)
-	}
-	return nil
 }
 
 func TestProcess(*testing.T) {
@@ -100,4 +131,48 @@ func TestProcess(*testing.T) {
 	}
 	n, _ := strconv.Atoi(os.Args[2])
 	os.Exit(n)
+}
+
+func TestRedirection(*testing.T) {
+	if len(os.Args) != 3 || os.Args[1] != "-test.run=TestRedirection" {
+		return
+	}
+	switch os.Args[2] {
+	case "stdout":
+		fmt.Fprintln(os.Stdout, "stdout")
+	case "stderr":
+		fmt.Fprintln(os.Stderr, "stderr")
+	}
+}
+
+func testUndefined(vm *otto.Otto, src string) error {
+	v, err := vm.Run(src)
+	if err == nil && !v.IsUndefined() {
+		err = fmt.Errorf("expected undefined, got %v", v)
+	}
+	return err
+}
+
+func testBoolean(vm *otto.Otto, src string) (bool, error) {
+	v, err := vm.Run(src)
+	if err == nil {
+		if !v.IsBoolean() {
+			err = fmt.Errorf("expected boolean, got %v", v)
+		} else {
+			return v.ToBoolean()
+		}
+	}
+	return false, err
+}
+
+func testString(vm *otto.Otto, src string) (string, error) {
+	v, err := vm.Run(src)
+	if err == nil {
+		if !v.IsString() {
+			err = fmt.Errorf("expected string, got %v")
+		} else {
+			return v.ToString()
+		}
+	}
+	return "", err
 }

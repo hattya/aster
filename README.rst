@@ -32,22 +32,22 @@ Asterfile is evaluated as JavaScript by otto_.
 
    aster.watch(/.+\.go$/, function(files) {
      // build
-     if (os.system('go', 'get', '-t', '-v', './...')) {
+     if (os.system(['go', 'get', '-t', '-v', './...'])) {
        aster.notify('failure', 'build', 'failure');
        return;
      }
      aster.notify('success', 'build', 'success');
 
      // test
-     if (os.system('go', 'test', '-v', '-cover', '-coverprofile cover.out', './...')) {
+     if (os.system(['go', 'test', '-v', '-cover', '-coverprofile cover.out', './...'])) {
        aster.notify('failure', 'test', 'failure');
        return;
      }
      aster.notify('success', 'test', 'success');
 
      // coverage
-     os.system('go', 'tool', 'cover', '-func cover.out');
-     os.system('go', 'tool', 'cover', '-html cover.out', '-o coverage.html');
+     os.system(['go', 'tool', 'cover', '-func cover.out']);
+     os.system(['go', 'tool', 'cover', '-html cover.out', '-o coverage.html']);
    });
 
 .. _otto: https://github.com/robertkrimen/otto
@@ -90,10 +90,22 @@ text
     ``text`` is a text of a GNTP_ notification.
 
 
-os.system(name[, ... argN])
+os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``os.system`` spawns a new process and returns ``true`` when it is failed.
+
+args
+    ``args`` is an ``Array`` of ``String``.
+
+options
+    ``options`` is an ``Object``.
+
+    stdout
+        ``stdout`` is a file name to redirect stdout. *It will be overwritten if exists.*
+
+    stderr
+        ``stderr`` is a file name to redirect stderr. *It will be overwritten if exists.*
 
 
 os.whence(name)

@@ -100,3 +100,7 @@ func pushd(path string) (func() error, error) {
 func touch(path string) error {
 	return ioutil.WriteFile(path, []byte{}, 0666)
 }
+
+func mktemp() (*os.File, error) {
+	return ioutil.TempFile("", "aster.test")
+}
