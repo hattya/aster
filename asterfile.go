@@ -34,7 +34,7 @@ import (
 type Aster struct {
 	vm    *otto.Otto
 	gntp  *gntp.Client
-	watch map[*otto.Object]*otto.Object
+	watch []*AsterWatch
 }
 
 func newAsterfile() (*Aster, error) {
@@ -62,12 +62,9 @@ func (a *Aster) Watch(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) == 2 {
 		re := call.Argument(0)
 		if re.Class() == "RegExp" {
-			co := call.Argument(1)
-			if co.Class() == "Function" {
-				if a.watch == nil {
-					a.watch = make(map[*otto.Object]*otto.Object)
-				}
-				a.watch[re.Object()] = co.Object()
+			cb := call.Argument(1)
+			if cb.Class() == "Function" {
+				a.watch = append(a.watch, &AsterWatch{re.Object(), cb.Object()})
 			}
 		}
 	}
@@ -87,10 +84,10 @@ func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
 }
 
 func (a *Aster) OnChange(files map[string]int) {
-	for re, co := range a.watch {
+	for _, w := range a.watch {
 		var cl []interface{}
 		for n := range files {
-			v, _ := re.Call("test", n)
+			v, _ := w.re.Call("test", n)
 			test, _ := v.ToBoolean()
 			if test {
 				cl = append(cl, n)
@@ -98,11 +95,16 @@ func (a *Aster) OnChange(files map[string]int) {
 		}
 		if 0 < len(cl) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
-			_, err := co.Call("call", nil, ary)
+			_, err := w.cb.Call("call", nil, ary)
 			if err != nil {
 				warn(err)
 			}
 			return
 		}
 	}
+}
+
+type AsterWatch struct {
+	re *otto.Object // RegExp
+	cb *otto.Object // Function
 }
