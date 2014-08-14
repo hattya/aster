@@ -1,17 +1,21 @@
 aster.watch(/.+\.go$/, function(files) {
+  // vet
+  if (exec('go vet')) {
+    return notify('failure', 'vet');
+  }
+  notify('success', 'vet');
+
   // build
   if (exec('go get -t -v ./...')) {
-    aster.notify('failure', 'build', 'failure');
-    return;
+    return notify('failure', 'build');
   }
-  aster.notify('success', 'build', 'success');
+  notify('success', 'build');
 
   // test
-  if (exec('go test -v -cover -coverprofile cover.out')) {
-    aster.notify('failure', 'test', 'failure');
-    return;
+  if (exec('go test -v -covermode count -coverprofile cover.out')) {
+    return notify('failure', 'test');
   }
-  aster.notify('success', 'test', 'success');
+  notify('success', 'test');
 
   // coverage
   exec('go tool cover -func cover.out');
@@ -27,6 +31,11 @@ aster.watch(/.+\.rst$/, function(files) {
 function exec(cmdline) {
   console.log('+ ' + cmdline);
   return os.system.call(null, cmdline.split(/\s+/));
+}
+
+// notify
+function notify(name, cmd) {
+  return aster.notify(name, 'aster: ' + cmd, cmd + (name == 'success' ? ' passed' : ' failed'));
 }
 
 // rst2html
