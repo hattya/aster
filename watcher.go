@@ -36,9 +36,10 @@ import (
 )
 
 type Watcher struct {
-	af      *Aster
-	watcher *fsnotify.Watcher
-	qc      chan string
+	*fsnotify.Watcher
+
+	af *Aster
+	qc chan string
 }
 
 func newWatcher(af *Aster) (*Watcher, error) {
@@ -57,15 +58,11 @@ func newWatcher(af *Aster) (*Watcher, error) {
 		return nil, err
 	}
 	w := &Watcher{
-		qc:      make(chan string, 1),
+		Watcher: watcher,
 		af:      af,
-		watcher: watcher,
+		qc:      make(chan string, 1),
 	}
 	return w, nil
-}
-
-func (w *Watcher) Close() error {
-	return w.watcher.Close()
 }
 
 func (w *Watcher) Watch() {
@@ -76,12 +73,12 @@ func (w *Watcher) Watch() {
 func (w *Watcher) WaitEvent() {
 	for {
 		select {
-		case ev := <-w.watcher.Events:
+		case ev := <-w.Events:
 			switch ev.Op {
 			case fsnotify.Create:
-				w.watcher.Add(ev.Name)
+				w.Add(ev.Name)
 			case fsnotify.Remove:
-				w.watcher.Remove(ev.Name)
+				w.Remove(ev.Name)
 				continue
 			case fsnotify.Chmod, fsnotify.Rename:
 				continue
@@ -92,7 +89,7 @@ func (w *Watcher) WaitEvent() {
 				name = name[2:]
 			}
 			w.qc <- name
-		case err := <-w.watcher.Errors:
+		case err := <-w.Errors:
 			if err != nil {
 				warn(err)
 			}
@@ -124,6 +121,7 @@ func (w *Watcher) Loop() {
 					mu.Unlock()
 				}
 			}
+
 			select {
 			case fire <- true:
 			default:

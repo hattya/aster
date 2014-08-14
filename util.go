@@ -29,16 +29,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 )
 
-func prog() string {
-	s := filepath.Base(os.Args[0])
-	return s[:len(s)-len(filepath.Ext(s))]
-}
-
 func exit(args ...interface{}) {
-	fmt.Fprintf(os.Stderr, "%s: ", prog())
+	fmt.Fprint(os.Stderr, "aster: ")
 	fmt.Fprintln(os.Stderr, args...)
 	os.Exit(1)
 }

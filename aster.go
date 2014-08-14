@@ -53,12 +53,12 @@ func main() {
 }
 
 func usage() {
-	fmt.Printf(`usage: %s <options>
+	fmt.Printf(`usage: aster <options>
 
 options:
 
   -h                  show this help message and exit
   -g[=<host:port>]    notify to Growl (default: localhost:23053)
 
-`, prog())
+`)
 }

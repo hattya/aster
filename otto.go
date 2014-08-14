@@ -127,7 +127,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 }
 
 func os_whence(call otto.FunctionCall) otto.Value {
-	if 0 < len(call.ArgumentList) {
+	if 1 <= len(call.ArgumentList) {
 		s, _ := call.Argument(0).ToString()
 		path, err := exec.LookPath(s)
 		if err == nil {

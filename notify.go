@@ -66,7 +66,7 @@ func newNotifier() *gntp.Client {
 	}
 	c := gntp.NewClient()
 	c.Server = asterG.String()
-	c.AppName = "aster"
+	c.AppName = "Aster"
 	err := c.Register([]gntp.Notification{
 		{
 			Event:   "success",

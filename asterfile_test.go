@@ -67,7 +67,8 @@ func TestWatchArgs(t *testing.T) {
 		af, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
-		} else if g, e := len(af.watch), 1; g != e {
+		}
+		if g, e := len(af.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -83,8 +84,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}
-		_, err := newAsterfile()
-		switch {
+		switch _, err := newAsterfile(); {
 		case err == nil:
 			t.Error("expected error")
 		case !regexp.MustCompile(` end of input$`).MatchString(err.Error()):
@@ -96,8 +96,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}
-		_, err = newAsterfile()
-		switch {
+		switch _, err := newAsterfile(); {
 		case err == nil:
 			t.Error("expected error")
 		case strings.HasPrefix(err.Error(), "TypeError: 'watch'"):
@@ -111,8 +110,9 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 		af, err := newAsterfile()
 		if err != nil {
-			t.Error("unexpected error:", err)
-		} else if g, e := len(af.watch), 0; g != e {
+			t.Fatal("unexpected error:", err)
+		}
+		if g, e := len(af.watch), 0; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 
@@ -123,8 +123,9 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 		af, err = newAsterfile()
 		if err != nil {
-			t.Error("unexpected error:", err)
-		} else if g, e := len(af.watch), 0; g != e {
+			t.Fatal("unexpected error:", err)
+		}
+		if g, e := len(af.watch), 0; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 
@@ -135,8 +136,9 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 		af, err = newAsterfile()
 		if err != nil {
-			t.Error("unexpected error:", err)
-		} else if g, e := len(af.watch), 0; g != e {
+			t.Fatal("unexpected error:", err)
+		}
+		if g, e := len(af.watch), 0; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -154,7 +156,8 @@ func TestNotifyArgs(t *testing.T) {
 		af, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
-		} else if g, e := len(af.watch), 0; g != e {
+		}
+		if g, e := len(af.watch), 0; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -173,7 +176,8 @@ func TestNotifyInvalidArgs(t *testing.T) {
 		af, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
-		} else if g, e := len(af.watch), 0; g != e {
+		}
+		if g, e := len(af.watch), 0; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
