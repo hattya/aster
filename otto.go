@@ -57,7 +57,10 @@ func ottoError(err error) error {
 		return fmt.Errorf(strings.TrimSpace(e.String()))
 	case parser.ErrorList:
 		var b bytes.Buffer
-		for _, pe := range e {
+		for i, pe := range e {
+			if 0 < i {
+				fmt.Fprintln(&b)
+			}
 			fmt.Fprintf(&b, "Asterfile:%d:%d: %s", pe.Position.Line, pe.Position.Column, pe.Message)
 			if pe.Message == "Unexpected end of input" {
 				break

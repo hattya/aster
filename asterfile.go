@@ -27,6 +27,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/mattn/go-gntp"
 	"github.com/robertkrimen/otto"
 )
@@ -39,23 +41,56 @@ type Aster struct {
 
 func newAsterfile() (*Aster, error) {
 	a := &Aster{
-		vm:   newVM(),
 		gntp: newNotifier(),
 	}
+	if err := a.Eval(); err != nil {
+		return nil, err
+	}
+	return a, nil
+}
+
+func (a *Aster) Eval() error {
+	a.vm = newVM()
+	a.watch = nil
 	// aster object
 	aster, _ := a.vm.Object(`aster = {}`)
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
+	// watch Asterfile
+	re, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
+	cb, _ := a.vm.ToValue(a.Reload)
+	aster.Call("watch", re, cb)
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
-		return nil, ottoError(err)
+		return ottoError(err)
 	}
 	_, err = a.vm.Run(script)
 	if err != nil {
-		return nil, ottoError(err)
+		return ottoError(err)
 	}
-	return a, nil
+	return nil
+}
+
+func (a *Aster) Reload(otto.FunctionCall) otto.Value {
+	// create snapshot
+	vm := a.vm
+	watch := a.watch
+	// eval
+	var name string
+	if err := a.Eval(); err != nil {
+		name = "failure"
+		// report error
+		warn("failed to reload")
+		fmt.Fprintln(stderr, err)
+		// rollback to snapshot
+		a.vm = vm
+		a.watch = watch
+	} else {
+		name = "success"
+	}
+	a.vm.Run(fmt.Sprintf(`aster.notify("%s", "Aster reload", "Asterfile has been reloaded")`, name))
+	return otto.UndefinedValue()
 }
 
 func (a *Aster) Watch(call otto.FunctionCall) otto.Value {

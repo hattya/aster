@@ -28,16 +28,20 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
+// for testing
+var stderr io.Writer = os.Stderr
+
 func exit(args ...interface{}) {
-	fmt.Fprint(os.Stderr, "aster: ")
-	fmt.Fprintln(os.Stderr, args...)
+	fmt.Fprint(stderr, "aster: ")
+	fmt.Fprintln(stderr, args...)
 	os.Exit(1)
 }
 
 func warn(args ...interface{}) {
-	fmt.Fprint(os.Stderr, "warn: ")
-	fmt.Fprintln(os.Stderr, args...)
+	fmt.Fprint(stderr, "warn: ")
+	fmt.Fprintln(stderr, args...)
 }

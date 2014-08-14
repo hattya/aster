@@ -27,49 +27,89 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestWatch(t *testing.T) {
-	err := sandbox(func() {
-		js := `aster.watch(/.+\.go$/, function(files) {
+	js := `aster.watch(/.+\.go$/, function(files) {
   //console.log(files);
 })`
-		if err := genAsterfile(js); err != nil {
-			t.Fatal(err)
-		}
-		af, err := newAsterfile()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		watcher, err := newWatcher(af)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer watcher.Close()
-
-		go watcher.Watch()
+	stderr, err := aster(js, func(d time.Duration) {
 		touch("a.go")
 		touch("b.go")
 		os.Rename("b.go", "_b.go")
 		os.Remove("_b.go")
 		touch("c.go")
-		time.Sleep(1201 * time.Millisecond)
+		time.Sleep(d)
 	})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+	if g, e := stderr, ""; g != e {
+		t.Errorf("expected %v, got %#v", e, g)
+	}
+}
+
+func TestReload(t *testing.T) {
+	js := ``
+	stderr, err := aster(js, func(d time.Duration) {
+		js = ``
+		if err := genAsterfile(js); err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(d)
+
+		js = `+`
+		if err := genAsterfile(js); err != nil {
+			t.Fatal(err)
+		}
+		time.Sleep(d)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.SplitN(stderr, "\n", 2)
+	if g, e := lines[0], "warn: failed to reload"; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+}
+
+func aster(js string, test func(time.Duration)) (string, error) {
+	var b bytes.Buffer
+	stderr = &b
+	err := sandbox(func() error {
+		if err := genAsterfile(js); err != nil {
+			return err
+		}
+		af, err := newAsterfile()
+		if err != nil {
+			return err
+		}
+
+		watcher, err := newWatcher(af)
+		if err != nil {
+			return err
+		}
+		defer watcher.Close()
+
+		go watcher.Watch()
+		test(1129 * time.Millisecond)
+		return nil
+	})
+	return b.String(), err
 }
 
 func genAsterfile(js string) error {
 	return ioutil.WriteFile("Asterfile", []byte(js), 0666)
 }
 
-func sandbox(test func()) error {
+func sandbox(test interface{}) error {
 	dir, err := ioutil.TempDir("", "aster.test")
 	if err != nil {
 		return err
@@ -82,8 +122,15 @@ func sandbox(test func()) error {
 	}
 	defer popd()
 
-	test()
-	return nil
+	switch t := test.(type) {
+	case func():
+		t()
+		return nil
+	case func() error:
+		return t()
+	default:
+		return fmt.Errorf("unknown type: %T", test)
+	}
 }
 
 func pushd(path string) (func() error, error) {
