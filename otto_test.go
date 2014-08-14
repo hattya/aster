@@ -31,7 +31,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 
@@ -39,21 +38,67 @@ import (
 )
 
 func TestOSSystem(t *testing.T) {
-	prog := filepath.ToSlash(os.Args[0])
-	vm := newVM()
-	tmpl := `os.system(["%s", "-test.run=TestProcess", "%d"])`
+	// stdout
+	stdout, err := mktemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(stdout.Name())
+	defer stdout.Close()
+	// stderr
+	stderr, err := mktemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(stderr.Name())
+	defer stderr.Close()
 
-	src := fmt.Sprintf(tmpl, prog, 0)
+	vm := newVM()
+	n1 := filepath.ToSlash(stdout.Name())
+	n2 := filepath.ToSlash(stderr.Name())
+	tmpl := `os.system(["go", "run", "otto_test_cmd.go", "-code", "%d"], {"stdout": "%s", "stderr": "%s"})`
+
+	src := fmt.Sprintf(tmpl, 0, n1, n2)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
+	stdout.Seek(0, os.SEEK_SET)
+	data, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.SplitN(string(data), "\n", 2)
+	if g, e := lines[0], "stdout"; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
 
-	src = fmt.Sprintf(tmpl, prog, 1)
+	src = fmt.Sprintf(tmpl, 1, n1, n2)
 	switch b, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
 	case !b:
 		t.Errorf("expected true, got %v", b)
+	}
+	stderr.Seek(0, os.SEEK_SET)
+	data, err = ioutil.ReadAll(stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines = strings.SplitN(string(data), "\n", 2)
+	if g, e := lines[0], "stderr"; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+
+	// invalid args
+	src = fmt.Sprintf(tmpl, 1, ".", n2)
+	if _, err := vm.Run(src); err == nil {
+		t.Error("expected error")
+	}
+
+	// invalid args
+	src = fmt.Sprintf(tmpl, 1, n1, ".")
+	if _, err := vm.Run(src); err == nil {
+		t.Error("expected error")
 	}
 
 	// invalid args
@@ -75,42 +120,6 @@ func TestOSSystem(t *testing.T) {
 	}
 }
 
-func TestOSSystemRedir(t *testing.T) {
-	f, err := mktemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(f.Name())
-	defer f.Close()
-
-	prog := filepath.ToSlash(os.Args[0])
-	name := filepath.ToSlash(f.Name())
-	vm := newVM()
-	tmpl := `os.system(["%s", "-test.run=TestRedirection", "%[2]s"], {"%[2]s": "%s"})`
-
-	for _, redir := range []string{"stdout", "stderr"} {
-		src := fmt.Sprintf(tmpl, prog, redir, name)
-		if err := testUndefined(vm, src); err != nil {
-			t.Error(err)
-		}
-		f.Seek(0, os.SEEK_SET)
-		data, err := ioutil.ReadAll(f)
-		if err != nil {
-			t.Fatal(err)
-		}
-		list := strings.SplitN(string(data), "\n", 2)
-		if g, e := list[0], redir; g != e {
-			t.Errorf("expected %v, got %v", e, g)
-		}
-
-		// invalid args
-		src = fmt.Sprintf(tmpl, prog, redir, ".")
-		if _, err := vm.Run(src); err == nil {
-			t.Error("expected error")
-		}
-	}
-}
-
 func TestOSWhence(t *testing.T) {
 	vm := newVM()
 
@@ -122,26 +131,6 @@ func TestOSWhence(t *testing.T) {
 	src = `os.whence("go")`
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
-	}
-}
-
-func TestProcess(*testing.T) {
-	if len(os.Args) != 3 || os.Args[1] != "-test.run=TestProcess" {
-		return
-	}
-	n, _ := strconv.Atoi(os.Args[2])
-	os.Exit(n)
-}
-
-func TestRedirection(*testing.T) {
-	if len(os.Args) != 3 || os.Args[1] != "-test.run=TestRedirection" {
-		return
-	}
-	switch os.Args[2] {
-	case "stdout":
-		fmt.Fprintln(os.Stdout, "stdout")
-	case "stderr":
-		fmt.Fprintln(os.Stderr, "stderr")
 	}
 }
 
@@ -169,7 +158,7 @@ func testString(vm *otto.Otto, src string) (string, error) {
 	v, err := vm.Run(src)
 	if err == nil {
 		if !v.IsString() {
-			err = fmt.Errorf("expected string, got %v")
+			err = fmt.Errorf("expected string, got %v", v)
 		} else {
 			return v.ToString()
 		}

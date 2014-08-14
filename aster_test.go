@@ -48,7 +48,7 @@ func TestWatch(t *testing.T) {
 
 		watcher, err := newWatcher(af)
 		if err != nil {
-			exit(err)
+			t.Fatal(err)
 		}
 		defer watcher.Close()
 

@@ -27,8 +27,6 @@
 package main
 
 import (
-	"io/ioutil"
-
 	"github.com/mattn/go-gntp"
 	"github.com/robertkrimen/otto"
 )
@@ -49,11 +47,7 @@ func newAsterfile() (*Aster, error) {
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
 	// eval Asterfile
-	src, err := ioutil.ReadFile("Asterfile")
-	if err != nil {
-		return nil, err
-	}
-	script, err := a.vm.Compile("Asterfile", src)
+	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
 		return nil, ottoError(err)
 	}
