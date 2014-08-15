@@ -77,9 +77,10 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 	vm := a.vm
 	watch := a.watch
 	// eval
-	var name string
+	var name, text string
 	if err := a.Eval(); err != nil {
 		name = "failure"
+		text = "Error occurred while reloading Asterfile"
 		// report error
 		warn("failed to reload")
 		fmt.Fprintln(stderr, err)
@@ -88,8 +89,9 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 		a.watch = watch
 	} else {
 		name = "success"
+		text = "Asterfile has been reloaded"
 	}
-	a.vm.Run(fmt.Sprintf(`aster.notify("%s", "Aster reload", "Asterfile has been reloaded")`, name))
+	a.vm.Run(fmt.Sprintf(`aster.notify("%s", "Aster reload", "%s")`, name, text))
 	return otto.UndefinedValue()
 }
 
