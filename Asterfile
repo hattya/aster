@@ -24,13 +24,13 @@ aster.watch(/.+\.go$/, function(files) {
 
 aster.watch(/.+\.rst$/, function(files) {
   files.forEach(rst2html);
-  aster.notify('success', 'rst2html.py', files.join('\n'));
+  aster.notify('success', 'aster: rst2html.py', files.join('\n'));
 });
 
 // exec
 function exec(cmdline) {
   console.log('+ ' + cmdline);
-  return os.system.call(null, cmdline.split(/\s+/));
+  return os.system(cmdline.split(/\s+/));
 }
 
 // notify
@@ -50,5 +50,5 @@ if (os.whence('py') === undefined) {
 function rst2html(rst) {
   var html = rst.slice(0, -4) + '.html';
   console.log('+ rst2html.py ' + rst + ' ' + html);
-  return os.system.call(null, rst2html_py.concat(rst, html));
+  return os.system(rst2html_py.concat(rst, html));
 }

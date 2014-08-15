@@ -45,7 +45,7 @@ func TestAsterfileNotFound(t *testing.T) {
 
 func TestInvalidAsterfile(t *testing.T) {
 	err := sandbox(func() {
-		js := `+`
+		js := `[].join(;`
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}

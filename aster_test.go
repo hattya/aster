@@ -75,7 +75,7 @@ func TestReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], "warn: failed to reload"; g != e {
+	if g, e := lines[0], "aster: failed to reload"; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 }

@@ -36,12 +36,11 @@ import (
 var stderr io.Writer = os.Stderr
 
 func exit(args ...interface{}) {
-	fmt.Fprint(stderr, "aster: ")
-	fmt.Fprintln(stderr, args...)
+	warn(args...)
 	os.Exit(1)
 }
 
 func warn(args ...interface{}) {
-	fmt.Fprint(stderr, "warn: ")
+	fmt.Fprint(stderr, "aster: ")
 	fmt.Fprintln(stderr, args...)
 }
