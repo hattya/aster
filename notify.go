@@ -32,29 +32,29 @@ import (
 	"github.com/mattn/go-gntp"
 )
 
-type growlValue string
+type gntpValue string
 
-func (g *growlValue) Set(value string) error {
+func (g *gntpValue) Set(value string) error {
 	if value == "true" {
 		*g = "localhost:23053"
 	} else {
-		*g = growlValue(value)
+		*g = gntpValue(value)
 	}
 	return nil
 }
 
-func (g *growlValue) String() string {
+func (g *gntpValue) String() string {
 	if *g == "" {
 		return "false"
 	}
 	return string(*g)
 }
 
-func (g *growlValue) IsBoolFlag() bool {
+func (g *gntpValue) IsBoolFlag() bool {
 	return true
 }
 
-var asterG growlValue
+var asterG gntpValue
 
 func init() {
 	flag.Var(&asterG, "g", "")
