@@ -56,7 +56,7 @@ func TestOSSystem(t *testing.T) {
 	vm := newVM()
 	n1 := filepath.ToSlash(stdout.Name())
 	n2 := filepath.ToSlash(stderr.Name())
-	tmpl := `os.system(["go", "run", "otto_test_cmd.go", "-code", "%d"], {"stdout": "%s", "stderr": "%s"})`
+	tmpl := `os.system(['go', 'run', 'otto_test_cmd.go', '-code', '%d'], {'stdout': '%s', 'stderr': '%s'})`
 
 	src := fmt.Sprintf(tmpl, 0, n1, n2)
 	if err := testUndefined(vm, src); err != nil {
@@ -102,13 +102,13 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// invalid args
-	src = fmt.Sprintf(`os.system(["1"])`)
+	src = fmt.Sprintf(`os.system(['1'])`)
 	if _, err := vm.Run(src); err == nil {
 		t.Errorf("expected error")
 	}
 
 	// invalid args
-	src = fmt.Sprintf(`os.system("1")`)
+	src = fmt.Sprintf(`os.system('1')`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -128,7 +128,7 @@ func TestOSWhence(t *testing.T) {
 		t.Error(err)
 	}
 
-	src = `os.whence("go")`
+	src = `os.whence('go')`
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
 	}

@@ -59,7 +59,7 @@ func (a *Aster) Eval() error {
 	// watch Asterfile
 	re, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
 	cb, _ := a.vm.ToValue(a.Reload)
-	aster.Call("watch", re, cb)
+	aster.Call(`watch`, re, cb)
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
@@ -112,10 +112,9 @@ func (a *Aster) Watch(call otto.FunctionCall) otto.Value {
 
 func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
 	if 3 <= len(call.ArgumentList) {
-		var args []string
-		for _, a := range call.ArgumentList {
-			s, _ := a.ToString()
-			args = append(args, s)
+		var args [3]string
+		for i := range args {
+			args[i], _ = call.ArgumentList[i].ToString()
 		}
 		notify(a.gntp, args[0], args[1], args[2])
 	}
@@ -127,7 +126,7 @@ func (a *Aster) OnChange(files map[string]int) {
 		// call RegExp.test
 		var cl []interface{}
 		for n := range files {
-			v, _ := w.re.Call("test", n)
+			v, _ := w.re.Call(`test`, n)
 			test, _ := v.ToBoolean()
 			if test {
 				cl = append(cl, n)
@@ -136,7 +135,7 @@ func (a *Aster) OnChange(files map[string]int) {
 		// call callback
 		if 0 < len(cl) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
-			_, err := w.cb.Call("call", nil, ary)
+			_, err := w.cb.Call(`call`, nil, ary)
 			if err != nil {
 				warn(err)
 			}

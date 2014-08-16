@@ -117,7 +117,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 
 		// invalid args
-		js = `aster.watch("", 1);`
+		js = `aster.watch('', 1);`
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}
@@ -149,7 +149,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 
 func TestNotifyArgs(t *testing.T) {
 	err := sandbox(func() {
-		js := `aster.notify("event", "title", "text")`
+		js := `aster.notify('name', 'title', 'text')`
 		if err := genAsterfile(js); err != nil {
 			t.Fatal(err)
 		}

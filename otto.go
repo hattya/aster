@@ -81,13 +81,13 @@ func os_system(call otto.FunctionCall) otto.Value {
 	if !ok {
 		return otto.UndefinedValue()
 	}
-	var args []string
-	for _, a := range ary {
-		s, ok := a.(string)
+	args := make([]string, len(ary))
+	for i := range ary {
+		s, ok := ary[i].(string)
 		if !ok {
 			return otto.UndefinedValue()
 		}
-		args = append(args, s)
+		args[i] = s
 	}
 	// options
 	v, _ = call.Argument(1).Export()
@@ -131,7 +131,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 
 func os_whence(call otto.FunctionCall) otto.Value {
 	if 1 <= len(call.ArgumentList) {
-		s, _ := call.Argument(0).ToString()
+		s, _ := call.ArgumentList[0].ToString()
 		path, err := exec.LookPath(s)
 		if err == nil {
 			v, _ := call.Otto.ToValue(path)
