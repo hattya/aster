@@ -58,7 +58,10 @@ func usage() {
 options:
 
   -h                  show this help message and exit
-  -g[=<host:port>]    notify to Growl (default: localhost:23053)
+  -g [<host:port>]    notify to Growl (default: localhost:23053)
+  -s <duration>       squash events during <duration> (default: 727ms)
 
+<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
+"s", "m" and "h"
 `)
 }

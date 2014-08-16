@@ -27,6 +27,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 	"sync"
@@ -34,6 +35,12 @@ import (
 
 	"github.com/go-fsnotify/fsnotify"
 )
+
+var asterS time.Duration
+
+func init() {
+	flag.DurationVar(&asterS, "s", 727*time.Millisecond, "")
+}
 
 type Watcher struct {
 	*fsnotify.Watcher
@@ -113,7 +120,7 @@ func (w *Watcher) Loop() {
 		squash:
 			for {
 				select {
-				case <-time.After(1 * time.Second):
+				case <-time.After(asterS):
 					break squash
 				case name := <-w.qc:
 					mu.Lock()

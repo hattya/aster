@@ -99,7 +99,7 @@ func aster(js string, test func(time.Duration)) (string, error) {
 		defer watcher.Close()
 
 		go watcher.Watch()
-		test(1129 * time.Millisecond)
+		test(751 * time.Millisecond)
 		return nil
 	})
 	return b.String(), err
