@@ -69,7 +69,7 @@ func TestOSSystem(t *testing.T) {
 	}
 	lines := strings.SplitN(string(data), "\n", 2)
 	if g, e := lines[0], "stdout"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 
 	src = fmt.Sprintf(tmpl, 1, n1, n2)
@@ -86,7 +86,7 @@ func TestOSSystem(t *testing.T) {
 	}
 	lines = strings.SplitN(string(data), "\n", 2)
 	if g, e := lines[0], "stderr"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 
 	// invalid args

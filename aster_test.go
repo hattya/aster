@@ -52,7 +52,7 @@ func TestWatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	if g, e := stderr, ""; g != e {
-		t.Errorf("expected %v, got %#v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 
@@ -76,13 +76,18 @@ func TestReload(t *testing.T) {
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
 	if g, e := lines[0], "aster: failed to reload"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 
 func aster(js string, test func(time.Duration)) (string, error) {
+	// stderr
 	var b bytes.Buffer
 	stderr = &b
+	// duration
+	s := asterS
+	asterS = 101 * time.Millisecond
+
 	err := sandbox(func() error {
 		if err := genAsterfile(js); err != nil {
 			return err
@@ -99,9 +104,13 @@ func aster(js string, test func(time.Duration)) (string, error) {
 		defer watcher.Close()
 
 		go watcher.Watch()
-		test(751 * time.Millisecond)
+		test(139 * time.Millisecond)
 		return nil
 	})
+	// restore
+	stderr = os.Stderr
+	asterS = s
+
 	return b.String(), err
 }
 
