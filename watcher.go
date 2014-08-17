@@ -45,8 +45,8 @@ func init() {
 type Watcher struct {
 	*fsnotify.Watcher
 
-	af *Aster
-	qc chan string
+	af   *Aster
+	quit chan bool
 }
 
 func newWatcher(af *Aster) (*Watcher, error) {
@@ -67,27 +67,47 @@ func newWatcher(af *Aster) (*Watcher, error) {
 	w := &Watcher{
 		Watcher: watcher,
 		af:      af,
-		qc:      make(chan string, 1),
+		quit:    make(chan bool),
 	}
 	return w, nil
 }
 
-func (w *Watcher) Watch() {
-	go w.WaitEvent()
-	w.Loop()
+func (w *Watcher) Close() error {
+	w.quit <- true
+	return w.Watcher.Close()
 }
 
-func (w *Watcher) WaitEvent() {
+func (w *Watcher) Watch() {
+	var mu sync.Mutex
+	files := make(map[string]int)
+	fire := make(chan bool, 1)
+	done := make(chan bool, 1)
+
+	timer := time.AfterFunc(0, func() {
+		mu.Lock()
+		defer mu.Unlock()
+		if 0 < len(files) {
+			select {
+			case fire <- true:
+			default:
+			}
+		}
+	})
+	done <- true
+
 	for {
 		select {
+		case <-w.quit:
+			return
 		case ev := <-w.Events:
+			// filter
 			switch ev.Op {
 			case fsnotify.Create:
 				w.Add(ev.Name)
 			case fsnotify.Remove:
 				w.Remove(ev.Name)
 				continue
-			case fsnotify.Chmod, fsnotify.Rename:
+			case fsnotify.Rename, fsnotify.Chmod:
 				continue
 			}
 			name := ev.Name
@@ -95,44 +115,17 @@ func (w *Watcher) WaitEvent() {
 			if 2 < len(name) && name[0] == '.' && os.IsPathSeparator(name[1]) {
 				name = name[2:]
 			}
-			w.qc <- name
-		case err := <-w.Errors:
-			if err != nil {
-				warn(err)
-			}
-		}
-	}
-}
 
-func (w *Watcher) Loop() {
-	var mu sync.Mutex
-	files := make(map[string]int)
-	fire := make(chan bool, 1)
-	done := make(chan bool, 1)
-
-	done <- true
-	for {
-		select {
-		case name := <-w.qc:
 			mu.Lock()
+			n := len(files)
 			files[name]++
 			mu.Unlock()
-		squash:
-			for {
-				select {
-				case <-time.After(asterS):
-					break squash
-				case name := <-w.qc:
-					mu.Lock()
-					files[name]++
-					mu.Unlock()
-				}
+			// new cycle has begun
+			if n == 0 {
+				timer.Reset(asterS)
 			}
-
-			select {
-			case fire <- true:
-			default:
-			}
+		case err := <-w.Errors:
+			warn(err)
 		case <-fire:
 			go func() {
 				select {
