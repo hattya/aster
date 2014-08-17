@@ -106,7 +106,6 @@ func (w *Watcher) Watch() {
 				w.Add(ev.Name)
 			case fsnotify.Remove:
 				w.Remove(ev.Name)
-				continue
 			case fsnotify.Rename, fsnotify.Chmod:
 				continue
 			}
@@ -118,7 +117,12 @@ func (w *Watcher) Watch() {
 
 			mu.Lock()
 			n := len(files)
-			files[name]++
+			switch ev.Op {
+			case fsnotify.Remove:
+				delete(files, name)
+			default:
+				files[name]++
+			}
 			mu.Unlock()
 			// new cycle has begun
 			if n == 0 {
