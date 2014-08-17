@@ -106,7 +106,15 @@ func (w *Watcher) Watch() {
 				w.Add(ev.Name)
 			case fsnotify.Remove:
 				w.Remove(ev.Name)
-			case fsnotify.Rename, fsnotify.Chmod:
+			case fsnotify.Rename:
+				if _, err := os.Lstat(ev.Name); err != nil {
+					w.Remove(ev.Name)
+					ev.Op = fsnotify.Remove
+				} else {
+					w.Add(ev.Name)
+					ev.Op = fsnotify.Create
+				}
+			case fsnotify.Chmod:
 				continue
 			}
 			name := ev.Name
