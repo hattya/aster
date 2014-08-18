@@ -103,15 +103,25 @@ func (w *Watcher) Watch() {
 			// filter
 			switch ev.Op {
 			case fsnotify.Create:
-				w.Add(ev.Name)
+				switch fi, err := os.Lstat(ev.Name); {
+				case err != nil:
+					// removed immediately?
+					continue
+				case fi.IsDir():
+					w.Add(ev.Name)
+					continue
+				}
 			case fsnotify.Remove:
 				w.Remove(ev.Name)
 			case fsnotify.Rename:
-				if _, err := os.Lstat(ev.Name); err != nil {
+				switch fi, err := os.Lstat(ev.Name); {
+				case err != nil:
 					w.Remove(ev.Name)
 					ev.Op = fsnotify.Remove
-				} else {
+				case fi.IsDir():
 					w.Add(ev.Name)
+					continue
+				default:
 					ev.Op = fsnotify.Create
 				}
 			case fsnotify.Chmod:

@@ -43,9 +43,10 @@ func TestWatch(t *testing.T) {
 	stderr, err := aster(js, func(d time.Duration) {
 		touch("a.go")
 		touch("b.go")
-		os.Rename("b.go", "_b.go")
-		os.Remove("_b.go")
-		touch("c.go")
+		os.Rename("b.go", "b_.go")
+		os.Remove("b_.go")
+		os.Mkdir("c.go", 0777)
+		os.Rename("c.go", "c_.go")
 		time.Sleep(d)
 	})
 	if err != nil {
