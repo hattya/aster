@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -38,27 +39,36 @@ import (
 )
 
 func TestOSSystem(t *testing.T) {
-	// stdout
-	stdout, err := mktemp()
+	dir, err := mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(stdout.Name())
+	defer os.RemoveAll(dir)
+	// stdout
+	stdout, err := os.Create(filepath.Join(dir, "stdout"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer stdout.Close()
 	// stderr
-	stderr, err := mktemp()
+	stderr, err := os.Create(filepath.Join(dir, "stderr"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(stderr.Name())
 	defer stderr.Close()
+	// exe
+	exe := filepath.ToSlash(filepath.Join(dir, "otto_cmd.exe"))
+	out, err := exec.Command("go", "build", "-o", exe, "otto_test_cmd.go").CombinedOutput()
+	if err != nil {
+		t.Fatalf("build failed\n%s", out)
+	}
 
 	vm := newVM()
 	n1 := filepath.ToSlash(stdout.Name())
 	n2 := filepath.ToSlash(stderr.Name())
-	tmpl := `os.system(['go', 'run', 'otto_test_cmd.go', '-code', '%d'], {'stdout': '%s', 'stderr': '%s'})`
+	tmpl := `os.system(['%s', '-code', '%d'], {'stdout': '%s', 'stderr': '%s'})`
 
-	src := fmt.Sprintf(tmpl, 0, n1, n2)
+	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -72,12 +82,12 @@ func TestOSSystem(t *testing.T) {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
-	src = fmt.Sprintf(tmpl, 1, n1, n2)
+	src = fmt.Sprintf(tmpl, exe, 1, n1, n2)
 	switch b, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true, got %v", b)
+		t.Errorf("expected true")
 	}
 	stderr.Seek(0, os.SEEK_SET)
 	data, err = ioutil.ReadAll(stderr)
@@ -90,13 +100,13 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// invalid args
-	src = fmt.Sprintf(tmpl, 1, ".", n2)
+	src = fmt.Sprintf(tmpl, exe, 1, ".", n2)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
 	// invalid args
-	src = fmt.Sprintf(tmpl, 1, n1, ".")
+	src = fmt.Sprintf(tmpl, exe, 1, n1, ".")
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}

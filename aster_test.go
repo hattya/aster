@@ -42,11 +42,18 @@ func TestWatch(t *testing.T) {
 })`
 	stderr, err := aster(js, func(d time.Duration) {
 		touch("a.go")
+		os.Remove("a.go")
+
 		touch("b.go")
 		os.Rename("b.go", "b_.go")
 		os.Remove("b_.go")
-		os.Mkdir("c.go", 0777)
+
+		touch("c.go")
+		os.Mkdir("dir.go", 0777)
+		time.Sleep(d)
+
 		os.Rename("c.go", "c_.go")
+		os.Rename("dir.go", "dir_.go")
 		time.Sleep(d)
 	})
 	if err != nil {
@@ -120,7 +127,7 @@ func genAsterfile(js string) error {
 }
 
 func sandbox(test interface{}) error {
-	dir, err := ioutil.TempDir("", "aster.test")
+	dir, err := mkdtemp()
 	if err != nil {
 		return err
 	}
@@ -158,6 +165,6 @@ func touch(path string) error {
 	return ioutil.WriteFile(path, []byte{}, 0666)
 }
 
-func mktemp() (*os.File, error) {
-	return ioutil.TempFile("", "aster.test")
+func mkdtemp() (string, error) {
+	return ioutil.TempDir("", "aster.test")
 }
