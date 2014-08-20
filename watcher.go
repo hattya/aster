@@ -100,6 +100,10 @@ func (w *Watcher) Watch() {
 		case <-w.quit:
 			return
 		case ev := <-w.Events:
+			// remove "./" prefix
+			if 2 < len(ev.Name) && ev.Name[0] == '.' && os.IsPathSeparator(ev.Name[1]) {
+				ev.Name = ev.Name[2:]
+			}
 			// filter
 			switch ev.Op {
 			case fsnotify.Create:
@@ -111,35 +115,19 @@ func (w *Watcher) Watch() {
 					w.Add(ev.Name)
 					continue
 				}
-			case fsnotify.Remove:
+			case fsnotify.Remove, fsnotify.Rename:
 				w.Remove(ev.Name)
-			case fsnotify.Rename:
-				switch fi, err := os.Lstat(ev.Name); {
-				case err != nil:
-					w.Remove(ev.Name)
-					ev.Op = fsnotify.Remove
-				case fi.IsDir():
-					w.Add(ev.Name)
-					continue
-				default:
-					ev.Op = fsnotify.Create
-				}
 			case fsnotify.Chmod:
 				continue
-			}
-			name := ev.Name
-			// remove "./" prefix
-			if 2 < len(name) && name[0] == '.' && os.IsPathSeparator(name[1]) {
-				name = name[2:]
 			}
 
 			mu.Lock()
 			n := len(files)
 			switch ev.Op {
-			case fsnotify.Remove:
-				delete(files, name)
+			case fsnotify.Remove, fsnotify.Rename:
+				delete(files, ev.Name)
 			default:
-				files[name]++
+				files[ev.Name]++
 			}
 			mu.Unlock()
 			// new cycle has begun
