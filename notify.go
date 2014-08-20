@@ -28,6 +28,7 @@ package main
 
 import (
 	"flag"
+	"strings"
 
 	"github.com/mattn/go-gntp"
 )
@@ -38,6 +39,9 @@ func (g *gntpValue) Set(value string) error {
 	if value == "true" {
 		*g = "localhost:23053"
 	} else {
+		if !strings.Contains(value, ":") {
+			value += ":23053"
+		}
 		*g = gntpValue(value)
 	}
 	return nil

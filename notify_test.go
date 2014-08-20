@@ -44,4 +44,8 @@ func TestGNTPValue(t *testing.T) {
 	if g, e := v.String(), "127.0.0.1:23053"; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
+	v.Set("127.0.0.1")
+	if g, e := v.String(), "127.0.0.1:23053"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
 }
