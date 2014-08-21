@@ -90,6 +90,15 @@ text
     ``text`` is a text of a GNTP_ notification.
 
 
+aster.ignore
+~~~~~~~~~~~~
+
+``aster.ignore`` is an ``Array`` of ``RegExp``. It will be ignored recursively
+from ``Aster`` when a directory is matched to any of ``aster.ignore``.
+
+A path to be matched is a relative path from where the Asterfile exists.
+
+
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
