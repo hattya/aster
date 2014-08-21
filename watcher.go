@@ -58,6 +58,9 @@ func newWatcher(af *Aster) (*Watcher, error) {
 		if err != nil || !fi.IsDir() {
 			return err
 		}
+		if af.ignore.Match(path) {
+			return filepath.SkipDir
+		}
 		return watcher.Add(path)
 	})
 	if err != nil {
@@ -111,7 +114,7 @@ func (w *Watcher) Watch() {
 				case err != nil:
 					// removed immediately?
 					continue
-				case fi.IsDir():
+				case fi.IsDir() && !w.af.ignore.Match(ev.Name):
 					w.Add(ev.Name)
 					continue
 				}

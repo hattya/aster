@@ -27,16 +27,40 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/mattn/go-gntp"
 	"github.com/robertkrimen/otto"
 )
 
+var defaultIgnore string
+
+func init() {
+	var b bytes.Buffer
+	b.WriteString(`^(?:`)
+	for i, s := range []string{
+		".hg",
+		".git",
+		".svn",
+		".bzr",
+	} {
+		if 0 < i {
+			b.WriteRune('|')
+		}
+		b.WriteString(regexp.QuoteMeta(s))
+	}
+	b.WriteString(`)$`)
+	defaultIgnore = b.String()
+}
+
 type Aster struct {
-	vm    *otto.Otto
-	gntp  *gntp.Client
-	watch []*AsterWatch
+	vm     *otto.Otto
+	watch  []*AsterWatch
+	gntp   *gntp.Client
+	ignore AsterIgnore
 }
 
 func newAsterfile() (*Aster, error) {
@@ -53,7 +77,11 @@ func (a *Aster) Eval() error {
 	a.vm = newVM()
 	a.watch = nil
 	// aster object
-	aster, _ := a.vm.Object(`aster = {}`)
+	aster, _ := a.vm.Object(fmt.Sprintf(`aster = {
+	  'ignore': [
+	    /%s/,
+	  ],
+	}`, defaultIgnore))
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
 	// watch Asterfile
@@ -69,13 +97,32 @@ func (a *Aster) Eval() error {
 	if err != nil {
 		return ottoError(err)
 	}
+	a.Ignore()
 	return nil
+}
+
+func (a *Aster) Ignore() {
+	ary, _ := a.vm.Object(`aster.ignore`)
+	if ary.Class() == "Array" {
+		// get aster.ignore.length
+		v, _ := ary.Get("length")
+		n, _ := v.ToInteger()
+
+		a.ignore = make(AsterIgnore, n)
+		for i := int64(0); i < n; i++ {
+			v, _ := ary.Get(strconv.FormatInt(i, 10))
+			if v.Class() == "RegExp" {
+				a.ignore[i] = v.Object()
+			}
+		}
+	}
 }
 
 func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 	// create snapshot
 	vm := a.vm
 	watch := a.watch
+	ignore := a.ignore
 	// eval
 	var name, text otto.Value
 	if err := a.Eval(); err != nil {
@@ -85,6 +132,7 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 		// rollback to snapshot
 		a.vm = vm
 		a.watch = watch
+		a.ignore = ignore
 
 		name, _ = a.vm.ToValue("failure")
 		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
@@ -147,4 +195,17 @@ func (a *Aster) OnChange(files map[string]int) {
 type AsterWatch struct {
 	re *otto.Object // RegExp
 	cb *otto.Object // Function
+}
+
+type AsterIgnore []*otto.Object // []RegExp
+
+func (ig AsterIgnore) Match(s string) bool {
+	for _, re := range []*otto.Object(ig) {
+		v, _ := re.Call(`test`, s)
+		test, _ := v.ToBoolean()
+		if test {
+			return true
+		}
+	}
+	return false
 }
