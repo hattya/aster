@@ -109,12 +109,15 @@ func (a *Aster) Ignore() {
 		n, _ := v.ToInteger()
 
 		a.ignore = make(AsterIgnore, n)
-		for i := int64(0); i < n; i++ {
-			v, _ := ary.Get(strconv.FormatInt(i, 10))
+		i := 0
+		for j := int64(0); j < n; j++ {
+			v, _ := ary.Get(strconv.FormatInt(j, 10))
 			if v.Class() == "RegExp" {
 				a.ignore[i] = v.Object()
+				i++
 			}
 		}
+		a.ignore = a.ignore[:i]
 	}
 }
 
