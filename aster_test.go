@@ -31,31 +31,82 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestWatch(t *testing.T) {
-	js := `aster.watch(/.+\.go$/, function(files) {
-  //console.log(files);
-})`
-	stderr, err := aster(js, func(d time.Duration) {
-		touch("a.go")
-		os.Remove("a.go")
+	tt := &asterTest{
+		js: `aster.watch(/.+\.go$/, function(files) {
+  cycles.push(files);
+})`,
+		setup: func(af *Aster) {
+			mkdir(".git")
+			af.vm.Run(`var cycles = []`)
+		},
+		test: func(d time.Duration) {
+			touch("a.go")
+			os.Remove("a.go")
 
-		touch("b.go")
-		os.Rename("b.go", "b_.go")
-		os.Remove("b_.go")
+			touch("b.go")
+			os.Rename("b.go", "b_.go")
+			os.Remove("b_.go")
 
-		touch("c.go")
-		os.Mkdir("dir.go", 0777)
-		time.Sleep(d)
+			touch("c.go")
+			mkdir("dir.go")
+			time.Sleep(d)
 
-		os.Rename("c.go", "c_.go")
-		os.Rename("dir.go", "dir_.go")
-		time.Sleep(d)
-	})
+			os.Rename("c.go", "c_.go")
+			os.Rename("dir.go", "dir_.go")
+
+			touch(filepath.Join(".git", "git.go"))
+
+			mkdir(".hg")
+			touch(filepath.Join(".hg", "hg.go"))
+			time.Sleep(d)
+		},
+		teardown: func(af *Aster) {
+			v, _ := af.vm.Get("cycles")
+			cycles := v.Object()
+			// cycles.length
+			v, _ = cycles.Get("length")
+			n, _ := v.ToInteger()
+			if g, e := n, int64(2); g != e {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
+			// cycles[0].length
+			v, _ = cycles.Get("0")
+			files := v.Object()
+			v, _ = files.Get("length")
+			n, _ = v.ToInteger()
+			if g, e := n, int64(1); g != e {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
+			// cycles[0]
+			v, _ = files.Get("0")
+			s, _ := v.ToString()
+			if g, e := s, "c.go"; g != e {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
+			// cyles[1].length
+			v, _ = cycles.Get("1")
+			files = v.Object()
+			v, _ = files.Get("length")
+			n, _ = v.ToInteger()
+			if g, e := n, int64(1); g != e {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
+			// cycles[1]
+			v, _ = files.Get("0")
+			s, _ = v.ToString()
+			if g, e := s, "c_.go"; g != e {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
+		},
+	}
+	stderr, err := aster(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,20 +116,23 @@ func TestWatch(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
-	js := ``
-	stderr, err := aster(js, func(d time.Duration) {
-		js = ``
-		if err := genAsterfile(js); err != nil {
-			t.Fatal(err)
-		}
-		time.Sleep(d)
+	tt := &asterTest{
+		js: ``,
+		test: func(d time.Duration) {
+			js := ``
+			if err := genAsterfile(js); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
 
-		js = `+`
-		if err := genAsterfile(js); err != nil {
-			t.Fatal(err)
-		}
-		time.Sleep(d)
-	})
+			js = `+`
+			if err := genAsterfile(js); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+		},
+	}
+	stderr, err := aster(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +142,14 @@ func TestReload(t *testing.T) {
 	}
 }
 
-func aster(js string, test func(time.Duration)) (string, error) {
+type asterTest struct {
+	js       string
+	setup    func(*Aster)
+	test     func(time.Duration)
+	teardown func(*Aster)
+}
+
+func aster(tt *asterTest) (string, error) {
 	// stderr
 	var b bytes.Buffer
 	stderr = &b
@@ -97,12 +158,16 @@ func aster(js string, test func(time.Duration)) (string, error) {
 	asterS = 101 * time.Millisecond
 
 	err := sandbox(func() error {
-		if err := genAsterfile(js); err != nil {
+		if err := genAsterfile(tt.js); err != nil {
 			return err
 		}
 		af, err := newAsterfile()
 		if err != nil {
 			return err
+		}
+
+		if tt.setup != nil {
+			tt.setup(af)
 		}
 
 		watcher, err := newWatcher(af)
@@ -112,7 +177,11 @@ func aster(js string, test func(time.Duration)) (string, error) {
 		defer watcher.Close()
 
 		go watcher.Watch()
-		test(149 * time.Millisecond)
+		tt.test(149 * time.Millisecond)
+
+		if tt.teardown != nil {
+			tt.teardown(af)
+		}
 		return nil
 	})
 	// restore
@@ -161,8 +230,12 @@ func pushd(path string) (func() error, error) {
 	return popd, os.Chdir(path)
 }
 
-func touch(path string) error {
-	return ioutil.WriteFile(path, []byte{}, 0666)
+func mkdir(name string) error {
+	return os.MkdirAll(name, 0777)
+}
+
+func touch(name string) error {
+	return ioutil.WriteFile(name, []byte{}, 0666)
 }
 
 func mkdtemp() (string, error) {
