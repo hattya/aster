@@ -31,6 +31,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -85,6 +86,7 @@ func (w *Watcher) Watch() {
 	files := make(map[string]int)
 	fire := make(chan bool, 1)
 	done := make(chan bool, 1)
+	var retry int32
 
 	timer := time.AfterFunc(0, func() {
 		mu.Lock()
@@ -143,10 +145,9 @@ func (w *Watcher) Watch() {
 			go func() {
 				select {
 				case <-done:
-				case fire <- true:
-					// retry
-					return
 				default:
+					// retry later
+					atomic.AddInt32(&retry, 1)
 					return
 				}
 
@@ -160,6 +161,13 @@ func (w *Watcher) Watch() {
 				mu.Unlock()
 				// process
 				w.af.OnChange(ss)
+				// retry
+				if 0 < atomic.SwapInt32(&retry, 0) {
+					select {
+					case fire <- true:
+					default:
+					}
+				}
 				done <- true
 			}()
 		}
