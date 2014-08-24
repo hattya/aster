@@ -1,5 +1,5 @@
 //
-// aster :: watch.go
+// aster :: watcher.go
 //
 //   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
 //
@@ -91,6 +91,7 @@ func (w *Watcher) Watch() {
 	timer := time.AfterFunc(0, func() {
 		mu.Lock()
 		defer mu.Unlock()
+
 		if 0 < len(files) {
 			select {
 			case fire <- true:
