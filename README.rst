@@ -102,7 +102,8 @@ A path to be matched is a relative path from where the Asterfile exists.
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``os.system`` spawns a new process and returns ``true`` when it is failed.
+``os.system`` runs the command specified by ``args`` and returns ``true`` when
+it is failed.
 
 args
     ``args`` is an ``Array`` of ``String``.
