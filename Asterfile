@@ -22,10 +22,18 @@ aster.watch(/.+\.go$/, function(files) {
   exec('go tool cover -html cover.out -o coverage.html');
 });
 
-aster.watch(/.+\.rst$/, function(files) {
-  files.forEach(rst2html);
-  aster.notify('success', 'aster: rst2html.py', files.join('\n'));
-});
+if (os.whence('rst2html.py') !== undefined) {
+  aster.watch(/.+\.rst$/, function(files) {
+    files.forEach(rst2html);
+    aster.notify('success', 'aster: rst2html.py', files.join('\n'));
+  });
+
+  // rst2html
+  function rst2html(rst) {
+    var html = rst.slice(0, -4) + '.html';
+    return exec('rst2html.py ' + rst + ' ' + html);
+  }
+}
 
 // exec
 function exec(cmdline) {
@@ -36,19 +44,4 @@ function exec(cmdline) {
 // notify
 function notify(name, cmd) {
   return aster.notify(name, 'aster: ' + cmd, cmd + (name == 'success' ? ' passed' : ' failed'));
-}
-
-// rst2html
-var rst2html_py = [];
-if (os.whence('py') === undefined) {
-  rst2html_py.push('rst2html.py');
-} else {
-  rst2html_py.push('py');
-  rst2html_py.push(os.whence('rst2html.py'));
-}
-
-function rst2html(rst) {
-  var html = rst.slice(0, -4) + '.html';
-  console.log('+ rst2html.py ' + rst + ' ' + html);
-  return os.system(rst2html_py.concat(rst, html));
 }
