@@ -33,6 +33,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/hattya/go.binfmt"
 	"github.com/robertkrimen/otto"
 	"github.com/robertkrimen/otto/parser"
 )
@@ -116,7 +117,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		}
 	}
 
-	cmd := exec.Command(args[0], args[1:]...)
+	cmd := binfmt.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
