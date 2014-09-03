@@ -99,10 +99,12 @@ func os_system(call otto.FunctionCall) otto.Value {
 	if v.Class() == "Object" {
 		options := v.Object()
 		redir := func(o *otto.Object, k string) (io.WriteCloser, error) {
-			v, _ = o.Get(k)
-			if v.IsString() {
+			switch v, _ = o.Get(k); {
+			case v.IsString():
 				s, _ := v.ToString()
 				return os.Create(s)
+			case v.IsNull():
+				return discard, nil
 			}
 			return nil, nil
 		}

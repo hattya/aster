@@ -64,10 +64,11 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	vm := newVM()
-	n1 := filepath.ToSlash(stdout.Name())
-	n2 := filepath.ToSlash(stderr.Name())
-	tmpl := `os.system(['%s', '-code', '%d'], {'stdout': '%s', 'stderr': '%s'})`
+	n1 := "'" + filepath.ToSlash(stdout.Name()) + "'"
+	n2 := "'" + filepath.ToSlash(stderr.Name()) + "'"
+	tmpl := `os.system(['%s', '-code', '%d'], {'stdout': %s, 'stderr': %s})`
 
+	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
@@ -82,6 +83,7 @@ func TestOSSystem(t *testing.T) {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
+	// String: stderr
 	src = fmt.Sprintf(tmpl, exe, 1, n1, n2)
 	switch b, err := testBoolean(vm, src); {
 	case err != nil:
@@ -97,6 +99,21 @@ func TestOSSystem(t *testing.T) {
 	lines = strings.SplitN(string(data), "\n", 2)
 	if g, e := lines[0], "stderr"; g != e {
 		t.Errorf("expected %q, got %q", e, g)
+	}
+
+	// null: stdout
+	src = fmt.Sprintf(tmpl, exe, 0, "null", "null")
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	// null: stderr
+	src = fmt.Sprintf(tmpl, exe, 1, "null", "null")
+	switch b, err := testBoolean(vm, src); {
+	case err != nil:
+		t.Error(err)
+	case !b:
+		t.Errorf("expected true")
 	}
 
 	// invalid args

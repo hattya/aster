@@ -44,3 +44,15 @@ func warn(args ...interface{}) {
 	fmt.Fprint(stderr, "aster: ")
 	fmt.Fprintln(stderr, args...)
 }
+
+type devNull int
+
+func (devNull) Write(p []byte) (int, error) {
+	return len(p), nil
+}
+
+func (devNull) Close() error {
+	return nil
+}
+
+var discard io.WriteCloser = devNull(0)
