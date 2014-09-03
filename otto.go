@@ -29,8 +29,10 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/hattya/go.binfmt"
@@ -74,46 +76,51 @@ func ottoError(err error) error {
 
 func os_system(call otto.FunctionCall) otto.Value {
 	// defaults
-	stdout := os.Stdout
-	stderr := os.Stderr
+	var stdout io.WriteCloser = os.Stdout
+	var stderr io.WriteCloser = os.Stderr
 	// args
-	v, _ := call.Argument(0).Export()
-	ary, ok := v.([]interface{})
-	if !ok {
+	v := call.Argument(0)
+	if v.Class() != "Array" {
 		return otto.UndefinedValue()
 	}
-	args := make([]string, len(ary))
-	for i := range ary {
-		s, ok := ary[i].(string)
-		if !ok {
+	ary := v.Object()
+	v, _ = ary.Get("length")
+	n, _ := v.ToInteger()
+	args := make([]string, n)
+	for i := int64(0); i < n; i++ {
+		v, _ := ary.Get(strconv.FormatInt(i, 10))
+		if !v.IsString() {
 			return otto.UndefinedValue()
 		}
-		args[i] = s
+		args[i], _ = v.ToString()
 	}
 	// options
-	v, _ = call.Argument(1).Export()
-	options, ok := v.(map[string]interface{})
-	if ok {
-		var err error
-		// stdout
-		if v, ok := options["stdout"]; ok {
-			if s, ok := v.(string); ok {
-				stdout, err = os.Create(s)
-				if err != nil {
-					return throw(call.Otto.ToValue(err.Error()))
-				}
-				defer stdout.Close()
+	v = call.Argument(1)
+	if v.Class() == "Object" {
+		options := v.Object()
+		redir := func(o *otto.Object, k string) (io.WriteCloser, error) {
+			v, _ = o.Get(k)
+			if v.IsString() {
+				s, _ := v.ToString()
+				return os.Create(s)
 			}
+			return nil, nil
+		}
+		// stdout
+		switch wc, err := redir(options, "stdout"); {
+		case err != nil:
+			return throw(call.Otto.ToValue(err.Error()))
+		case wc != nil:
+			stdout = wc
+			defer wc.Close()
 		}
 		// stderr
-		if v, ok := options["stderr"]; ok {
-			if s, ok := v.(string); ok {
-				stderr, err = os.Create(s)
-				if err != nil {
-					return throw(call.Otto.ToValue(err.Error()))
-				}
-				defer stderr.Close()
-			}
+		switch wc, err := redir(options, "stderr"); {
+		case err != nil:
+			return throw(call.Otto.ToValue(err.Error()))
+		case wc != nil:
+			stderr = wc
+			defer wc.Close()
 		}
 	}
 
