@@ -34,6 +34,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/hattya/go.binfmt"
 	"github.com/robertkrimen/otto"
@@ -105,6 +106,8 @@ func os_system(call otto.FunctionCall) otto.Value {
 				return os.Create(s)
 			case v.IsNull():
 				return discard, nil
+			case v.Class() == "Array":
+				return newWriter(call.Otto, v.Object())
 			}
 			return nil, nil
 		}
@@ -149,4 +152,51 @@ func os_whence(call otto.FunctionCall) otto.Value {
 		}
 	}
 	return otto.UndefinedValue()
+}
+
+type Writer struct {
+	vm  *otto.Otto
+	ary *otto.Object
+	mu  sync.Mutex
+	b   bytes.Buffer
+}
+
+func newWriter(vm *otto.Otto, o *otto.Object) (w io.WriteCloser, err error) {
+	if o.Class() == "Array" {
+		w = &Writer{
+			vm:  vm,
+			ary: o,
+		}
+	} else {
+		err = fmt.Errorf("instance is %q", o.Class())
+	}
+	return
+}
+
+func (w *Writer) Write(p []byte) (int, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.b.Write(p)
+	for {
+		if s, err := w.b.ReadString('\n'); err == nil {
+			v, _ := w.vm.ToValue(s[:len(s)-1])
+			w.ary.Call("push", v)
+		} else {
+			w.b.WriteString(s)
+			break
+		}
+	}
+	return len(p), nil
+}
+
+func (w *Writer) Close() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if 0 < w.b.Len() {
+		v, _ := w.vm.ToValue(w.b.String())
+		w.ary.Call("push", v)
+	}
+	return nil
 }

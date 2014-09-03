@@ -32,6 +32,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -114,6 +115,43 @@ func TestOSSystem(t *testing.T) {
 		t.Error(err)
 	case !b:
 		t.Errorf("expected true")
+	}
+
+	// Array: stdout
+	ary, _ := vm.Object(`b = []`)
+	src = fmt.Sprintf(tmpl, exe, 0, "b", "b")
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+	v, _ := ary.Get("length")
+	n, _ := v.ToInteger()
+	if g, e := n, int64(1); g != e {
+		t.Errorf("expected %d, got %d", e, g)
+	}
+	v, _ = ary.Get(strconv.FormatInt(0, 10))
+	s, _ := v.ToString()
+	if g, e := s, "stdout"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+
+	// Array: stderr
+	ary, _ = vm.Object(`b = []`)
+	src = fmt.Sprintf(tmpl, exe, 1, "b", "b")
+	switch b, err := testBoolean(vm, src); {
+	case err != nil:
+		t.Error(err)
+	case !b:
+		t.Errorf("expected true")
+	}
+	v, _ = ary.Get("length")
+	n, _ = v.ToInteger()
+	if g, e := n, int64(1); g != e {
+		t.Errorf("expected %d, got %d", e, g)
+	}
+	v, _ = ary.Get(strconv.FormatInt(0, 10))
+	s, _ = v.ToString()
+	if g, e := s, "stderr"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
 	}
 
 	// invalid args
