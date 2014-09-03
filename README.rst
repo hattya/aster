@@ -112,10 +112,22 @@ options
     ``options`` is an ``Object``.
 
     stdout
-        ``stdout`` is a file name to redirect stdout. *It will be overwritten if exists.*
+        ``stdout`` is a ``String`` or ``null``.
+
+        ``String``
+            It is a file name to redirect standard output. *It will be overwritten if exists.*
+
+        ``null``
+            It will be discarded standard output.
 
     stderr
-        ``stderr`` is a file name to redirect stderr. *It will be overwritten if exists.*
+        ``stderr`` is a ``String`` or ``null``.
+
+        ``String``
+            It is a file name to redirect standard error. *It will be overwritten if exists.*
+
+        ``null``
+            It will be discarded standard error.
 
 
 os.whence(name)
