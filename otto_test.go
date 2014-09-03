@@ -211,7 +211,7 @@ func testBoolean(vm *otto.Otto, src string) (bool, error) {
 	v, err := vm.Run(src)
 	if err == nil {
 		if !v.IsBoolean() {
-			err = fmt.Errorf("expected boolean, got %v", v)
+			err = fmt.Errorf("expected Boolean, got %v", v)
 		} else {
 			return v.ToBoolean()
 		}
@@ -223,7 +223,7 @@ func testString(vm *otto.Otto, src string) (string, error) {
 	v, err := vm.Run(src)
 	if err == nil {
 		if !v.IsString() {
-			err = fmt.Errorf("expected string, got %v", v)
+			err = fmt.Errorf("expected String, got %v", v)
 		} else {
 			return v.ToString()
 		}

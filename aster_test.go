@@ -42,7 +42,7 @@ func TestWatch(t *testing.T) {
 		js: `aster.watch(/.+\.go$/, function(files) {
   cycles.push(files);
 })`,
-		setup: func(af *Aster) {
+		before: func(af *Aster) {
 			mkdir(".git")
 			af.vm.Run(`var cycles = []`)
 		},
@@ -67,7 +67,7 @@ func TestWatch(t *testing.T) {
 			touch(filepath.Join(".hg", "hg.go"))
 			time.Sleep(d)
 		},
-		teardown: func(af *Aster) {
+		after: func(af *Aster) {
 			v, _ := af.vm.Get("cycles")
 			cycles := v.Object()
 			// cycles.length
@@ -143,10 +143,10 @@ func TestReload(t *testing.T) {
 }
 
 type asterTest struct {
-	js       string
-	setup    func(*Aster)
-	test     func(time.Duration)
-	teardown func(*Aster)
+	js     string
+	before func(*Aster)
+	test   func(time.Duration)
+	after  func(*Aster)
 }
 
 func aster(tt *asterTest) (string, error) {
@@ -166,8 +166,8 @@ func aster(tt *asterTest) (string, error) {
 			return err
 		}
 
-		if tt.setup != nil {
-			tt.setup(af)
+		if tt.before != nil {
+			tt.before(af)
 		}
 
 		watcher, err := newWatcher(af)
@@ -179,8 +179,8 @@ func aster(tt *asterTest) (string, error) {
 		go watcher.Watch()
 		tt.test(149 * time.Millisecond)
 
-		if tt.teardown != nil {
-			tt.teardown(af)
+		if tt.after != nil {
+			tt.after(af)
 		}
 		return nil
 	})
