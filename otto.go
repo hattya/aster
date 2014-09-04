@@ -77,6 +77,7 @@ func ottoError(err error) error {
 
 func os_system(call otto.FunctionCall) otto.Value {
 	// defaults
+	var dir string
 	var stdout io.WriteCloser = os.Stdout
 	var stderr io.WriteCloser = os.Stderr
 	// args
@@ -99,6 +100,12 @@ func os_system(call otto.FunctionCall) otto.Value {
 	v = call.Argument(1)
 	if v.Class() == "Object" {
 		options := v.Object()
+		// dir
+		v, _ = options.Get("dir")
+		if v.IsString() {
+			dir, _ = v.ToString()
+		}
+
 		redir := func(o *otto.Object, k string) (w io.WriteCloser, err error) {
 			switch v, _ = o.Get(k); {
 			case v.IsString():
@@ -133,6 +140,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 	}
 
 	cmd := binfmt.Command(args[0], args[1:]...)
+	cmd.Dir = dir
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr

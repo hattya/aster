@@ -160,6 +160,12 @@ func TestOSSystem(t *testing.T) {
 		t.Error(err)
 	}
 
+	// dir
+	src = fmt.Sprintf(`os.system(['./%s'], {'dir': '%s', 'stdout': null})`, path.Base(exe), dir)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
 	// invalid args
 	src = fmt.Sprintf(tmpl, exe, 1, "'.'", n2)
 	if _, err := vm.Run(src); err == nil {
