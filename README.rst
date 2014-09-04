@@ -80,14 +80,14 @@ aster.notify(name, title, text)
 is not specified to Aster.
 
 name
-    ``name`` is a name (type) of a GNTP_ notification and which is either
+    ``name`` is the name (type) of a GNTP_ notification and which is either
     ``success`` or ``failure``.
 
 title
-    ``title`` is a title of a GNTP_ notification.
+    ``title`` is the title of a GNTP_ notification.
 
 text
-    ``text`` is a text of a GNTP_ notification.
+    ``text`` is the text of a GNTP_ notification.
 
 
 aster.ignore
@@ -111,29 +111,36 @@ args
 options
     ``options`` is an ``Object``.
 
+    dir
+        ``dir`` is the working directory of the command.
+
     stdout
         ``stdout`` is a ``String``, ``null`` or ``Array``.
 
         ``String``
-            It is a file name to redirect the standard output. *It will be overwritten if exists.*
+            It is the file name to redirect the standard output. *It will be
+            overwritten if exists.*
 
         ``null``
             The standard output will be discarded.
 
         ``Array``
-            The standard output will be splitted into lines, and added to the ``Array``.
+            The standard output will be splitted into lines, and added to the
+            ``Array``.
 
     stderr
         ``stderr`` is a ``String``, ``null`` or ``Array``.
 
         ``String``
-            It is a file name to redirect the standard error. *It will be overwritten if exists.*
+            It is the file name to redirect the standard error. *It will be
+            overwritten if exists.*
 
         ``null``
             The standard error will be discarded.
 
         ``Array``
-            The standard error will be splitted into lines, and added to the ``Array``.
+            The standard error will be splitted into lines, and added to the
+            ``Array``.
 
 
 os.whence(name)
