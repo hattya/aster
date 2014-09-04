@@ -239,5 +239,6 @@ func touch(name string) error {
 }
 
 func mkdtemp() (string, error) {
-	return ioutil.TempDir("", "aster.test")
+	dir, err := ioutil.TempDir("", "aster.test")
+	return filepath.ToSlash(dir), err
 }

@@ -31,7 +31,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"strconv"
 	"strings"
 	"testing"
@@ -46,27 +46,27 @@ func TestOSSystem(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 	// stdout
-	stdout, err := os.Create(filepath.Join(dir, "stdout"))
+	stdout, err := os.Create(path.Join(dir, "stdout"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer stdout.Close()
 	// stderr
-	stderr, err := os.Create(filepath.Join(dir, "stderr"))
+	stderr, err := os.Create(path.Join(dir, "stderr"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer stderr.Close()
 	// exe
-	exe := filepath.ToSlash(filepath.Join(dir, "otto_cmd.exe"))
+	exe := path.Join(dir, "otto_cmd.exe")
 	out, err := exec.Command("go", "build", "-o", exe, "otto_test_cmd.go").CombinedOutput()
 	if err != nil {
 		t.Fatalf("build failed\n%s", out)
 	}
 
 	vm := newVM()
-	n1 := "'" + filepath.ToSlash(stdout.Name()) + "'"
-	n2 := "'" + filepath.ToSlash(stderr.Name()) + "'"
+	n1 := "'" + stdout.Name() + "'"
+	n2 := "'" + stderr.Name() + "'"
 	tmpl := `os.system(['%s', '-code', '%d'], {'stdout': %s, 'stderr': %s})`
 
 	// String: stdout
@@ -154,14 +154,20 @@ func TestOSSystem(t *testing.T) {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
+	// Object
+	src = fmt.Sprintf(tmpl, exe, 0, "null", "{}")
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
 	// invalid args
-	src = fmt.Sprintf(tmpl, exe, 1, ".", n2)
+	src = fmt.Sprintf(tmpl, exe, 1, "'.'", n2)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
 	// invalid args
-	src = fmt.Sprintf(tmpl, exe, 1, n1, ".")
+	src = fmt.Sprintf(tmpl, exe, 1, n1, "'.'")
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
@@ -196,6 +202,31 @@ func TestOSWhence(t *testing.T) {
 	src = `os.whence('go')`
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestBuffer(t *testing.T) {
+	vm := otto.New()
+	ary, _ := vm.Object(`ary = []`)
+	b := &Buffer{
+		vm:  vm,
+		ary: ary,
+	}
+	b.Write([]byte("0\n1\n2"))
+	b.Close()
+
+	v, _ := ary.Get("length")
+	n, _ := v.ToInteger()
+	if g, e := n, int64(3); g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	for i := int64(0); i < n; i++ {
+		e := strconv.FormatInt(i, 10)
+		v, _ = ary.Get(e)
+		g, _ := v.ToString()
+		if g != e {
+			t.Errorf("expected %v, got %v", e, g)
+		}
 	}
 }
 
