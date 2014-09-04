@@ -107,7 +107,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 			case v.IsNull():
 				return discard, nil
 			case v.Class() == "Array":
-				return newWriter(call.Otto, v.Object())
+				return newBuffer(call.Otto, v.Object())
 			}
 			return nil, nil
 		}
@@ -154,16 +154,16 @@ func os_whence(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-type Writer struct {
+type Buffer struct {
 	vm  *otto.Otto
 	ary *otto.Object
 	mu  sync.Mutex
 	b   bytes.Buffer
 }
 
-func newWriter(vm *otto.Otto, o *otto.Object) (w io.WriteCloser, err error) {
+func newBuffer(vm *otto.Otto, o *otto.Object) (b io.WriteCloser, err error) {
 	if o.Class() == "Array" {
-		w = &Writer{
+		b = &Buffer{
 			vm:  vm,
 			ary: o,
 		}
@@ -173,30 +173,30 @@ func newWriter(vm *otto.Otto, o *otto.Object) (w io.WriteCloser, err error) {
 	return
 }
 
-func (w *Writer) Write(p []byte) (int, error) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+func (b *Buffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
-	w.b.Write(p)
+	b.b.Write(p)
 	for {
-		if s, err := w.b.ReadString('\n'); err == nil {
-			v, _ := w.vm.ToValue(s[:len(s)-1])
-			w.ary.Call("push", v)
+		if s, err := b.b.ReadString('\n'); err == nil {
+			v, _ := b.vm.ToValue(s[:len(s)-1])
+			b.ary.Call("push", v)
 		} else {
-			w.b.WriteString(s)
+			b.b.WriteString(s)
 			break
 		}
 	}
 	return len(p), nil
 }
 
-func (w *Writer) Close() error {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+func (b *Buffer) Close() error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 
-	if 0 < w.b.Len() {
-		v, _ := w.vm.ToValue(w.b.String())
-		w.ary.Call("push", v)
+	if 0 < b.b.Len() {
+		v, _ := b.vm.ToValue(b.b.String())
+		b.ary.Call("push", v)
 	}
 	return nil
 }
