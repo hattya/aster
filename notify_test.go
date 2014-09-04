@@ -29,7 +29,7 @@ package main
 import "testing"
 
 func TestGNTPValue(t *testing.T) {
-	var v gntpValue
+	var v GNTPValue
 	if !v.IsBoolFlag() {
 		t.Error("expected true")
 	}

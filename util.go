@@ -45,14 +45,14 @@ func warn(args ...interface{}) {
 	fmt.Fprintln(stderr, args...)
 }
 
-type devNull int
+type DevNull int
 
-func (devNull) Write(p []byte) (int, error) {
+func (DevNull) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (devNull) Close() error {
+func (DevNull) Close() error {
 	return nil
 }
 
-var discard io.WriteCloser = devNull(0)
+var discard io.WriteCloser = DevNull(0)

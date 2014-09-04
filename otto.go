@@ -99,33 +99,36 @@ func os_system(call otto.FunctionCall) otto.Value {
 	v = call.Argument(1)
 	if v.Class() == "Object" {
 		options := v.Object()
-		redir := func(o *otto.Object, k string) (io.WriteCloser, error) {
+		redir := func(o *otto.Object, k string) (w io.WriteCloser, err error) {
 			switch v, _ = o.Get(k); {
 			case v.IsString():
 				s, _ := v.ToString()
-				return os.Create(s)
+				w, err = os.Create(s)
 			case v.IsNull():
-				return discard, nil
+				w = discard
 			case v.Class() == "Array":
-				return newBuffer(call.Otto, v.Object())
+				w = &Buffer{
+					vm:  call.Otto,
+					ary: v.Object(),
+				}
 			}
-			return nil, nil
+			return
 		}
 		// stdout
-		switch wc, err := redir(options, "stdout"); {
+		switch w, err := redir(options, "stdout"); {
 		case err != nil:
 			return throw(call.Otto.ToValue(err.Error()))
-		case wc != nil:
-			stdout = wc
-			defer wc.Close()
+		case w != nil:
+			stdout = w
+			defer w.Close()
 		}
 		// stderr
-		switch wc, err := redir(options, "stderr"); {
+		switch w, err := redir(options, "stderr"); {
 		case err != nil:
 			return throw(call.Otto.ToValue(err.Error()))
-		case wc != nil:
-			stderr = wc
-			defer wc.Close()
+		case w != nil:
+			stderr = w
+			defer w.Close()
 		}
 	}
 
@@ -157,20 +160,9 @@ func os_whence(call otto.FunctionCall) otto.Value {
 type Buffer struct {
 	vm  *otto.Otto
 	ary *otto.Object
-	mu  sync.Mutex
-	b   bytes.Buffer
-}
 
-func newBuffer(vm *otto.Otto, o *otto.Object) (b io.WriteCloser, err error) {
-	if o.Class() == "Array" {
-		b = &Buffer{
-			vm:  vm,
-			ary: o,
-		}
-	} else {
-		err = fmt.Errorf("instance is %q", o.Class())
-	}
-	return
+	mu sync.Mutex
+	b  bytes.Buffer
 }
 
 func (b *Buffer) Write(p []byte) (int, error) {

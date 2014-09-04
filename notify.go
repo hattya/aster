@@ -33,32 +33,32 @@ import (
 	"github.com/mattn/go-gntp"
 )
 
-type gntpValue string
+type GNTPValue string
 
-func (g *gntpValue) Set(value string) error {
+func (g *GNTPValue) Set(value string) error {
 	if value == "true" {
 		*g = "localhost:23053"
 	} else {
 		if !strings.Contains(value, ":") {
 			value += ":23053"
 		}
-		*g = gntpValue(value)
+		*g = GNTPValue(value)
 	}
 	return nil
 }
 
-func (g *gntpValue) String() string {
+func (g *GNTPValue) String() string {
 	if *g == "" {
 		return "false"
 	}
 	return string(*g)
 }
 
-func (g *gntpValue) IsBoolFlag() bool {
+func (g *GNTPValue) IsBoolFlag() bool {
 	return true
 }
 
-var asterG gntpValue
+var asterG GNTPValue
 
 func init() {
 	flag.Var(&asterG, "g", "")
