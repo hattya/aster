@@ -30,22 +30,27 @@ import "testing"
 
 func TestGNTPValue(t *testing.T) {
 	var v GNTPValue
-	if !v.IsBoolFlag() {
-		t.Error("expected true")
+	if g, e := v.IsBoolFlag(), true; g != e {
+		t.Errorf("expected %v, got %v", e, g)
 	}
-	if g, e := v.String(), "false"; g != e {
+	if g, e := v.String(), ""; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
-	v.Set("true")
-	if g, e := v.String(), "localhost:23053"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
-	}
-	v.Set("127.0.0.1:23053")
-	if g, e := v.String(), "127.0.0.1:23053"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
-	}
-	v.Set("127.0.0.1")
-	if g, e := v.String(), "127.0.0.1:23053"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+
+	for _, tt := range [][]string{
+		{"", ""},
+		{"true", "localhost:23053"},
+		{"false", ""},
+		{"localhost", "localhost:23053"},
+		{"localhost:23053", "localhost:23053"},
+	} {
+		var v GNTPValue
+		v.Set(tt[0])
+		if g, e := v.String(), tt[1]; g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
+		if g, e := v.Get(), tt[1]; g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
 	}
 }

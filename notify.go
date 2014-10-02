@@ -28,6 +28,7 @@ package main
 
 import (
 	"flag"
+	"strconv"
 	"strings"
 
 	"github.com/mattn/go-gntp"
@@ -35,28 +36,25 @@ import (
 
 type GNTPValue string
 
-func (g *GNTPValue) Set(value string) error {
-	if value == "true" {
-		*g = "localhost:23053"
-	} else {
-		if !strings.Contains(value, ":") {
-			value += ":23053"
+func (g *GNTPValue) Set(s string) error {
+	if v, err := strconv.ParseBool(s); err == nil || s == "" {
+		if v {
+			*g = "localhost:23053"
+		} else {
+			*g = ""
 		}
-		*g = GNTPValue(value)
+	} else {
+		if !strings.Contains(s, ":") {
+			s += ":23053"
+		}
+		*g = GNTPValue(s)
 	}
 	return nil
 }
 
-func (g *GNTPValue) String() string {
-	if *g == "" {
-		return "false"
-	}
-	return string(*g)
-}
-
-func (g *GNTPValue) IsBoolFlag() bool {
-	return true
-}
+func (g *GNTPValue) Get() interface{} { return string(*g) }
+func (g *GNTPValue) String() string   { return string(*g) }
+func (g *GNTPValue) IsBoolFlag() bool { return true }
 
 var asterG GNTPValue
 
