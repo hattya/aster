@@ -32,6 +32,8 @@ import (
 	"runtime"
 )
 
+const version = "0.0+"
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
