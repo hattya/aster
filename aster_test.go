@@ -35,6 +35,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/hattya/go.cli"
 )
 
 func TestWatch(t *testing.T) {
@@ -150,43 +152,42 @@ type asterTest struct {
 }
 
 func aster(tt *asterTest) (string, error) {
-	// stderr
 	var b bytes.Buffer
-	stderr = &b
-	// duration
-	s := asterS
-	asterS = 101 * time.Millisecond
+	app.Stderr = &b
+	app.Action = func(*cli.Context) error {
+		return sandbox(func() error {
+			if err := genAsterfile(tt.js); err != nil {
+				return err
+			}
+			af, err := newAsterfile()
+			if err != nil {
+				return err
+			}
 
-	err := sandbox(func() error {
-		if err := genAsterfile(tt.js); err != nil {
-			return err
-		}
-		af, err := newAsterfile()
-		if err != nil {
-			return err
-		}
+			if tt.before != nil {
+				tt.before(af)
+			}
 
-		if tt.before != nil {
-			tt.before(af)
-		}
+			watcher, err := newWatcher(af)
+			if err != nil {
+				return err
+			}
+			defer watcher.Close()
 
-		watcher, err := newWatcher(af)
-		if err != nil {
-			return err
-		}
-		defer watcher.Close()
+			go watcher.Watch()
+			tt.test(149 * time.Millisecond)
 
-		go watcher.Watch()
-		tt.test(149 * time.Millisecond)
+			if tt.after != nil {
+				tt.after(af)
+			}
+			return nil
+		})
+	}
 
-		if tt.after != nil {
-			tt.after(af)
-		}
-		return nil
-	})
-	// restore
-	stderr = os.Stderr
-	asterS = s
+	err := app.Run([]string{"-s", "101ms"})
+	// reset
+	app.Stderr = nil
+	app.Flags.Set("s", app.Flags.Lookup("s").Default)
 
 	return b.String(), err
 }

@@ -130,8 +130,7 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 	var name, text otto.Value
 	if err := a.Eval(); err != nil {
 		// report error
-		warn("failed to reload")
-		fmt.Fprintln(stderr, err)
+		warn("failed to reload\n", err)
 		// rollback to snapshot
 		a.vm = vm
 		a.watch = watch

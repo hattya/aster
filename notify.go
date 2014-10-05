@@ -27,7 +27,6 @@
 package main
 
 import (
-	"flag"
 	"strconv"
 	"strings"
 
@@ -56,18 +55,19 @@ func (g *GNTPValue) Get() interface{} { return string(*g) }
 func (g *GNTPValue) String() string   { return string(*g) }
 func (g *GNTPValue) IsBoolFlag() bool { return true }
 
-var asterG GNTPValue
-
 func init() {
-	flag.Var(&asterG, "g", "")
+	var g GNTPValue
+	app.Flags.Var("g", &g, "notify to Growl (default: localhost:23053)")
+	app.Flags.MetaVar("g", "[=<host>[:<port>]]")
 }
 
 func newNotifier() *gntp.Client {
-	if asterG == "" {
+	g := app.Flags.Get("g").(string)
+	if g == "" {
 		return nil
 	}
 	c := gntp.NewClient()
-	c.Server = asterG.String()
+	c.Server = g
 	c.AppName = "Aster"
 	err := c.Register([]gntp.Notification{
 		{

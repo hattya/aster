@@ -27,7 +27,6 @@
 package main
 
 import (
-	"flag"
 	"os"
 	"path/filepath"
 	"sync"
@@ -37,10 +36,9 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 )
 
-var asterS time.Duration
-
 func init() {
-	flag.DurationVar(&asterS, "s", 727*time.Millisecond, "")
+	app.Flags.Duration("s", 727*time.Millisecond, "squash events during <duration> (default: 727ms)")
+	app.Flags.MetaVar("s", " <duration>")
 }
 
 type Watcher struct {
@@ -138,7 +136,7 @@ func (w *Watcher) Watch() {
 			mu.Unlock()
 			// new cycle has begun
 			if n == 0 {
-				timer.Reset(asterS)
+				timer.Reset(app.Flags.Get("s").(time.Duration))
 			}
 		case err := <-w.Errors:
 			warn(err)

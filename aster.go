@@ -27,43 +27,49 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"os"
 	"runtime"
+	"strings"
+
+	"github.com/hattya/go.cli"
 )
 
 const version = "0.0+"
 
+var app = cli.NewCLI()
+
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	flag.Usage = usage
-	flag.Parse()
+	app.Version = version
+	app.Usage = "<options>"
+	app.Epilog = strings.TrimSpace(`
+<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
+"s", "m" and "h"
+`)
+	app.Action = action
 
+	if err := app.Run(os.Args[1:]); err != nil {
+		switch err.(type) {
+		case cli.FlagError:
+			os.Exit(2)
+		}
+		os.Exit(1)
+	}
+}
+
+func action(ctx *cli.Context) error {
 	af, err := newAsterfile()
 	if err != nil {
-		exit(err)
+		return err
 	}
 
 	watcher, err := newWatcher(af)
 	if err != nil {
-		exit(err)
+		return err
 	}
 	defer watcher.Close()
 
 	watcher.Watch()
-}
-
-func usage() {
-	fmt.Printf(`usage: aster <options>
-
-options:
-
-  -h                     show this help message and exit
-  -g[=<host[:<port>]]    notify to Growl (default: localhost:23053)
-  -s <duration>          squash events during <duration> (default: 727ms)
-
-<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
-"s", "m" and "h"
-`)
+	return nil
 }

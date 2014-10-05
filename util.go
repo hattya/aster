@@ -26,23 +26,11 @@
 
 package main
 
-import (
-	"fmt"
-	"io"
-	"os"
-)
-
-// for testing
-var stderr io.Writer = os.Stderr
-
-func exit(args ...interface{}) {
-	warn(args...)
-	os.Exit(1)
-}
+import "io"
 
 func warn(args ...interface{}) {
-	fmt.Fprint(stderr, "aster: ")
-	fmt.Fprintln(stderr, args...)
+	app.Error("aster: ")
+	app.Errorln(args...)
 }
 
 type DevNull int
