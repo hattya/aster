@@ -61,12 +61,12 @@ func main() {
 func action(ctx *cli.Context) error {
 	af, err := newAsterfile()
 	if err != nil {
-		return err
+		return ctx.ErrorHandler(&cli.Abort{Err: err})
 	}
 
 	watcher, err := newWatcher(af)
 	if err != nil {
-		return err
+		return ctx.ErrorHandler(&cli.Abort{Err: err})
 	}
 	defer watcher.Close()
 
