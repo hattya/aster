@@ -72,10 +72,18 @@ func init_(ctx *cli.Context) error {
 	}
 	defer f.Close()
 
+	newline := false
+	if fi, err := f.Stat(); err == nil && 0 < fi.Size() {
+		newline = true
+	}
+
 	for _, a := range ctx.Args {
 		t, err := os.Open(filepath.Join(template, a))
 		if err != nil {
 			return fmt.Errorf("template '%v' is not found", a)
+		}
+		if newline {
+			fmt.Fprintln(f)
 		}
 		scanner := bufio.NewScanner(t)
 		for scanner.Scan() {
@@ -85,6 +93,7 @@ func init_(ctx *cli.Context) error {
 		if scanner.Err() != nil {
 			return fmt.Errorf("error occurred while processing template '%v'", a)
 		}
+		newline = true
 	}
 	return nil
 }
