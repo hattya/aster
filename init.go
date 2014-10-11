@@ -1,5 +1,5 @@
 //
-// aster :: aster.go
+// aster :: init.go
 //
 //   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
 //
@@ -27,49 +27,64 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"os"
-	"runtime"
+	"path/filepath"
 	"strings"
 
 	"github.com/hattya/go.cli"
 )
 
-const version = "0.0+"
+func init() {
+	app.Add(&cli.Command{
+		Name:  []string{"init"},
+		Usage: "[<template>...]",
+		Desc: strings.TrimSpace(`
+generate an Asterfile in the current directory
 
-var app = cli.NewCLI()
+    Create an Asterfile in the current directory if it does not exist,
+    and add specified template files to it.
 
-func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+    Template files are located in:
 
-	app.Version = version
-	app.Usage = "<options>"
-	app.Epilog = strings.TrimSpace(`
-<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
-"s", "m" and "h"
-`)
-	app.Action = cli.Option(watch)
-
-	if err := app.Run(os.Args[1:]); err != nil {
-		switch err.(type) {
-		case cli.FlagError:
-			os.Exit(2)
-		}
-		os.Exit(1)
-	}
+      UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
+      Windows: %APPDATA%\Aster\template\<template>
+`),
+		Flags:  cli.NewFlagSet(),
+		Action: init_,
+	})
 }
 
-func watch(*cli.Context) error {
-	af, err := newAsterfile()
+func init_(ctx *cli.Context) error {
+	dir, err := configDir()
 	if err != nil {
 		return err
 	}
+	template := filepath.Join(dir, "template")
+	if _, err := os.Stat(template); err != nil {
+		return nil
+	}
 
-	watcher, err := newWatcher(af)
+	f, err := os.OpenFile("Asterfile", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
-	defer watcher.Close()
+	defer f.Close()
 
-	watcher.Watch()
+	for _, a := range ctx.Args {
+		t, err := os.Open(filepath.Join(template, a))
+		if err != nil {
+			return fmt.Errorf("template '%v' is not found", a)
+		}
+		scanner := bufio.NewScanner(t)
+		for scanner.Scan() {
+			fmt.Fprintln(f, scanner.Text())
+		}
+		t.Close()
+		if scanner.Err() != nil {
+			return fmt.Errorf("error occurred while processing template '%v'", a)
+		}
+	}
 	return nil
 }

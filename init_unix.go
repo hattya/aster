@@ -1,5 +1,5 @@
 //
-// aster :: aster.go
+// aster :: init_unix.go
 //
 //   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
 //
@@ -24,52 +24,26 @@
 //   SOFTWARE.
 //
 
+// +build !plan9,!windows
+
 package main
 
 import (
+	"errors"
 	"os"
-	"runtime"
-	"strings"
-
-	"github.com/hattya/go.cli"
+	"path/filepath"
 )
 
-const version = "0.0+"
+var ErrEnv = errors.New("$HOME is not set")
 
-var app = cli.NewCLI()
-
-func main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	app.Version = version
-	app.Usage = "<options>"
-	app.Epilog = strings.TrimSpace(`
-<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
-"s", "m" and "h"
-`)
-	app.Action = cli.Option(watch)
-
-	if err := app.Run(os.Args[1:]); err != nil {
-		switch err.(type) {
-		case cli.FlagError:
-			os.Exit(2)
+func configDir() (string, error) {
+	config := os.Getenv("XDG_CONFIG_HOME")
+	if config == "" {
+		home := os.Getenv("HOME")
+		if home == "" {
+			return "", ErrEnv
 		}
-		os.Exit(1)
+		config = filepath.Join(home, ".config")
 	}
-}
-
-func watch(*cli.Context) error {
-	af, err := newAsterfile()
-	if err != nil {
-		return err
-	}
-
-	watcher, err := newWatcher(af)
-	if err != nil {
-		return err
-	}
-	defer watcher.Close()
-
-	watcher.Watch()
-	return nil
+	return filepath.Join(config, "aster"), nil
 }
