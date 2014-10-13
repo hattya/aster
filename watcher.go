@@ -109,8 +109,7 @@ func (w *Watcher) Watch() {
 				ev.Name = ev.Name[2:]
 			}
 			// filter
-			switch ev.Op {
-			case fsnotify.Create:
+			if ev.Op&fsnotify.Create != 0 {
 				switch fi, err := os.Lstat(ev.Name); {
 				case err != nil:
 					// removed immediately?
@@ -119,18 +118,19 @@ func (w *Watcher) Watch() {
 					w.Add(ev.Name)
 					continue
 				}
-			case fsnotify.Remove, fsnotify.Rename:
+			}
+			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
 				w.Remove(ev.Name)
-			case fsnotify.Chmod:
+			}
+			if ev.Op == fsnotify.Chmod {
 				continue
 			}
 
 			mu.Lock()
 			n := len(files)
-			switch ev.Op {
-			case fsnotify.Remove, fsnotify.Rename:
+			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
 				delete(files, ev.Name)
-			default:
+			} else {
 				files[ev.Name]++
 			}
 			mu.Unlock()
