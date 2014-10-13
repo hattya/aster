@@ -1,4 +1,4 @@
-var proj = 'aster';
+var proj = os.getwd().split(/[/\\]+/).slice(-1);
 
 // go
 aster.watch(/.+\.go$/, function(files) {
