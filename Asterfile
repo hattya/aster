@@ -1,47 +1,50 @@
+var proj = 'aster';
+
+// go
 aster.watch(/.+\.go$/, function(files) {
-  // vet
-  if (exec('go vet')) {
-    return notify('failure', 'vet');
+  if (go('vet')) {
+    return;
   }
-  notify('success', 'vet');
-
-  // build
-  if (exec('go get -t -v ./...')) {
-    return notify('failure', 'build');
+  if (go('get', '-t', '-v', './...')) {
+    return;
   }
-  notify('success', 'build');
-
-  // test
-  if (exec('go test -v -covermode count -coverprofile cover.out')) {
-    return notify('failure', 'test');
+  if (go('test', '-v', '-covermode', 'count', '-coverprofile', 'cover.out')) {
+    return;
   }
-  notify('success', 'test');
-
-  // coverage
-  exec('go tool cover -func cover.out');
-  exec('go tool cover -html cover.out -o coverage.html');
+  cover('-func', 'cover.out');
+  cover('-html', 'cover.out', '-o', 'coverage.html');
 });
 
-if (os.whence('rst2html.py') !== undefined) {
-  aster.watch(/.+\.rst$/, function(files) {
-    files.forEach(rst2html);
-    aster.notify('success', 'aster: rst2html.py', files.join('\n'));
-  });
-
-  // rst2html
-  function rst2html(rst) {
-    var html = rst.slice(0, -4) + '.html';
-    return exec('rst2html.py ' + rst + ' ' + html);
+function go() {
+  var args = ['go'].concat(Array.prototype.slice.call(arguments));
+  var cmd = args[1] == 'get' ? 'bulid' : args[1];
+  var rv = system(args);
+  if (rv) {
+    aster.notify('failure', proj + ': ' + cmd, cmd + ' failed');
+  } else {
+    aster.notify('success', proj + ': ' + cmd, cmd + ' passed');
   }
+  return rv;
 }
 
-// exec
-function exec(cmdline) {
-  console.log('+ ' + cmdline);
-  return os.system(cmdline.split(/\s+/));
+function cover() {
+  return system(['go', 'tool', 'cover'].concat(Array.prototype.slice.call(arguments)));
 }
 
-// notify
-function notify(name, cmd) {
-  return aster.notify(name, 'aster: ' + cmd, cmd + (name == 'success' ? ' passed' : ' failed'));
+// rst
+aster.watch(/.+\.rst$/, function(files) {
+  if (os.whence('rst2html.py') !== undefined) {
+    files.forEach(rst2html);
+    aster.notify('success', proj + ': rst2html.py', files.join('\n'));
+  }
+});
+
+function rst2html(rst) {
+  return system(['rst2html.py', rst, rst.slice(0, -4) + '.html']);
+}
+
+// system
+function system(args) {
+  console.log('+ ' + args.join(' '));
+  return os.system(args);
 }
