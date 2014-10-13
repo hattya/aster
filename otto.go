@@ -45,6 +45,7 @@ func newVM() *otto.Otto {
 	vm := otto.New()
 	// os object
 	os, _ := vm.Object(`os = {}`)
+	os.Set("getwd", os_getwd)
 	os.Set("system", os_system)
 	os.Set("whence", os_whence)
 
@@ -73,6 +74,12 @@ func ottoError(err error) error {
 		return fmt.Errorf(b.String())
 	}
 	return err
+}
+
+func os_getwd(call otto.FunctionCall) otto.Value {
+	wd, _ := os.Getwd()
+	v, _ := call.Otto.ToValue(wd)
+	return v
 }
 
 func os_system(call otto.FunctionCall) otto.Value {

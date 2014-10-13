@@ -39,6 +39,23 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+func TestOSGetwd(t *testing.T) {
+	vm := newVM()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	src := `os.getwd()`
+	s, err := testString(vm, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g, e := s, wd; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+}
+
 func TestOSSystem(t *testing.T) {
 	dir, err := mkdtemp()
 	if err != nil {
