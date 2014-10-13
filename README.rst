@@ -118,6 +118,13 @@ by Aster when a directory is matched to any of ``aster.ignore``.
 A path to be matched is a relative path from where the Asterfile exists.
 
 
+os.getwd()
+~~~~~~~~~~
+
+``os.getwd`` returns an absolute path of the current directory, or an empty
+``String`` if error occurred.
+
+
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
