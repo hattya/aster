@@ -85,6 +85,27 @@ func TestOSMkdir(t *testing.T) {
 	}
 }
 
+func TestOSRemove(t *testing.T) {
+	dir, err := mkdtemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	vm := newVM()
+
+	touch(path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.remove("%s")`, path.Join(dir, "a"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.remove("%s")`, path.Join(dir, "b"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestOSSystem(t *testing.T) {
 	dir, err := mkdtemp()
 	if err != nil {
