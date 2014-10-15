@@ -139,6 +139,15 @@ perm
     ``os.mkdir`` creates.
 
 
+os.remove(path)
+~~~~~~~~~~~~~~~
+
+``os.remove`` removes ``path`` and its contents recursively.
+
+path
+    ``path`` is a ``String``.
+
+
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
