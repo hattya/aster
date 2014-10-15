@@ -122,14 +122,28 @@ os.getwd()
 ~~~~~~~~~~
 
 ``os.getwd`` returns an absolute path of the current directory, or an empty
-``String`` if error occurred.
+``String`` if fails.
+
+
+os.mkdir(path[, perm=0777])
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``os.mkdir`` creates a directory named ``path``, along with any necessary
+parent directories, and returns ``true`` if fails.
+
+path
+    ``path`` is a ``String``.
+
+perm
+    ``perm`` is a permission bits which are used for all directories that
+    ``os.mkdir`` creates.
 
 
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``os.system`` runs the command specified by ``args`` and returns ``true`` when
-it is failed.
+``os.system`` runs the command specified by ``args``, and returns ``true`` if
+fails.
 
 args
     ``args`` is an ``Array`` of ``String``.
