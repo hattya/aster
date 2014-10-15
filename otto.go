@@ -46,6 +46,7 @@ func newVM() *otto.Otto {
 	// os object
 	os, _ := vm.Object(`os = {}`)
 	os.Set("getwd", os_getwd)
+	os.Set("mkdir", os_mkdir)
 	os.Set("system", os_system)
 	os.Set("whence", os_whence)
 
@@ -80,6 +81,25 @@ func os_getwd(call otto.FunctionCall) otto.Value {
 	wd, _ := os.Getwd()
 	v, _ := call.Otto.ToValue(wd)
 	return v
+}
+
+func os_mkdir(call otto.FunctionCall) otto.Value {
+	if 1 <= len(call.ArgumentList) {
+		path, _ := call.ArgumentList[0].ToString()
+		var perm os.FileMode
+		v := call.Argument(1)
+		if v.IsNumber() {
+			i, _ := v.ToInteger()
+			perm = os.FileMode(i)
+		}
+		if perm == 0 {
+			perm = os.FileMode(0777)
+		}
+		if os.MkdirAll(path, perm) != nil {
+			return otto.TrueValue()
+		}
+	}
+	return otto.UndefinedValue()
 }
 
 func os_system(call otto.FunctionCall) otto.Value {

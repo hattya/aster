@@ -56,6 +56,35 @@ func TestOSGetwd(t *testing.T) {
 	}
 }
 
+func TestOSMkdir(t *testing.T) {
+	dir, err := mkdtemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	vm := newVM()
+
+	src := fmt.Sprintf(`os.mkdir("%s")`, path.Join(dir, "a"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.mkdir("%s", 0777)`, path.Join(dir, "b"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	touch(path.Join(dir, "c"))
+	src = fmt.Sprintf(`os.mkdir("%s", 0777)`, path.Join(dir, "c"))
+	switch b, err := testBoolean(vm, src); {
+	case err != nil:
+		t.Error(err)
+	case !b:
+		t.Errorf("expected true")
+	}
+}
+
 func TestOSSystem(t *testing.T) {
 	dir, err := mkdtemp()
 	if err != nil {
