@@ -42,7 +42,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	app.Version = version
-	app.Usage = "<options>"
+	app.Usage = []string{
+		"[options]",
+		"init [<template>...]",
+	}
 	app.Epilog = strings.TrimSpace(`
 <duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
 "s", "m" and "h"
