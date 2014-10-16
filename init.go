@@ -43,13 +43,13 @@ func init() {
 		Desc: strings.TrimSpace(`
 generate an Asterfile in the current directory
 
-    Create an Asterfile in the current directory if it does not exist,
-    and add specified template files to it.
+  Create an Asterfile in the current directory if it does not exist,
+  and add specified template files to it.
 
-    Template files are located in:
+  Template files are located in:
 
-      UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
-      Windows: %APPDATA%\Aster\template\<template>
+    UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
+    Windows: %APPDATA%\Aster\template\<template>
 `),
 		Flags:  cli.NewFlagSet(),
 		Action: init_,
