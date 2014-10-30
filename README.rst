@@ -148,6 +148,18 @@ path
     ``path`` is a ``String``.
 
 
+os.rename(src, dst)
+~~~~~~~~~~~~~~~~~~~
+
+``os.rename`` renames / moves a file or directory.
+
+src
+    ``src`` is a ``String``.
+
+dst
+    ``dst`` is a ``String``.
+
+
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
