@@ -106,6 +106,30 @@ func TestOSRemove(t *testing.T) {
 	}
 }
 
+func TestOSRename(t *testing.T) {
+	dir, err := mkdtemp()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	vm := newVM()
+
+	touch(path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.rename("%s", "%s")`, path.Join(dir, "a"), path.Join(dir, "b"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.rename("%s", "%s")`, path.Join(dir, "a"), path.Join(dir, "c"))
+	switch b, err := testBoolean(vm, src); {
+	case err != nil:
+		t.Error(err)
+	case !b:
+		t.Errorf("expected true")
+	}
+}
+
 func TestOSSystem(t *testing.T) {
 	dir, err := mkdtemp()
 	if err != nil {

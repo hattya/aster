@@ -48,6 +48,7 @@ func newVM() *otto.Otto {
 	os.Set("getwd", os_getwd)
 	os.Set("mkdir", os_mkdir)
 	os.Set("remove", os_remove)
+	os.Set("rename", os_rename)
 	os.Set("system", os_system)
 	os.Set("whence", os_whence)
 
@@ -107,6 +108,17 @@ func os_remove(call otto.FunctionCall) otto.Value {
 	if 1 <= len(call.ArgumentList) {
 		path, _ := call.ArgumentList[0].ToString()
 		os.RemoveAll(path)
+	}
+	return otto.UndefinedValue()
+}
+
+func os_rename(call otto.FunctionCall) otto.Value {
+	if 2 <= len(call.ArgumentList) {
+		src, _ := call.ArgumentList[0].ToString()
+		dst, _ := call.ArgumentList[1].ToString()
+		if os.Rename(src, dst) != nil {
+			return otto.TrueValue()
+		}
 	}
 	return otto.UndefinedValue()
 }
