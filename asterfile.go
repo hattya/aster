@@ -79,7 +79,7 @@ func (a *Aster) Eval() error {
 	// aster object
 	aster, _ := a.vm.Object(fmt.Sprintf(`aster = {
 	  'ignore': [
-	    /%s/,
+	    /%v/,
 	  ],
 	}`, defaultIgnore))
 	aster.Set("watch", a.Watch)
