@@ -28,6 +28,16 @@ package main
 
 import "testing"
 
+var gntpValueTests = []struct {
+	in, out string
+}{
+	{"", ""},
+	{"true", "localhost:23053"},
+	{"false", ""},
+	{"localhost", "localhost:23053"},
+	{"localhost:23053", "localhost:23053"},
+}
+
 func TestGNTPValue(t *testing.T) {
 	var v GNTPValue
 	if g, e := v.IsBoolFlag(), true; g != e {
@@ -37,19 +47,13 @@ func TestGNTPValue(t *testing.T) {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
-	for _, tt := range [][]string{
-		{"", ""},
-		{"true", "localhost:23053"},
-		{"false", ""},
-		{"localhost", "localhost:23053"},
-		{"localhost:23053", "localhost:23053"},
-	} {
+	for _, tt := range gntpValueTests {
 		var v GNTPValue
-		v.Set(tt[0])
-		if g, e := v.String(), tt[1]; g != e {
+		v.Set(tt.in)
+		if g, e := v.String(), tt.out; g != e {
 			t.Errorf("expected %q, got %q", e, g)
 		}
-		if g, e := v.Get(), tt[1]; g != e {
+		if g, e := v.Get(), tt.out; g != e {
 			t.Errorf("expected %q, got %q", e, g)
 		}
 	}

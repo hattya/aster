@@ -57,7 +57,7 @@ func TestOSGetwd(t *testing.T) {
 }
 
 func TestOSMkdir(t *testing.T) {
-	dir, err := mkdtemp()
+	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,28 +65,28 @@ func TestOSMkdir(t *testing.T) {
 
 	vm := newVM()
 
-	src := fmt.Sprintf(`os.mkdir("%s")`, path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.mkdir("%v")`, path.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.mkdir("%s", 0777)`, path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.mkdir("%v", 0777)`, path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
 	touch(path.Join(dir, "c"))
-	src = fmt.Sprintf(`os.mkdir("%s", 0777)`, path.Join(dir, "c"))
-	switch b, err := testBoolean(vm, src); {
+	src = fmt.Sprintf(`os.mkdir("%v", 0777)`, path.Join(dir, "c"))
+	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
-	case !b:
-		t.Errorf("expected true")
+	case !v:
+		t.Errorf("expected %v, got %v", true, v)
 	}
 }
 
 func TestOSRemove(t *testing.T) {
-	dir, err := mkdtemp()
+	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,19 +95,19 @@ func TestOSRemove(t *testing.T) {
 	vm := newVM()
 
 	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.remove("%s")`, path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.remove("%v")`, path.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.remove("%s")`, path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.remove("%v")`, path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestOSRename(t *testing.T) {
-	dir, err := mkdtemp()
+	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,22 +116,22 @@ func TestOSRename(t *testing.T) {
 	vm := newVM()
 
 	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.rename("%s", "%s")`, path.Join(dir, "a"), path.Join(dir, "b"))
+	src := fmt.Sprintf(`os.rename("%v", "%v")`, path.Join(dir, "a"), path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.rename("%s", "%s")`, path.Join(dir, "a"), path.Join(dir, "c"))
-	switch b, err := testBoolean(vm, src); {
+	src = fmt.Sprintf(`os.rename("%v", "%v")`, path.Join(dir, "a"), path.Join(dir, "c"))
+	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
-	case !b:
-		t.Errorf("expected true")
+	case !v:
+		t.Errorf("expected %v, got %v", true, v)
 	}
 }
 
 func TestOSSystem(t *testing.T) {
-	dir, err := mkdtemp()
+	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +158,7 @@ func TestOSSystem(t *testing.T) {
 	vm := newVM()
 	n1 := "'" + stdout.Name() + "'"
 	n2 := "'" + stderr.Name() + "'"
-	tmpl := `os.system(['%s', '-code', '%d'], {'stdout': %s, 'stderr': %s})`
+	tmpl := `os.system(['%v', '-code', '%v'], {'stdout': %v, 'stderr': %v})`
 
 	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
@@ -181,7 +181,7 @@ func TestOSSystem(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true")
+		t.Errorf("expected %v, got %v", true, b)
 	}
 	stderr.Seek(0, os.SEEK_SET)
 	data, err = ioutil.ReadAll(stderr)
@@ -205,7 +205,7 @@ func TestOSSystem(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true")
+		t.Errorf("expected %v, got %v", true, b)
 	}
 
 	// Array: stdout
@@ -217,7 +217,7 @@ func TestOSSystem(t *testing.T) {
 	v, _ := ary.Get("length")
 	n, _ := v.ToInteger()
 	if g, e := n, int64(1); g != e {
-		t.Errorf("expected %d, got %d", e, g)
+		t.Errorf("expected %v, got %v", e, g)
 	}
 	v, _ = ary.Get(strconv.FormatInt(0, 10))
 	s, _ := v.ToString()
@@ -237,7 +237,7 @@ func TestOSSystem(t *testing.T) {
 	v, _ = ary.Get("length")
 	n, _ = v.ToInteger()
 	if g, e := n, int64(1); g != e {
-		t.Errorf("expected %d, got %d", e, g)
+		t.Errorf("expected %v, got %v", e, g)
 	}
 	v, _ = ary.Get(strconv.FormatInt(0, 10))
 	s, _ = v.ToString()
@@ -252,7 +252,7 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// dir
-	src = fmt.Sprintf(`os.system(['./%s'], {'dir': '%s', 'stdout': null})`, path.Base(exe), dir)
+	src = fmt.Sprintf(`os.system(['./%v'], {'dir': '%v', 'stdout': null})`, path.Base(exe), dir)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}

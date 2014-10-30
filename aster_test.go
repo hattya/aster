@@ -197,7 +197,7 @@ func genAsterfile(js string) error {
 }
 
 func sandbox(test interface{}) error {
-	dir, err := mkdtemp()
+	dir, err := tempDir()
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func touch(name string) error {
 	return ioutil.WriteFile(name, []byte{}, 0666)
 }
 
-func mkdtemp() (string, error) {
+func tempDir() (string, error) {
 	dir, err := ioutil.TempDir("", "aster.test")
 	return filepath.ToSlash(dir), err
 }
