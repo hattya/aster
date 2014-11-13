@@ -109,6 +109,13 @@ text
     ``text`` is the text of a GNTP_ notification.
 
 
+aster.title(title)
+~~~~~~~~~~~~~~~~~~
+
+``aster.title`` sets the title of an XTerm, or the title of the console window
+on Windows.
+
+
 aster.ignore
 ~~~~~~~~~~~~
 
