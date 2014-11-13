@@ -1,11 +1,14 @@
 var proj = os.getwd().split(/[/\\]+/).slice(-1);
+var title = 'Aster ☆ ' + proj;
+
+aster.title(title);
 
 // go
 aster.watch(/.+\.go$/, function(files) {
-  if (go('vet')) {
+  if (go('get', '-t', '-v')) {
     return;
   }
-  if (go('get', '-t', '-v', './...')) {
+  if (go('vet')) {
     return;
   }
   if (go('test', '-v', '-covermode', 'count', '-coverprofile', 'cover.out')) {
@@ -13,6 +16,7 @@ aster.watch(/.+\.go$/, function(files) {
   }
   cover('-func', 'cover.out');
   cover('-html', 'cover.out', '-o', 'coverage.html');
+  aster.title(title);
 });
 
 function go() {
