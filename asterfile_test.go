@@ -185,3 +185,42 @@ func TestNotifyInvalidArgs(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestTitleArgs(t *testing.T) {
+	err := sandbox(func() {
+		js := `aster.title('aster.test')`
+		if err := genAsterfile(js); err != nil {
+			t.Fatal(err)
+		}
+		af, err := newAsterfile()
+		if err != nil {
+			t.Fatal("unexpected error:", err)
+		}
+		if g, e := len(af.watch), 1; g != e {
+			t.Errorf("expected %v, got %v", e, g)
+		}
+	})
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestTitleInvalidArgs(t *testing.T) {
+	err := sandbox(func() {
+		// too few args
+		js := `aster.title()`
+		if err := genAsterfile(js); err != nil {
+			t.Fatal(err)
+		}
+		af, err := newAsterfile()
+		if err != nil {
+			t.Fatal("unexpected error:", err)
+		}
+		if g, e := len(af.watch), 1; g != e {
+			t.Errorf("expected %v, got %v", e, g)
+		}
+	})
+	if err != nil {
+		t.Error(err)
+	}
+}

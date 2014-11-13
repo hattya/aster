@@ -84,6 +84,7 @@ func (a *Aster) Eval() error {
 	}`, defaultIgnore))
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
+	aster.Set("title", a.Title)
 	// watch Asterfile
 	re, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
 	cb, _ := a.vm.ToValue(a.Reload)
@@ -167,6 +168,14 @@ func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
 			args[i], _ = call.ArgumentList[i].ToString()
 		}
 		notify(a.gntp, args[0], args[1], args[2])
+	}
+	return otto.UndefinedValue()
+}
+
+func (a *Aster) Title(call otto.FunctionCall) otto.Value {
+	if 1 <= len(call.ArgumentList) {
+		title, _ := call.ArgumentList[0].ToString()
+		app.Title(title)
 	}
 	return otto.UndefinedValue()
 }
