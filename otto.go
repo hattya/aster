@@ -1,7 +1,7 @@
 //
 // aster :: otto.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -35,6 +35,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hattya/go.binfmt"
 	"github.com/robertkrimen/otto"
@@ -49,8 +50,29 @@ func newVM() *otto.Otto {
 	os.Set("mkdir", os_mkdir)
 	os.Set("remove", os_remove)
 	os.Set("rename", os_rename)
+	os.Set("stat", os_stat)
 	os.Set("system", os_system)
 	os.Set("whence", os_whence)
+	// os.FileInfo object
+	vm.Run(fmt.Sprintf(`os.FileInfo = function(name, size, mode, mtime) {
+  this.name = name;
+  this.size = size;
+  this.mode = mode;
+  this.mtime = mtime;
+};
+
+os.FileInfo.prototype.isDir = function() {
+  return (this.mode & %v) !== 0;
+};
+
+os.FileInfo.prototype.isRegular = function() {
+  return (this.mode & %v) === 0;
+};
+
+os.FileInfo.prototype.perm = function() {
+  return this.mode & %v;
+};
+`, int64(1<<31), int64(0xff<<24), 0777))
 
 	return vm
 }
@@ -118,6 +140,18 @@ func os_rename(call otto.FunctionCall) otto.Value {
 		dst, _ := call.ArgumentList[1].ToString()
 		if os.Rename(src, dst) != nil {
 			return otto.TrueValue()
+		}
+	}
+	return otto.UndefinedValue()
+}
+
+func os_stat(call otto.FunctionCall) otto.Value {
+	if 1 <= len(call.ArgumentList) {
+		path, _ := call.ArgumentList[0].ToString()
+		if fi, err := os.Stat(path); err == nil {
+			mtime, _ := call.Otto.Call(`new Date`, nil, fi.ModTime().Unix()*1000+int64(fi.ModTime().Nanosecond())/int64(time.Millisecond))
+			v, _ := call.Otto.Call(`new os.FileInfo`, nil, fi.Name(), fi.Size(), fi.Mode(), mtime)
+			return v
 		}
 	}
 	return otto.UndefinedValue()

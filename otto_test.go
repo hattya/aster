@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -127,6 +127,88 @@ func TestOSRename(t *testing.T) {
 		t.Error(err)
 	case !v:
 		t.Errorf("expected %v, got %v", true, v)
+	}
+}
+
+var osStatTests = []struct {
+	path string
+	dir  bool
+}{
+	{".", true},
+	{"Asterfile", false},
+}
+
+func TestOSStat(t *testing.T) {
+	vm := newVM()
+
+	for _, tt := range osStatTests {
+		src := fmt.Sprintf(`os.stat('%v')`, tt.path)
+		v, err := vm.Run(src)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fi := v.Object()
+		switch v, err := fi.Get("name"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsString():
+			t.Errorf("expected String, got %v", v)
+		}
+		switch v, err = fi.Get("size"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsNumber():
+			t.Errorf("expected Number, got %v", v)
+		}
+		switch v, err := fi.Get("mode"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsNumber():
+			t.Errorf("expected Number, got %v", v)
+		}
+		switch v, err := fi.Get("mtime"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsObject() || v.Class() != "Date":
+			t.Errorf("expected Date, got %v", v)
+		}
+		switch v, err := fi.Call("isDir"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsBoolean():
+			t.Errorf("expected Boolean, got %v", v)
+		default:
+			switch g, err := v.ToBoolean(); {
+			case err != nil:
+				t.Error(err)
+			case g != tt.dir:
+				t.Errorf("expected %v, got %v", tt.dir, g)
+			}
+		}
+		switch v, err := fi.Call("isRegular"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsBoolean():
+			t.Errorf("expected Boolean, got %v", v)
+		default:
+			switch g, err := v.ToBoolean(); {
+			case err != nil:
+				t.Error(err)
+			case g != !tt.dir:
+				t.Errorf("expected %v, got %v", !tt.dir, g)
+			}
+		}
+		switch v, err := fi.Call("perm"); {
+		case err != nil:
+			t.Error(err)
+		case !v.IsNumber():
+			t.Errorf("expected Number, got %v", v)
+		}
+	}
+
+	src := `os.stat('__aster__')`
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
 	}
 }
 
