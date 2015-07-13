@@ -1,7 +1,7 @@
 //
 // aster :: init_unix.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -36,14 +36,16 @@ import (
 
 var ErrEnv = errors.New("$HOME is not set")
 
-func configDir() (string, error) {
-	config := os.Getenv("XDG_CONFIG_HOME")
-	if config == "" {
-		home := os.Getenv("HOME")
-		if home == "" {
-			return "", ErrEnv
+func init() {
+	configDir = func() (string, error) {
+		config := os.Getenv("XDG_CONFIG_HOME")
+		if config == "" {
+			home := os.Getenv("HOME")
+			if home == "" {
+				return "", ErrEnv
+			}
+			config = filepath.Join(home, ".config")
 		}
-		config = filepath.Join(home, ".config")
+		return filepath.Join(config, "aster"), nil
 	}
-	return filepath.Join(config, "aster"), nil
 }

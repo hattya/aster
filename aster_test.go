@@ -1,7 +1,7 @@
 //
 // aster :: aster_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -118,15 +118,22 @@ func TestWatch(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
+	drone := os.Getenv("DRONE") != ""
 	tt := &asterTest{
 		js: ``,
 		test: func(d time.Duration) {
+			if drone {
+				os.Remove("Asterfile")
+			}
 			js := ``
 			if err := genAsterfile(js); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
 
+			if drone {
+				os.Remove("Asterfile")
+			}
 			js = `+`
 			if err := genAsterfile(js); err != nil {
 				t.Fatal(err)
@@ -152,6 +159,7 @@ type asterTest struct {
 }
 
 func aster(tt *asterTest) (string, error) {
+	s := 101 * time.Millisecond
 	var b bytes.Buffer
 	app.Stderr = &b
 	app.Action = func(*cli.Context) error {
@@ -172,10 +180,10 @@ func aster(tt *asterTest) (string, error) {
 			if err != nil {
 				return err
 			}
-			defer watcher.Close()
 
 			go watcher.Watch()
-			tt.test(149 * time.Millisecond)
+			tt.test(time.Duration(float64(s.Nanoseconds()) * 1.4))
+			watcher.Close()
 
 			if tt.after != nil {
 				tt.after(af)
@@ -184,10 +192,10 @@ func aster(tt *asterTest) (string, error) {
 		})
 	}
 
-	err := app.Run([]string{"-s", "101ms"})
+	err := app.Run([]string{"-s", s.String()})
 	// reset
 	app.Stderr = nil
-	app.Flags.Set("s", app.Flags.Lookup("s").Default)
+	app.Flags.Reset()
 
 	return b.String(), err
 }

@@ -1,7 +1,7 @@
 //
 // aster :: init_windows.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -34,10 +34,12 @@ import (
 
 var ErrEnv = errors.New("%APPDATA% is not set")
 
-func configDir() (string, error) {
-	appdata := os.Getenv("APPDATA")
-	if appdata == "" {
-		return "", ErrEnv
+func init() {
+	configDir = func() (string, error) {
+		appdata := os.Getenv("APPDATA")
+		if appdata == "" {
+			return "", ErrEnv
+		}
+		return filepath.Join(appdata, "Aster"), nil
 	}
-	return filepath.Join(appdata, "Aster"), nil
 }

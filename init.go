@@ -1,7 +1,7 @@
 //
 // aster :: init.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -35,6 +35,8 @@ import (
 
 	"github.com/hattya/go.cli"
 )
+
+var configDir func() (string, error)
 
 func init() {
 	app.Add(&cli.Command{
