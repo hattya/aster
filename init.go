@@ -36,6 +36,8 @@ import (
 	"github.com/hattya/go.cli"
 )
 
+const lf = "\n"
+
 var configDir func() (string, error)
 
 func init() {
@@ -74,9 +76,36 @@ func init_(ctx *cli.Context) error {
 	}
 	defer f.Close()
 
-	newline := false
+	var newline []byte
 	if fi, err := f.Stat(); err == nil && 0 < fi.Size() {
-		newline = true
+		var off int64
+		if 1 < fi.Size() {
+			off = -2
+		} else {
+			off = -1
+		}
+		if _, err := f.Seek(off, os.SEEK_END); err == nil {
+			b := make([]byte, -off)
+			if n, err := f.Read(b); err == nil {
+				switch n {
+				case 2:
+					if b[0] == '\r' && b[1] == '\n' {
+						newline = b
+						break
+					}
+					b[0] = b[1]
+					fallthrough
+				case 1:
+					switch b[0] {
+					case '\n', '\r':
+						newline = b[:1]
+					}
+				}
+			}
+		}
+		if len(newline) == 0 {
+			newline = []byte(lf)
+		}
 	}
 
 	for _, a := range ctx.Args {
@@ -84,18 +113,20 @@ func init_(ctx *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("template '%v' is not found", a)
 		}
-		if newline {
-			fmt.Fprintln(f)
+		if 0 < len(newline) {
+			f.Write(newline)
+		} else {
+			newline = []byte(lf)
 		}
 		scanner := bufio.NewScanner(t)
 		for scanner.Scan() {
-			fmt.Fprintln(f, scanner.Text())
+			f.Write(scanner.Bytes())
+			f.Write(newline)
 		}
 		t.Close()
 		if scanner.Err() != nil {
 			return fmt.Errorf("error occurred while processing template '%v'", a)
 		}
-		newline = true
 	}
 	return nil
 }

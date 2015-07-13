@@ -37,6 +37,15 @@ import (
 	"github.com/hattya/go.cli"
 )
 
+var initTests = []struct {
+	js, newline string
+}{
+	{"  ", "\n"},
+	{"\n", "\n"},
+	{"\r", "\r"},
+	{"\r\n", "\r\n"},
+}
+
 func TestInit(t *testing.T) {
 	fn := configDir
 	defer func() { configDir = fn }()
@@ -56,32 +65,20 @@ func TestInit(t *testing.T) {
 			return err
 		}
 
-		if err := genAsterfile(""); err != nil {
-			return err
-		}
-		if err := app.Run(args); err != nil {
-			return err
-		}
-		data, err := ioutil.ReadFile("Asterfile")
-		if err != nil {
-			return err
-		}
-		if g, e := string(data), "template go\n"; g != e {
-			t.Fatalf("expected %q, got %q", e, g)
-		}
-
-		if err := genAsterfile("Asterfile\n"); err != nil {
-			return err
-		}
-		if err := app.Run(args); err != nil {
-			return err
-		}
-		data, err = ioutil.ReadFile("Asterfile")
-		if err != nil {
-			return err
-		}
-		if g, e := string(data), "Asterfile\n\ntemplate go\n"; g != e {
-			t.Fatalf("expected %q, got %q", e, g)
+		for _, tt := range initTests {
+			if err := genAsterfile(tt.js); err != nil {
+				return err
+			}
+			if err := app.Run(args); err != nil {
+				return err
+			}
+			data, err := ioutil.ReadFile("Asterfile")
+			if err != nil {
+				return err
+			}
+			if g, e := string(data), tt.js+tt.newline+"template go"+tt.newline; g != e {
+				t.Fatalf("expected %q, got %q", e, g)
+			}
 		}
 		return nil
 	})
