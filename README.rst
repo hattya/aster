@@ -4,11 +4,17 @@ Aster
 Aster is a command line tool to handle events on file system modifications. It
 is inspired by Guard_.
 
+.. image:: https://drone.io/github.com/hattya/aster/status.png
+   :target: https://drone.io/github.com/hattya/aster/latest
+
+.. image:: https://ci.appveyor.com/api/projects/status/qc3luxk7q7jmx2ut?svg=true
+   :target: https://ci.appveyor.com/project/hattya/aster
+
 .. _Guard: http://guardgem.org/
 
 
-Install
--------
+Installation
+------------
 
 .. code:: console
 
