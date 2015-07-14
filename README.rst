@@ -173,6 +173,12 @@ dst
     ``dst`` is a ``String``.
 
 
+os.stat(path)
+~~~~~~~~~~~~~
+
+``os.stat`` returns a ``os.FileInfo`` which describes the path.
+
+
 os.system(args[, options])
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -226,6 +232,33 @@ otherwise.
 
 name
     ``name`` to search.
+
+
+class os.FileInfo
+~~~~~~~~~~~~~~~~~
+
+properties
+    name
+        base name of the file.
+
+    size
+        file size, in bytes.
+
+    mode
+        file mode bits.
+
+    mtime
+        time of last miodification. It is a ``Date``.
+
+methods
+    isDir()
+        ``FileInfo.isDir`` reports whether the file is a directory.
+
+    isRegular()
+        ``FileInfo.isRegular`` reports whether the file is a regular file.
+
+    perm()
+        ``FileInfo.perm`` returns the permission bits.
 
 
 .. _GNTP: http://growl.info/documentation/developer/gntp.php
