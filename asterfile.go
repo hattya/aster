@@ -1,7 +1,7 @@
 //
 // aster :: asterfile.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -31,6 +31,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/mattn/go-gntp"
 	"github.com/robertkrimen/otto"
@@ -58,6 +59,7 @@ func init() {
 
 type Aster struct {
 	vm     *otto.Otto
+	n      int32
 	watch  []*AsterWatch
 	gntp   *gntp.Client
 	ignore AsterIgnore
@@ -140,6 +142,8 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 		name, _ = a.vm.ToValue("failure")
 		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
 	} else {
+		atomic.AddInt32(&a.n, 1)
+
 		name, _ = a.vm.ToValue("success")
 		text, _ = a.vm.ToValue("Asterfile has been reloaded")
 	}
@@ -148,6 +152,10 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 	aster, _ := a.vm.Object(`aster`)
 	v, _ := aster.Call(`notify`, name, title, text)
 	return v
+}
+
+func (a *Aster) Reloaded() bool {
+	return 0 < atomic.SwapInt32(&a.n, 0)
 }
 
 func (a *Aster) Watch(call otto.FunctionCall) otto.Value {

@@ -1,7 +1,7 @@
 //
 // aster :: watcher.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -29,6 +29,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -77,6 +78,33 @@ func newWatcher(af *Aster) (*Watcher, error) {
 func (w *Watcher) Close() error {
 	w.quit <- true
 	return w.Watcher.Close()
+}
+
+func (w *Watcher) Update(root string) error {
+	var ignore []string
+	exclude := func(s string) bool {
+		for _, x := range ignore {
+			if strings.HasPrefix(s, x) {
+				return true
+			}
+		}
+		return false
+	}
+	return filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
+		if err != nil || !fi.IsDir() {
+			return err
+		}
+		switch {
+		case w.af.ignore.Match(path):
+			ignore = append(ignore, path+string(os.PathSeparator))
+			fallthrough
+		case exclude(path):
+			w.Remove(path)
+		default:
+			return w.Add(path)
+		}
+		return nil
+	})
 }
 
 func (w *Watcher) Watch() {
@@ -160,6 +188,11 @@ func (w *Watcher) Watch() {
 				mu.Unlock()
 				// process
 				w.af.OnChange(ss)
+				if w.af.Reloaded() {
+					if err := w.Update("."); err != nil {
+						warn(err)
+					}
+				}
 				// retry
 				if 0 < atomic.SwapInt32(&retry, 0) {
 					select {

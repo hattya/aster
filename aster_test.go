@@ -122,10 +122,15 @@ func TestReload(t *testing.T) {
 	tt := &asterTest{
 		js: ``,
 		test: func(d time.Duration) {
+			if err := mkdir("build"); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+
 			if drone {
 				os.Remove("Asterfile")
 			}
-			js := ``
+			js := `aster.ignore.push(/^build$/);`
 			if err := genAsterfile(js); err != nil {
 				t.Fatal(err)
 			}
