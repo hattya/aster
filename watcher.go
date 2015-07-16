@@ -142,8 +142,8 @@ func (w *Watcher) Watch() {
 				case err != nil:
 					// removed immediately?
 					continue
-				case fi.IsDir() && !w.af.ignore.Match(ev.Name):
-					w.Add(ev.Name)
+				case fi.IsDir():
+					w.Update(ev.Name)
 					continue
 				}
 			}
