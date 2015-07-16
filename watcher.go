@@ -77,6 +77,7 @@ func newWatcher(af *Aster) (*Watcher, error) {
 
 func (w *Watcher) Close() error {
 	w.quit <- true
+	<-w.quit
 	return w.Watcher.Close()
 }
 
@@ -130,6 +131,10 @@ func (w *Watcher) Watch() {
 	for {
 		select {
 		case <-w.quit:
+			timer.Stop()
+			atomic.SwapInt32(&retry, 0)
+			<-done
+			close(w.quit)
 			return
 		case ev := <-w.Events:
 			// remove "./" prefix
