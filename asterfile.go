@@ -61,8 +61,8 @@ type Aster struct {
 	vm     *otto.Otto
 	n      int32
 	watch  []*AsterWatch
-	gntp   *gntp.Client
 	ignore AsterIgnore
+	gntp   *gntp.Client
 }
 
 func newAsterfile() (*Aster, error) {
@@ -112,7 +112,7 @@ func (a *Aster) Ignore() {
 		n, _ := v.ToInteger()
 
 		a.ignore = make(AsterIgnore, n)
-		i := 0
+		var i int64
 		for j := int64(0); j < n; j++ {
 			v, _ := ary.Get(strconv.FormatInt(j, 10))
 			if v.Class() == "RegExp" {

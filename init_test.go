@@ -38,7 +38,7 @@ import (
 )
 
 var initTests = []struct {
-	js, newline string
+	src, newline string
 }{
 	{"  ", "\n"},
 	{"\n", "\n"},
@@ -66,7 +66,7 @@ func TestInit(t *testing.T) {
 		}
 
 		for _, tt := range initTests {
-			if err := genAsterfile(tt.js); err != nil {
+			if err := genAsterfile(tt.src); err != nil {
 				return err
 			}
 			if err := app.Run(args); err != nil {
@@ -76,7 +76,7 @@ func TestInit(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			if g, e := string(data), tt.js+tt.newline+"template go"+tt.newline; g != e {
+			if g, e := string(data), tt.src+tt.newline+"template go"+tt.newline; g != e {
 				t.Fatalf("expected %q, got %q", e, g)
 			}
 		}

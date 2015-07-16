@@ -1,7 +1,7 @@
 //
 // aster :: aster.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -62,17 +62,17 @@ func main() {
 }
 
 func watch(*cli.Context) error {
-	af, err := newAsterfile()
+	a, err := newAsterfile()
 	if err != nil {
 		return err
 	}
 
-	watcher, err := newWatcher(af)
+	w, err := newWatcher(a)
 	if err != nil {
 		return err
 	}
-	defer watcher.Close()
+	defer w.Close()
 
-	watcher.Watch()
+	w.Watch()
 	return nil
 }

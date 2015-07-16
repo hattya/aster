@@ -46,7 +46,7 @@ func TestOSGetwd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	src := `os.getwd()`
+	src := `os.getwd();`
 	s, err := testString(vm, src)
 	if err != nil {
 		t.Fatal(err)
@@ -65,18 +65,18 @@ func TestOSMkdir(t *testing.T) {
 
 	vm := newVM()
 
-	src := fmt.Sprintf(`os.mkdir("%v")`, path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.mkdir('%v');`, path.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.mkdir("%v", 0777)`, path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.mkdir('%v', 0777);`, path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
 	touch(path.Join(dir, "c"))
-	src = fmt.Sprintf(`os.mkdir("%v", 0777)`, path.Join(dir, "c"))
+	src = fmt.Sprintf(`os.mkdir('%v', 0777);`, path.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -95,12 +95,12 @@ func TestOSRemove(t *testing.T) {
 	vm := newVM()
 
 	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.remove("%v")`, path.Join(dir, "a"))
+	src := fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.remove("%v")`, path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -116,12 +116,12 @@ func TestOSRename(t *testing.T) {
 	vm := newVM()
 
 	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.rename("%v", "%v")`, path.Join(dir, "a"), path.Join(dir, "b"))
+	src := fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.rename("%v", "%v")`, path.Join(dir, "a"), path.Join(dir, "c"))
+	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -142,7 +142,7 @@ func TestOSStat(t *testing.T) {
 	vm := newVM()
 
 	for _, tt := range osStatTests {
-		src := fmt.Sprintf(`os.stat('%v')`, tt.path)
+		src := fmt.Sprintf(`os.stat('%v');`, tt.path)
 		v, err := vm.Run(src)
 		if err != nil {
 			t.Fatal(err)
@@ -206,7 +206,7 @@ func TestOSStat(t *testing.T) {
 		}
 	}
 
-	src := `os.stat('__aster__')`
+	src := `os.stat('__aster__');`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -240,7 +240,7 @@ func TestOSSystem(t *testing.T) {
 	vm := newVM()
 	n1 := "'" + stdout.Name() + "'"
 	n2 := "'" + stderr.Name() + "'"
-	tmpl := `os.system(['%v', '-code', '%v'], {'stdout': %v, 'stderr': %v})`
+	tmpl := `os.system(['%v', '-code', '%v'], {'stdout': %v, 'stderr': %v});`
 
 	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
@@ -334,7 +334,7 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// dir
-	src = fmt.Sprintf(`os.system(['./%v'], {'dir': '%v', 'stdout': null})`, path.Base(exe), dir)
+	src = fmt.Sprintf(`os.system(['./%v'], {'dir': '%v', 'stdout': null});`, path.Base(exe), dir)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -352,19 +352,19 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// invalid args
-	src = fmt.Sprintf(`os.system(['1'])`)
+	src = fmt.Sprintf(`os.system(['1']);`)
 	if _, err := vm.Run(src); err == nil {
 		t.Errorf("expected error")
 	}
 
 	// invalid args
-	src = fmt.Sprintf(`os.system('1')`)
+	src = fmt.Sprintf(`os.system('1');`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
 	// invalid args
-	src = fmt.Sprintf(`os.system([1])`)
+	src = fmt.Sprintf(`os.system([1]);`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -373,12 +373,12 @@ func TestOSSystem(t *testing.T) {
 func TestOSWhence(t *testing.T) {
 	vm := newVM()
 
-	src := `os.whence()`
+	src := `os.whence();`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = `os.whence('go')`
+	src = `os.whence('go');`
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
 	}

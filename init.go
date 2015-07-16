@@ -118,13 +118,13 @@ func init_(ctx *cli.Context) error {
 		} else {
 			newline = []byte(lf)
 		}
-		scanner := bufio.NewScanner(t)
-		for scanner.Scan() {
-			f.Write(scanner.Bytes())
+		s := bufio.NewScanner(t)
+		for s.Scan() {
+			f.Write(s.Bytes())
 			f.Write(newline)
 		}
 		t.Close()
-		if scanner.Err() != nil {
+		if s.Err() != nil {
 			return fmt.Errorf("error occurred while processing template '%v'", a)
 		}
 	}

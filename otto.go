@@ -53,7 +53,7 @@ func newVM() *otto.Otto {
 	os.Set("stat", os_stat)
 	os.Set("system", os_system)
 	os.Set("whence", os_whence)
-	// os.FileInfo object
+
 	vm.Run(fmt.Sprintf(`os.FileInfo = function(name, size, mode, mtime) {
   this.name = name;
   this.size = size;

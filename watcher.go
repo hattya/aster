@@ -45,12 +45,12 @@ func init() {
 type Watcher struct {
 	*fsnotify.Watcher
 
-	af   *Aster
-	quit chan bool
+	a    *Aster
+	quit chan struct{}
 }
 
-func newWatcher(af *Aster) (*Watcher, error) {
-	watcher, err := fsnotify.NewWatcher()
+func newWatcher(a *Aster) (*Watcher, error) {
+	fsw, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
@@ -58,25 +58,25 @@ func newWatcher(af *Aster) (*Watcher, error) {
 		if err != nil || !fi.IsDir() {
 			return err
 		}
-		if af.ignore.Match(path) {
+		if a.ignore.Match(path) {
 			return filepath.SkipDir
 		}
-		return watcher.Add(path)
+		return fsw.Add(path)
 	})
 	if err != nil {
-		watcher.Close()
+		fsw.Close()
 		return nil, err
 	}
 	w := &Watcher{
-		Watcher: watcher,
-		af:      af,
-		quit:    make(chan bool),
+		Watcher: fsw,
+		a:       a,
+		quit:    make(chan struct{}),
 	}
 	return w, nil
 }
 
 func (w *Watcher) Close() error {
-	w.quit <- true
+	w.quit <- struct{}{}
 	<-w.quit
 	return w.Watcher.Close()
 }
@@ -96,7 +96,7 @@ func (w *Watcher) Update(root string) error {
 			return err
 		}
 		switch {
-		case w.af.ignore.Match(path):
+		case w.a.ignore.Match(path):
 			ignore = append(ignore, path+string(os.PathSeparator))
 			fallthrough
 		case exclude(path):
@@ -111,8 +111,8 @@ func (w *Watcher) Update(root string) error {
 func (w *Watcher) Watch() {
 	var mu sync.Mutex
 	files := make(map[string]int)
-	fire := make(chan bool, 1)
-	done := make(chan bool, 1)
+	fire := make(chan struct{}, 1)
+	done := make(chan struct{}, 1)
 	var retry int32
 
 	timer := time.AfterFunc(0, func() {
@@ -121,12 +121,12 @@ func (w *Watcher) Watch() {
 
 		if 0 < len(files) {
 			select {
-			case fire <- true:
+			case fire <- struct{}{}:
 			default:
 			}
 		}
 	})
-	done <- true
+	done <- struct{}{}
 
 	for {
 		select {
@@ -192,8 +192,8 @@ func (w *Watcher) Watch() {
 				}
 				mu.Unlock()
 				// process
-				w.af.OnChange(ss)
-				if w.af.Reloaded() {
+				w.a.OnChange(ss)
+				if w.a.Reloaded() {
 					if err := w.Update("."); err != nil {
 						warn(err)
 					}
@@ -201,11 +201,11 @@ func (w *Watcher) Watch() {
 				// retry
 				if 0 < atomic.SwapInt32(&retry, 0) {
 					select {
-					case fire <- true:
+					case fire <- struct{}{}:
 					default:
 					}
 				}
-				done <- true
+				done <- struct{}{}
 			}()
 		}
 	}

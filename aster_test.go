@@ -41,12 +41,12 @@ import (
 
 func TestWatch(t *testing.T) {
 	tt := &asterTest{
-		js: `aster.watch(/.+\.go$/, function(files) {
+		src: `aster.watch(/.+\.go$/, function(files) {
   cycles.push(files);
-})`,
-		before: func(af *Aster) {
+});`,
+		before: func(a *Aster) {
 			mkdir(".git")
-			af.vm.Run(`var cycles = []`)
+			a.vm.Run(`var cycles = [];`)
 		},
 		test: func(d time.Duration) {
 			touch("a.go")
@@ -69,8 +69,8 @@ func TestWatch(t *testing.T) {
 			touch(filepath.Join(".hg", "hg.go"))
 			time.Sleep(d)
 		},
-		after: func(af *Aster) {
-			v, _ := af.vm.Get("cycles")
+		after: func(a *Aster) {
+			v, _ := a.vm.Get("cycles")
 			cycles := v.Object()
 			// cycles.length
 			v, _ = cycles.Get("length")
@@ -120,7 +120,7 @@ func TestWatch(t *testing.T) {
 func TestReload(t *testing.T) {
 	drone := os.Getenv("DRONE") != ""
 	tt := &asterTest{
-		js: ``,
+		src: ``,
 		test: func(d time.Duration) {
 			if err := mkdir("build"); err != nil {
 				t.Fatal(err)
@@ -130,8 +130,8 @@ func TestReload(t *testing.T) {
 			if drone {
 				os.Remove("Asterfile")
 			}
-			js := `aster.ignore.push(/^build$/);`
-			if err := genAsterfile(js); err != nil {
+			src := `aster.ignore.push(/^build$/);`
+			if err := genAsterfile(src); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
@@ -139,8 +139,8 @@ func TestReload(t *testing.T) {
 			if drone {
 				os.Remove("Asterfile")
 			}
-			js = `+`
-			if err := genAsterfile(js); err != nil {
+			src = `+;`
+			if err := genAsterfile(src); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
@@ -157,7 +157,7 @@ func TestReload(t *testing.T) {
 }
 
 type asterTest struct {
-	js     string
+	src    string
 	before func(*Aster)
 	test   func(time.Duration)
 	after  func(*Aster)
@@ -169,29 +169,28 @@ func aster(tt *asterTest) (string, error) {
 	app.Stderr = &b
 	app.Action = func(*cli.Context) error {
 		return sandbox(func() error {
-			if err := genAsterfile(tt.js); err != nil {
+			if err := genAsterfile(tt.src); err != nil {
 				return err
 			}
-			af, err := newAsterfile()
+			a, err := newAsterfile()
 			if err != nil {
 				return err
 			}
 
 			if tt.before != nil {
-				tt.before(af)
+				tt.before(a)
 			}
 
-			watcher, err := newWatcher(af)
+			w, err := newWatcher(a)
 			if err != nil {
 				return err
 			}
-
-			go watcher.Watch()
+			go w.Watch()
 			tt.test(time.Duration(float64(s.Nanoseconds()) * 1.4))
-			watcher.Close()
+			w.Close()
 
 			if tt.after != nil {
-				tt.after(af)
+				tt.after(a)
 			}
 			return nil
 		})
@@ -205,8 +204,8 @@ func aster(tt *asterTest) (string, error) {
 	return b.String(), err
 }
 
-func genAsterfile(js string) error {
-	return ioutil.WriteFile("Asterfile", []byte(js), 0666)
+func genAsterfile(src string) error {
+	return ioutil.WriteFile("Asterfile", []byte(src), 0666)
 }
 
 func sandbox(test interface{}) error {

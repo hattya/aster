@@ -1,7 +1,7 @@
 //
 // aster :: asterfile_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -45,8 +45,8 @@ func TestAsterfileNotFound(t *testing.T) {
 
 func TestInvalidAsterfile(t *testing.T) {
 	err := sandbox(func() {
-		js := `[].join(;`
-		if err := genAsterfile(js); err != nil {
+		src := `[].join(;`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
 		if _, err := newAsterfile(); err == nil {
@@ -60,15 +60,15 @@ func TestInvalidAsterfile(t *testing.T) {
 
 func TestWatchArgs(t *testing.T) {
 	err := sandbox(func() {
-		js := `aster.watch(/.+\.go/, function(files) {})`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.watch(/.+\.go/, function(files) {});`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 2; g != e {
+		if g, e := len(a.watch), 2; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -80,8 +80,8 @@ func TestWatchArgs(t *testing.T) {
 func TestWatchInvalidArgs(t *testing.T) {
 	err := sandbox(func() {
 		// syntax error
-		js := `aster.watch(//, 1);`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.watch(//, 1);`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
 		switch _, err := newAsterfile(); {
@@ -92,8 +92,8 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 
 		// type error
-		js = `aster.watc()`
-		if err := genAsterfile(js); err != nil {
+		src = `aster.watc();`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
 		switch _, err := newAsterfile(); {
@@ -104,41 +104,41 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 
 		// too few args
-		js = `aster.watch()`
-		if err := genAsterfile(js); err != nil {
+		src = `aster.watch();`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 
 		// invalid args
-		js = `aster.watch('', 1);`
-		if err := genAsterfile(js); err != nil {
+		src = `aster.watch('', 1);`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err = newAsterfile()
+		a, err = newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 
 		// invalid args
-		js = `aster.watch(/.+/, 1);`
-		if err := genAsterfile(js); err != nil {
+		src = `aster.watch(/.+/, 1);`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err = newAsterfile()
+		a, err = newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -149,15 +149,15 @@ func TestWatchInvalidArgs(t *testing.T) {
 
 func TestNotifyArgs(t *testing.T) {
 	err := sandbox(func() {
-		js := `aster.notify('name', 'title', 'text')`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.notify('name', 'title', 'text');`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -169,15 +169,15 @@ func TestNotifyArgs(t *testing.T) {
 func TestNotifyInvalidArgs(t *testing.T) {
 	err := sandbox(func() {
 		// too few args
-		js := `aster.notify()`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.notify();`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -188,15 +188,15 @@ func TestNotifyInvalidArgs(t *testing.T) {
 
 func TestTitleArgs(t *testing.T) {
 	err := sandbox(func() {
-		js := `aster.title('aster.test')`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.title('aster.test');`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
@@ -208,15 +208,15 @@ func TestTitleArgs(t *testing.T) {
 func TestTitleInvalidArgs(t *testing.T) {
 	err := sandbox(func() {
 		// too few args
-		js := `aster.title()`
-		if err := genAsterfile(js); err != nil {
+		src := `aster.title();`
+		if err := genAsterfile(src); err != nil {
 			t.Fatal(err)
 		}
-		af, err := newAsterfile()
+		a, err := newAsterfile()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(af.watch), 1; g != e {
+		if g, e := len(a.watch), 1; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	})
