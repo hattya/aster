@@ -27,9 +27,9 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -82,30 +82,41 @@ func (w *Watcher) Close() error {
 }
 
 func (w *Watcher) Update(root string) error {
-	var ignore []string
-	exclude := func(s string) bool {
-		for _, x := range ignore {
-			if strings.HasPrefix(s, x) {
-				return true
-			}
-		}
-		return false
+	fi, err := os.Lstat(root)
+	if err != nil {
+		return err
 	}
-	return filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
-		if err != nil || !fi.IsDir() {
+	return w.update(root, fi, false)
+}
+
+func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) error {
+	if !fi.IsDir() {
+		return nil
+	}
+
+	if !ignore {
+		ignore = w.a.ignore.Match(path)
+	}
+	if ignore {
+		w.Remove(path)
+	} else {
+		if err := w.Add(path); err != nil {
 			return err
 		}
-		switch {
-		case w.a.ignore.Match(path):
-			ignore = append(ignore, path+string(os.PathSeparator))
-			fallthrough
-		case exclude(path):
-			w.Remove(path)
-		default:
-			return w.Add(path)
+	}
+
+	list, err := ioutil.ReadDir(path)
+	if err != nil {
+		return err
+	}
+	for _, fi := range list {
+		if fi.IsDir() {
+			if err := w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
+				return err
+			}
 		}
-		return nil
-	})
+	}
+	return nil
 }
 
 func (w *Watcher) Watch() {
