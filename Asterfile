@@ -4,7 +4,7 @@ var title = 'Aster ☆ ' + proj;
 aster.title(title);
 
 // go
-aster.watch(/.+\.go$/, function(files) {
+aster.watch(/.+\.go$/, function() {
   if (go('get', '-t', '-v')) {
     return;
   }
@@ -21,7 +21,7 @@ aster.watch(/.+\.go$/, function(files) {
 
 function go() {
   var args = ['go'].concat(Array.prototype.slice.call(arguments));
-  var cmd = args[1] == 'get' ? 'bulid' : args[1];
+  var cmd = args[1] === 'get' ? 'bulid' : args[1];
   var rv = system(args);
   if (rv) {
     aster.notify('failure', proj + ': ' + cmd, cmd + ' failed');
