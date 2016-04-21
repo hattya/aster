@@ -1,7 +1,7 @@
 //
 // aster :: init.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -44,17 +44,17 @@ func init() {
 	app.Add(&cli.Command{
 		Name:  []string{"init"},
 		Usage: "[<template>...]",
-		Desc: strings.TrimSpace(`
-generate an Asterfile in the current directory
+		Desc: strings.TrimSpace(cli.Dedent(`
+			generate an Asterfile in the current directory
 
-  Create an Asterfile in the current directory if it does not exist,
-  and add specified template files to it.
+			  Create an Asterfile in the current directory if it does not exist,
+			  and add specified template files to it.
 
-  Template files are located in:
+			  Template files are located in:
 
-    UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
-    Windows: %APPDATA%\Aster\template\<template>
-`),
+			  UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
+			  Windows: %APPDATA%\Aster\template\<template>
+		`)),
 		Flags:  cli.NewFlagSet(),
 		Action: init_,
 	})

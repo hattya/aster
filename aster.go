@@ -1,7 +1,7 @@
 //
 // aster :: aster.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -46,10 +46,10 @@ func main() {
 		"[options]",
 		"init [<template>...]",
 	}
-	app.Epilog = strings.TrimSpace(`
-<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
-"s", "m" and "h"
-`)
+	app.Epilog = strings.TrimSpace(cli.Dedent(`
+		<duration> is an integer and time unit. Valid time units are "ns", "us", "ms",
+		"s", "m" and "h"
+	`))
 	app.Action = cli.Option(watch)
 
 	if err := app.Run(os.Args[1:]); err != nil {

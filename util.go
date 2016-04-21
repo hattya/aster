@@ -1,7 +1,7 @@
 //
 // aster :: util.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -28,9 +28,9 @@ package main
 
 import "io"
 
-func warn(args ...interface{}) {
+func warn(a ...interface{}) {
 	app.Error("aster: ")
-	app.Errorln(args...)
+	app.Errorln(a...)
 }
 
 type DevNull int

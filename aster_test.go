@@ -1,7 +1,7 @@
 //
 // aster :: aster_test.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -41,9 +41,11 @@ import (
 
 func TestWatch(t *testing.T) {
 	tt := &asterTest{
-		src: `aster.watch(/.+\.go$/, function(files) {
-  cycles.push(files);
-});`,
+		src: cli.Dedent(`
+			aster.watch(/.+\.go$/, function(files) {
+			  cycles.push(files);
+			});
+		`),
 		before: func(a *Aster) {
 			mkdir(".git")
 			a.vm.Run(`var cycles = [];`)
@@ -243,8 +245,8 @@ func pushd(path string) (func() error, error) {
 	return popd, os.Chdir(path)
 }
 
-func mkdir(name string) error {
-	return os.MkdirAll(name, 0777)
+func mkdir(path string) error {
+	return os.MkdirAll(path, 0777)
 }
 
 func touch(name string) error {
