@@ -1,7 +1,7 @@
 //
 // aster :: aster_test.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -32,6 +32,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -120,7 +121,7 @@ func TestWatch(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
-	drone := os.Getenv("DRONE") != ""
+	ci := os.Getenv("CI") != "" && runtime.GOOS == "linux"
 	tt := &asterTest{
 		src: ``,
 		test: func(d time.Duration) {
@@ -129,7 +130,7 @@ func TestReload(t *testing.T) {
 			}
 			time.Sleep(d)
 
-			if drone {
+			if ci {
 				os.Remove("Asterfile")
 			}
 			src := `aster.ignore.push(/^build$/);`
@@ -138,7 +139,7 @@ func TestReload(t *testing.T) {
 			}
 			time.Sleep(d)
 
-			if drone {
+			if ci {
 				os.Remove("Asterfile")
 			}
 			src = `+;`
