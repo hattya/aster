@@ -1,7 +1,7 @@
 //
 // aster :: watcher.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -98,7 +98,7 @@ func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) error {
 		ignore = w.a.ignore.Match(path)
 	}
 	if ignore {
-		go w.Remove(path)
+		w.Remove(path)
 	} else {
 		if err := w.Add(path); err != nil {
 			return err
@@ -164,7 +164,7 @@ func (w *Watcher) Watch() {
 				}
 			}
 			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
-				go w.Remove(ev.Name)
+				w.Remove(ev.Name)
 			}
 			if ev.Op == fsnotify.Chmod {
 				continue
