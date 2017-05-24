@@ -195,7 +195,7 @@ options
         ``dir`` is the working directory of the command.
 
     stdout
-        ``stdout`` is a ``String``, ``null`` or ``Array``.
+        ``stdout`` is a ``String``, ``null``, or an ``Array``.
 
         ``String``
             It is the file name to redirect the standard output. *It will be
@@ -209,7 +209,7 @@ options
             ``Array``.
 
     stderr
-        ``stderr`` is a ``String``, ``null`` or ``Array``.
+        ``stderr`` is a ``String``, ``null``, or an ``Array``.
 
         ``String``
             It is the file name to redirect the standard error. *It will be
