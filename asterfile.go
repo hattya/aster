@@ -32,6 +32,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"sync"
 	"sync/atomic"
 
 	"github.com/mattn/go-gntp"
@@ -63,19 +64,20 @@ type Aster struct {
 	n       int32
 	watches []*watchExpr
 	gntp    *gntp.Client
+	mu      sync.Mutex
 }
 
 func newAsterfile() (*Aster, error) {
 	a := &Aster{
 		gntp: newNotifier(),
 	}
-	if err := a.Eval(); err != nil {
+	if err := a.eval(); err != nil {
 		return nil, err
 	}
 	return a, nil
 }
 
-func (a *Aster) Eval() error {
+func (a *Aster) eval() error {
 	a.vm = newVM()
 	a.watches = nil
 	// aster object
@@ -86,12 +88,12 @@ func (a *Aster) Eval() error {
 		  ignore: [/%v/],
 		}
 	`, runtime.GOARCH, runtime.GOOS, defaultIgnore))
-	aster.Set("watch", a.Watch)
-	aster.Set("notify", a.Notify)
-	aster.Set("title", a.Title)
+	aster.Set("watch", a.watch)
+	aster.Set("notify", a.notify)
+	aster.Set("title", a.title)
 	// watch Asterfile
 	rx, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
-	fn, _ := a.vm.ToValue(a.Reload)
+	fn, _ := a.vm.ToValue(a.reload)
 	aster.Call("watch", rx, fn)
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
@@ -105,7 +107,7 @@ func (a *Aster) Eval() error {
 	return nil
 }
 
-func (a *Aster) Watch(call otto.FunctionCall) otto.Value {
+func (a *Aster) watch(call otto.FunctionCall) otto.Value {
 	rx := call.Argument(0)
 	if rx.Class() == "RegExp" {
 		fn := call.Argument(1)
@@ -119,7 +121,7 @@ func (a *Aster) Watch(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
+func (a *Aster) notify(call otto.FunctionCall) otto.Value {
 	if 3 <= len(call.ArgumentList) {
 		var args [3]string
 		for i := range args {
@@ -130,7 +132,7 @@ func (a *Aster) Notify(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func (a *Aster) Title(call otto.FunctionCall) otto.Value {
+func (a *Aster) title(call otto.FunctionCall) otto.Value {
 	if 1 <= len(call.ArgumentList) {
 		title, _ := call.ArgumentList[0].ToString()
 		app.Title(title)
@@ -138,13 +140,13 @@ func (a *Aster) Title(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func (a *Aster) Reload(otto.FunctionCall) otto.Value {
+func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	// create snapshot
 	vm := a.vm
 	watches := a.watches
 	// eval
 	var name, text otto.Value
-	if err := a.Eval(); err != nil {
+	if err := a.eval(); err != nil {
 		// report error
 		warn("failed to reload\n", err)
 		// rollback to snapshot
@@ -167,6 +169,9 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 }
 
 func (a *Aster) Ignore(name string) bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	ary, _ := a.vm.Object(`aster.ignore`)
 	if ary.Class() == "Array" {
 		// aster.ignore.length
@@ -191,6 +196,9 @@ func (a *Aster) Reloaded() bool {
 }
 
 func (a *Aster) OnChange(files map[string]int) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	for _, w := range a.watches {
 		// call RegExp.test
 		var cl []interface{}
