@@ -30,6 +30,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"runtime"
 	"strconv"
 	"sync/atomic"
 
@@ -81,9 +82,10 @@ func (a *Aster) Eval() error {
 	// aster object
 	aster, _ := a.vm.Object(fmt.Sprintf(`
 		aster = {
+		  arch:   %q,
 		  ignore: [/%v/],
 		}
-	`, defaultIgnore))
+	`, runtime.GOARCH, defaultIgnore))
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
 	aster.Set("title", a.Title)

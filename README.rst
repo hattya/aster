@@ -122,6 +122,15 @@ aster.title(title)
 on Windows.
 
 
+aster.arch
+~~~~~~~~~~
+
+``aster.arch`` is a ``String``. It is a synonym of |runtime.GOARCH|_.
+
+.. |runtime.GOARCH| replace:: ``runtime.GOARCH``
+.. _runtime.GOARCH: runtime_
+
+
 aster.ignore
 ~~~~~~~~~~~~
 
@@ -258,8 +267,8 @@ isRegular()
 perm()
     ``FileInfo.perm`` returns the permission bits.
 
-
 .. _GNTP: http://growl.info/documentation/developer/gntp.php
+.. _runtime: https://golang.org/pkg/runtime/#pkg-constants
 
 
 License
