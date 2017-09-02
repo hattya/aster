@@ -58,7 +58,7 @@ func newWatcher(a *Aster) (*Watcher, error) {
 		if err != nil || !fi.IsDir() {
 			return err
 		}
-		if a.ignore.Match(path) {
+		if a.Ignore(path) {
 			return filepath.SkipDir
 		}
 		return fsw.Add(path)
@@ -95,7 +95,7 @@ func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) error {
 	}
 
 	if !ignore {
-		ignore = w.a.ignore.Match(path)
+		ignore = w.a.Ignore(path)
 	}
 	if ignore {
 		w.Remove(path)

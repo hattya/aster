@@ -1,7 +1,7 @@
 //
 // aster :: notify.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -66,6 +66,7 @@ func newNotifier() *gntp.Client {
 	if g == "" {
 		return nil
 	}
+
 	c := gntp.NewClient()
 	c.Server = g
 	c.AppName = "Aster"
@@ -90,6 +91,7 @@ func notify(c *gntp.Client, name, title, text string) {
 	if c == nil {
 		return
 	}
+
 	err := c.Notify(&gntp.Message{
 		Event: name,
 		Title: title,

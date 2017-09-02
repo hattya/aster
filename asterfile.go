@@ -1,7 +1,7 @@
 //
 // aster :: asterfile.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -43,10 +43,10 @@ func init() {
 	var b bytes.Buffer
 	b.WriteString(`^(?:`)
 	for i, s := range []string{
-		".hg",
-		".git",
-		".svn",
 		".bzr",
+		".git",
+		".hg",
+		".svn",
 	} {
 		if 0 < i {
 			b.WriteRune('|')
@@ -58,11 +58,11 @@ func init() {
 }
 
 type Aster struct {
-	vm     *otto.Otto
-	n      int32
-	watch  []*AsterWatch
-	ignore AsterIgnore
-	gntp   *gntp.Client
+	vm      *otto.Otto
+	n       int32
+	watches []*watchExpr
+	ignore  AsterIgnore
+	gntp    *gntp.Client
 }
 
 func newAsterfile() (*Aster, error) {
@@ -77,20 +77,20 @@ func newAsterfile() (*Aster, error) {
 
 func (a *Aster) Eval() error {
 	a.vm = newVM()
-	a.watch = nil
+	a.watches = nil
 	// aster object
-	aster, _ := a.vm.Object(fmt.Sprintf(`aster = {
-	  'ignore': [
-	    /%v/,
-	  ],
-	}`, defaultIgnore))
+	aster, _ := a.vm.Object(fmt.Sprintf(`
+		aster = {
+		  ignore: [/%v/],
+		}
+	`, defaultIgnore))
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
 	aster.Set("title", a.Title)
 	// watch Asterfile
-	re, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
-	cb, _ := a.vm.ToValue(a.Reload)
-	aster.Call(`watch`, re, cb)
+	rx, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
+	fn, _ := a.vm.ToValue(a.Reload)
+	aster.Call("watch", rx, fn)
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
@@ -100,11 +100,7 @@ func (a *Aster) Eval() error {
 	if err != nil {
 		return ottoError(err)
 	}
-	a.Ignore()
-	return nil
-}
-
-func (a *Aster) Ignore() {
+	// update ignore
 	ary, _ := a.vm.Object(`aster.ignore`)
 	if ary.Class() == "Array" {
 		// get aster.ignore.length
@@ -122,48 +118,18 @@ func (a *Aster) Ignore() {
 		}
 		a.ignore = a.ignore[:i]
 	}
-}
-
-func (a *Aster) Reload(otto.FunctionCall) otto.Value {
-	// create snapshot
-	vm := a.vm
-	watch := a.watch
-	ignore := a.ignore
-	// eval
-	var name, text otto.Value
-	if err := a.Eval(); err != nil {
-		// report error
-		warn("failed to reload\n", err)
-		// rollback to snapshot
-		a.vm = vm
-		a.watch = watch
-		a.ignore = ignore
-
-		name, _ = a.vm.ToValue("failure")
-		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
-	} else {
-		atomic.AddInt32(&a.n, 1)
-
-		name, _ = a.vm.ToValue("success")
-		text, _ = a.vm.ToValue("Asterfile has been reloaded")
-	}
-	title, _ := a.vm.ToValue("Aster reload")
-	// call aster.notify
-	aster, _ := a.vm.Object(`aster`)
-	v, _ := aster.Call(`notify`, name, title, text)
-	return v
-}
-
-func (a *Aster) Reloaded() bool {
-	return 0 < atomic.SwapInt32(&a.n, 0)
+	return nil
 }
 
 func (a *Aster) Watch(call otto.FunctionCall) otto.Value {
-	re := call.Argument(0)
-	if re.Class() == "RegExp" {
-		cb := call.Argument(1)
-		if cb.Class() == "Function" {
-			a.watch = append(a.watch, &AsterWatch{re.Object(), cb.Object()})
+	rx := call.Argument(0)
+	if rx.Class() == "RegExp" {
+		fn := call.Argument(1)
+		if fn.Class() == "Function" {
+			a.watches = append(a.watches, &watchExpr{
+				rx: rx.Object(),
+				fn: fn.Object(),
+			})
 		}
 	}
 	return otto.UndefinedValue()
@@ -188,21 +154,58 @@ func (a *Aster) Title(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
+func (a *Aster) Reload(otto.FunctionCall) otto.Value {
+	// create snapshot
+	vm := a.vm
+	watches := a.watches
+	ignore := a.ignore
+	// eval
+	var name, text otto.Value
+	if err := a.Eval(); err != nil {
+		// report error
+		warn("failed to reload\n", err)
+		// rollback to snapshot
+		a.vm = vm
+		a.watches = watches
+		a.ignore = ignore
+
+		name, _ = a.vm.ToValue("failure")
+		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
+	} else {
+		atomic.AddInt32(&a.n, 1)
+
+		name, _ = a.vm.ToValue("success")
+		text, _ = a.vm.ToValue("Asterfile has been reloaded")
+	}
+	title, _ := a.vm.ToValue("Aster reload")
+	// call aster.notify
+	aster, _ := a.vm.Object(`aster`)
+	v, _ := aster.Call("notify", name, title, text)
+	return v
+}
+
+func (a *Aster) Ignore(name string) bool {
+	return a.ignore.Match(name)
+}
+
+func (a *Aster) Reloaded() bool {
+	return 0 < atomic.SwapInt32(&a.n, 0)
+}
+
 func (a *Aster) OnChange(files map[string]int) {
-	for _, w := range a.watch {
+	for _, w := range a.watches {
 		// call RegExp.test
 		var cl []interface{}
 		for n := range files {
-			v, _ := w.re.Call(`test`, n)
-			test, _ := v.ToBoolean()
-			if test {
+			v, _ := w.rx.Call("test", n)
+			if b, _ := v.ToBoolean(); b {
 				cl = append(cl, n)
 			}
 		}
 		// call callback
 		if 0 < len(cl) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
-			_, err := w.cb.Call(`call`, nil, ary)
+			_, err := w.fn.Call("call", nil, ary)
 			if err != nil {
 				warn(err)
 			}
@@ -211,16 +214,16 @@ func (a *Aster) OnChange(files map[string]int) {
 	}
 }
 
-type AsterWatch struct {
-	re *otto.Object // RegExp
-	cb *otto.Object // Function
+type watchExpr struct {
+	rx *otto.Object // RegExp
+	fn *otto.Object // Function
 }
 
 type AsterIgnore []*otto.Object // []RegExp
 
 func (ig AsterIgnore) Match(s string) bool {
-	for _, re := range []*otto.Object(ig) {
-		v, _ := re.Call(`test`, s)
+	for _, rx := range []*otto.Object(ig) {
+		v, _ := rx.Call("test", s)
 		test, _ := v.ToBoolean()
 		if test {
 			return true

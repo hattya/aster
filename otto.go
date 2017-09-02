@@ -1,7 +1,7 @@
 //
 // aster :: otto.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -45,14 +45,14 @@ import (
 func newVM() *otto.Otto {
 	vm := otto.New()
 	// os object
-	os, _ := vm.Object(`os = {}`)
-	os.Set("getwd", os_getwd)
-	os.Set("mkdir", os_mkdir)
-	os.Set("remove", os_remove)
-	os.Set("rename", os_rename)
-	os.Set("stat", os_stat)
-	os.Set("system", os_system)
-	os.Set("whence", os_whence)
+	os_, _ := vm.Object(`os = {}`)
+	os_.Set("getwd", os_getwd)
+	os_.Set("mkdir", os_mkdir)
+	os_.Set("remove", os_remove)
+	os_.Set("rename", os_rename)
+	os_.Set("stat", os_stat)
+	os_.Set("system", os_system)
+	os_.Set("whence", os_whence)
 
 	vm.Run(fmt.Sprintf(`
 		os.FileInfo = function(name, size, mode, mtime) {
@@ -73,7 +73,7 @@ func newVM() *otto.Otto {
 		os.FileInfo.prototype.perm = function() {
 		  return this.mode & 0777;
 		};
-	`, uint(1<<31), uint(0xff<<24)))
+	`, uint(os.ModeDir), uint(os.ModeType)))
 
 	return vm
 }
@@ -168,6 +168,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 	if v.Class() != "Array" {
 		return otto.UndefinedValue()
 	}
+
 	ary := v.Object()
 	v, _ = ary.Get("length")
 	n, _ := v.ToInteger()
@@ -197,10 +198,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 			case v.IsNull():
 				w = discard
 			case v.Class() == "Array":
-				w = &Buffer{
-					vm:  call.Otto,
-					ary: v.Object(),
-				}
+				w = newBuffer(call.Otto, v.Object())
 			}
 			return
 		}
@@ -248,7 +246,7 @@ func os_whence(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-type Buffer struct {
+type buffer struct {
 	vm  *otto.Otto
 	ary *otto.Object
 
@@ -256,7 +254,14 @@ type Buffer struct {
 	b  bytes.Buffer
 }
 
-func (b *Buffer) Write(p []byte) (int, error) {
+func newBuffer(vm *otto.Otto, ary *otto.Object) *buffer {
+	return &buffer{
+		vm:  vm,
+		ary: ary,
+	}
+}
+
+func (b *buffer) Write(p []byte) (int, error) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -273,7 +278,7 @@ func (b *Buffer) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (b *Buffer) Close() error {
+func (b *buffer) Close() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 

@@ -381,10 +381,7 @@ func TestOS_Whence(t *testing.T) {
 func TestBuffer(t *testing.T) {
 	vm := otto.New()
 	ary, _ := vm.Object(`ary = []`)
-	b := &Buffer{
-		vm:  vm,
-		ary: ary,
-	}
+	b := newBuffer(vm, ary)
 	b.Write([]byte("0\n1\n2"))
 	b.Close()
 

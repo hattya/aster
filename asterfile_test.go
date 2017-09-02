@@ -68,8 +68,8 @@ func TestWatchArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 2; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 2; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -112,8 +112,8 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 
 		// invalid args
@@ -125,8 +125,8 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 
 		// invalid args
@@ -138,8 +138,8 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -157,8 +157,8 @@ func TestNotifyArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -177,8 +177,8 @@ func TestNotifyInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -196,8 +196,8 @@ func TestTitleArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -216,8 +216,8 @@ func TestTitleInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("len(watch) = %v, expected %v", g, e)
+		if g, e := len(a.watches), 1; g != e {
+			t.Errorf("len(watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
