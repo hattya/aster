@@ -83,9 +83,10 @@ func (a *Aster) Eval() error {
 	aster, _ := a.vm.Object(fmt.Sprintf(`
 		aster = {
 		  arch:   %q,
+		  os:     %q,
 		  ignore: [/%v/],
 		}
-	`, runtime.GOARCH, defaultIgnore))
+	`, runtime.GOARCH, runtime.GOOS, defaultIgnore))
 	aster.Set("watch", a.Watch)
 	aster.Set("notify", a.Notify)
 	aster.Set("title", a.Title)

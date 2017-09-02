@@ -131,6 +131,15 @@ aster.arch
 .. _runtime.GOARCH: runtime_
 
 
+aster.os
+~~~~~~~~
+
+``aster.os`` is a ``String``. It is a synonym of |runtime.GOOS|_.
+
+.. |runtime.GOOS| replace:: ``runtime.GOOS``
+.. _runtime.GOOS: runtime_
+
+
 aster.ignore
 ~~~~~~~~~~~~
 
