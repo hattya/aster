@@ -62,7 +62,6 @@ type Aster struct {
 	vm      *otto.Otto
 	n       int32
 	watches []*watchExpr
-	ignore  AsterIgnore
 	gntp    *gntp.Client
 }
 
@@ -102,24 +101,6 @@ func (a *Aster) Eval() error {
 	_, err = a.vm.Run(script)
 	if err != nil {
 		return ottoError(err)
-	}
-	// update ignore
-	ary, _ := a.vm.Object(`aster.ignore`)
-	if ary.Class() == "Array" {
-		// get aster.ignore.length
-		v, _ := ary.Get("length")
-		n, _ := v.ToInteger()
-
-		a.ignore = make(AsterIgnore, n)
-		var i int64
-		for j := int64(0); j < n; j++ {
-			v, _ := ary.Get(strconv.FormatInt(j, 10))
-			if v.Class() == "RegExp" {
-				a.ignore[i] = v.Object()
-				i++
-			}
-		}
-		a.ignore = a.ignore[:i]
 	}
 	return nil
 }
@@ -161,7 +142,6 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 	// create snapshot
 	vm := a.vm
 	watches := a.watches
-	ignore := a.ignore
 	// eval
 	var name, text otto.Value
 	if err := a.Eval(); err != nil {
@@ -170,7 +150,6 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 		// rollback to snapshot
 		a.vm = vm
 		a.watches = watches
-		a.ignore = ignore
 
 		name, _ = a.vm.ToValue("failure")
 		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
@@ -188,7 +167,23 @@ func (a *Aster) Reload(otto.FunctionCall) otto.Value {
 }
 
 func (a *Aster) Ignore(name string) bool {
-	return a.ignore.Match(name)
+	ary, _ := a.vm.Object(`aster.ignore`)
+	if ary.Class() == "Array" {
+		// aster.ignore.length
+		v, _ := ary.Get("length")
+		n, _ := v.ToInteger()
+
+		for i := int64(0); i < n; i++ {
+			v, _ := ary.Get(strconv.FormatInt(i, 10))
+			if v.Class() == "RegExp" {
+				v, _ = v.Object().Call("test", name)
+				if b, _ := v.ToBoolean(); b {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (a *Aster) Reloaded() bool {
@@ -220,17 +215,4 @@ func (a *Aster) OnChange(files map[string]int) {
 type watchExpr struct {
 	rx *otto.Object // RegExp
 	fn *otto.Object // Function
-}
-
-type AsterIgnore []*otto.Object // []RegExp
-
-func (ig AsterIgnore) Match(s string) bool {
-	for _, rx := range []*otto.Object(ig) {
-		v, _ := rx.Call("test", s)
-		test, _ := v.ToBoolean()
-		if test {
-			return true
-		}
-	}
-	return false
 }
