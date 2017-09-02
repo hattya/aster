@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -39,7 +39,7 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
-func TestOSGetwd(t *testing.T) {
+func TestOS_Getwd(t *testing.T) {
 	vm := newVM()
 	wd, err := os.Getwd()
 	if err != nil {
@@ -52,11 +52,11 @@ func TestOSGetwd(t *testing.T) {
 		t.Fatal(err)
 	}
 	if g, e := s, wd; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 
-func TestOSMkdir(t *testing.T) {
+func TestOS_Mkdir(t *testing.T) {
 	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
@@ -81,11 +81,11 @@ func TestOSMkdir(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !v:
-		t.Errorf("expected %v, got %v", true, v)
+		t.Errorf("expected true, got %v", v)
 	}
 }
 
-func TestOSRemove(t *testing.T) {
+func TestOS_Remove(t *testing.T) {
 	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
@@ -106,7 +106,7 @@ func TestOSRemove(t *testing.T) {
 	}
 }
 
-func TestOSRename(t *testing.T) {
+func TestOS_Rename(t *testing.T) {
 	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
@@ -126,11 +126,11 @@ func TestOSRename(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !v:
-		t.Errorf("expected %v, got %v", true, v)
+		t.Errorf("expected true, got %v", v)
 	}
 }
 
-var osStatTests = []struct {
+var os_StatTests = []struct {
 	path string
 	dir  bool
 }{
@@ -138,10 +138,10 @@ var osStatTests = []struct {
 	{"Asterfile", false},
 }
 
-func TestOSStat(t *testing.T) {
+func TestOS_Stat(t *testing.T) {
 	vm := newVM()
 
-	for _, tt := range osStatTests {
+	for _, tt := range os_StatTests {
 		src := fmt.Sprintf(`os.stat('%v');`, tt.path)
 		v, err := vm.Run(src)
 		if err != nil {
@@ -178,10 +178,7 @@ func TestOSStat(t *testing.T) {
 		case !v.IsBoolean():
 			t.Errorf("expected Boolean, got %v", v)
 		default:
-			switch g, err := v.ToBoolean(); {
-			case err != nil:
-				t.Error(err)
-			case g != tt.dir:
+			if g, _ := v.ToBoolean(); g != tt.dir {
 				t.Errorf("expected %v, got %v", tt.dir, g)
 			}
 		}
@@ -191,10 +188,7 @@ func TestOSStat(t *testing.T) {
 		case !v.IsBoolean():
 			t.Errorf("expected Boolean, got %v", v)
 		default:
-			switch g, err := v.ToBoolean(); {
-			case err != nil:
-				t.Error(err)
-			case g != !tt.dir:
+			if g, _ := v.ToBoolean(); g != !tt.dir {
 				t.Errorf("expected %v, got %v", !tt.dir, g)
 			}
 		}
@@ -212,7 +206,7 @@ func TestOSStat(t *testing.T) {
 	}
 }
 
-func TestOSSystem(t *testing.T) {
+func TestOS_System(t *testing.T) {
 	dir, err := tempDir()
 	if err != nil {
 		t.Fatal(err)
@@ -254,7 +248,7 @@ func TestOSSystem(t *testing.T) {
 	}
 	lines := strings.SplitN(string(data), "\n", 2)
 	if g, e := lines[0], "stdout"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+		t.Errorf("stdout = %q, expected %q", g, e)
 	}
 
 	// String: stderr
@@ -263,7 +257,7 @@ func TestOSSystem(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected %v, got %v", true, b)
+		t.Errorf("expected true, got %v", b)
 	}
 	stderr.Seek(0, os.SEEK_SET)
 	data, err = ioutil.ReadAll(stderr)
@@ -272,44 +266,44 @@ func TestOSSystem(t *testing.T) {
 	}
 	lines = strings.SplitN(string(data), "\n", 2)
 	if g, e := lines[0], "stderr"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+		t.Errorf("stderr = %q, expected %q", g, e)
 	}
 
 	// null: stdout
-	src = fmt.Sprintf(tmpl, exe, 0, "null", "null")
+	src = fmt.Sprintf(tmpl, exe, 0, `null`, `null`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
 	// null: stderr
-	src = fmt.Sprintf(tmpl, exe, 1, "null", "null")
+	src = fmt.Sprintf(tmpl, exe, 1, `null`, `null`)
 	switch b, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected %v, got %v", true, b)
+		t.Errorf("expected true, got %v", b)
 	}
 
 	// Array: stdout
 	ary, _ := vm.Object(`b = []`)
-	src = fmt.Sprintf(tmpl, exe, 0, "b", "b")
+	src = fmt.Sprintf(tmpl, exe, 0, `b`, `b`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 	v, _ := ary.Get("length")
 	n, _ := v.ToInteger()
 	if g, e := n, int64(1); g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("stdout.length = %v, expected %v", g, e)
 	}
-	v, _ = ary.Get(strconv.FormatInt(0, 10))
+	v, _ = ary.Get("0")
 	s, _ := v.ToString()
 	if g, e := s, "stdout"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+		t.Errorf("stdout = %q, expected %q", g, e)
 	}
 
 	// Array: stderr
 	ary, _ = vm.Object(`b = []`)
-	src = fmt.Sprintf(tmpl, exe, 1, "b", "b")
+	src = fmt.Sprintf(tmpl, exe, 1, `b`, `b`)
 	switch b, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -319,16 +313,16 @@ func TestOSSystem(t *testing.T) {
 	v, _ = ary.Get("length")
 	n, _ = v.ToInteger()
 	if g, e := n, int64(1); g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("stderr.length = %v, expected %v", g, e)
 	}
-	v, _ = ary.Get(strconv.FormatInt(0, 10))
+	v, _ = ary.Get("0")
 	s, _ = v.ToString()
 	if g, e := s, "stderr"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+		t.Errorf("stderr = %q, expected %q", g, e)
 	}
 
 	// Object
-	src = fmt.Sprintf(tmpl, exe, 0, "null", "{}")
+	src = fmt.Sprintf(tmpl, exe, 0, `null`, `{}`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -340,13 +334,13 @@ func TestOSSystem(t *testing.T) {
 	}
 
 	// invalid args
-	src = fmt.Sprintf(tmpl, exe, 1, "'.'", n2)
+	src = fmt.Sprintf(tmpl, exe, 1, `'.'`, n2)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
 	// invalid args
-	src = fmt.Sprintf(tmpl, exe, 1, n1, "'.'")
+	src = fmt.Sprintf(tmpl, exe, 1, n1, `'.'`)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
@@ -370,7 +364,7 @@ func TestOSSystem(t *testing.T) {
 	}
 }
 
-func TestOSWhence(t *testing.T) {
+func TestOS_Whence(t *testing.T) {
 	vm := newVM()
 
 	src := `os.whence();`
@@ -397,14 +391,14 @@ func TestBuffer(t *testing.T) {
 	v, _ := ary.Get("length")
 	n, _ := v.ToInteger()
 	if g, e := n, int64(3); g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("ary.length = %v, expected %v", g, e)
 	}
 	for i := int64(0); i < n; i++ {
 		e := strconv.FormatInt(i, 10)
 		v, _ = ary.Get(e)
 		g, _ := v.ToString()
 		if g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("ary[%v] = %v, expected %v", i, g, e)
 		}
 	}
 }

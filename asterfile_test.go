@@ -1,7 +1,7 @@
 //
 // aster :: asterfile_test.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -69,7 +69,7 @@ func TestWatchArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 2; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -113,7 +113,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 
 		// invalid args
@@ -126,7 +126,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 
 		// invalid args
@@ -139,7 +139,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -158,7 +158,7 @@ func TestNotifyArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -178,7 +178,7 @@ func TestNotifyInvalidArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -197,7 +197,7 @@ func TestTitleArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -217,7 +217,7 @@ func TestTitleInvalidArgs(t *testing.T) {
 			t.Fatal("unexpected error:", err)
 		}
 		if g, e := len(a.watch), 1; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("len(watch) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {

@@ -73,13 +73,12 @@ func TestWatch(t *testing.T) {
 			time.Sleep(d)
 		},
 		after: func(a *Aster) {
-			v, _ := a.vm.Get("cycles")
-			cycles := v.Object()
+			cycles, _ := a.vm.Object(`cycles`)
 			// cycles.length
-			v, _ = cycles.Get("length")
+			v, _ := cycles.Get("length")
 			n, _ := v.ToInteger()
 			if g, e := n, int64(2); g != e {
-				t.Fatalf("expected %v, got %v", e, g)
+				t.Fatalf("cycles.length = %v, expected %v", g, e)
 			}
 			// cycles[0].length
 			v, _ = cycles.Get("0")
@@ -87,13 +86,13 @@ func TestWatch(t *testing.T) {
 			v, _ = files.Get("length")
 			n, _ = v.ToInteger()
 			if g, e := n, int64(1); g != e {
-				t.Fatalf("expected %v, got %v", e, g)
+				t.Fatalf("cycles[0].length = %v, expected %v", g, e)
 			}
-			// cycles[0]
+			// cycles[0][0]
 			v, _ = files.Get("0")
 			s, _ := v.ToString()
 			if g, e := s, "c.go"; g != e {
-				t.Fatalf("expected %v, got %v", e, g)
+				t.Fatalf("cycles[0][0] = %q, expected %q", g, e)
 			}
 			// cyles[1].length
 			v, _ = cycles.Get("1")
@@ -101,13 +100,13 @@ func TestWatch(t *testing.T) {
 			v, _ = files.Get("length")
 			n, _ = v.ToInteger()
 			if g, e := n, int64(1); g != e {
-				t.Fatalf("expected %v, got %v", e, g)
+				t.Fatalf("cycles[1].length = %v, expected %v", g, e)
 			}
-			// cycles[1]
+			// cycles[1][0]
 			v, _ = files.Get("0")
 			s, _ = v.ToString()
 			if g, e := s, "c_.go"; g != e {
-				t.Fatalf("expected %v, got %v", e, g)
+				t.Fatalf("cycles[1][0] = %q, expected %q", g, e)
 			}
 		},
 	}
