@@ -27,6 +27,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -49,6 +50,7 @@ func newVM() *otto.Otto {
 	os_, _ := vm.Object(`os = {}`)
 	os_.Set("getwd", os_getwd)
 	os_.Set("mkdir", os_mkdir)
+	os_.Set("open", os_open)
 	os_.Set("remove", os_remove)
 	os_.Set("rename", os_rename)
 	os_.Set("stat", os_stat)
@@ -56,6 +58,30 @@ func newVM() *otto.Otto {
 	os_.Set("whence", os_whence)
 
 	script, _ := vm.Compile("os", fmt.Sprintf(cli.Dedent(`
+		os.File = function(impl) {
+		  this._impl = impl;
+		};
+
+		os.File.prototype.close = function() {
+		  return this._impl.Close.apply(this, arguments);
+		};
+
+		os.File.prototype.name = function() {
+		  return this._impl.Name.apply(this, arguments);
+		};
+
+		os.File.prototype.read = function() {
+		  return this._impl.Read.apply(this, arguments);
+		};
+
+		os.File.prototype.readLine = function() {
+		  return this._impl.ReadLine.apply(this, arguments);
+		};
+
+		os.File.prototype.write = function() {
+		  return this._impl.Write.apply(this, arguments);
+		};
+
 		os.FileInfo = function(name, size, mode, mtime) {
 		  this.name = name;
 		  this.size = size;
@@ -129,6 +155,36 @@ func os_mkdir(call otto.FunctionCall) otto.Value {
 		return otto.TrueValue()
 	}
 	return otto.UndefinedValue()
+}
+
+func os_open(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
+	}
+
+	name, _ := call.ArgumentList[0].ToString()
+	flag := os.O_RDONLY
+	switch mode, _ := call.Argument(1).ToString(); mode {
+	case "r":
+		flag = os.O_RDONLY
+	case "r+":
+		flag = os.O_RDWR
+	case "w":
+		flag = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+	case "w+":
+		flag = os.O_RDWR | os.O_CREATE | os.O_TRUNC
+	case "a":
+		flag = os.O_WRONLY | os.O_CREATE | os.O_APPEND
+	case "a+":
+		flag = os.O_RDWR | os.O_CREATE | os.O_APPEND
+	}
+
+	f, err := os.OpenFile(name, flag, 0666)
+	if err != nil {
+		return throw(call.Otto, err)
+	}
+	v, _ := call.Otto.Call(`new os.File`, nil, newFile(call.Otto, f))
+	return v
 }
 
 func os_remove(call otto.FunctionCall) otto.Value {
@@ -300,4 +356,79 @@ func (b *buffer) Close() error {
 		b.ary.Call("push", v)
 	}
 	return nil
+}
+
+type file struct {
+	vm *otto.Otto
+	f  *os.File
+
+	br *bufio.Reader
+}
+
+func newFile(vm *otto.Otto, f *os.File) *file {
+	return &file{
+		vm: vm,
+		f:  f,
+		br: bufio.NewReader(f),
+	}
+}
+
+func (f *file) Close(call otto.FunctionCall) otto.Value {
+	err := f.f.Close()
+
+	if err != nil {
+		return otto.TrueValue()
+	}
+	return otto.UndefinedValue()
+}
+
+func (f *file) Name(call otto.FunctionCall) otto.Value {
+	v, _ := call.Otto.ToValue(f.f.Name())
+	return v
+}
+
+func (f *file) Read(call otto.FunctionCall) otto.Value {
+	v, _ := call.Argument(0).ToInteger()
+	n := int(v)
+	if n < 0 {
+		n = 0
+	}
+	p := make([]byte, n)
+	n, err := f.br.Read(p)
+
+	if err != nil && err != io.EOF {
+		return throw(f.vm, err)
+	}
+	rv, _ := f.vm.Object(`({})`)
+	rv.Set("eof", err == io.EOF)
+	rv.Set("buffer", string(p[:n]))
+	return rv.Value()
+}
+
+func (f *file) ReadLine(call otto.FunctionCall) otto.Value {
+	s, err := f.br.ReadString('\n')
+	switch {
+	case 1 < len(s) && s[len(s)-2] == '\r':
+		s = s[:len(s)-2]
+	case 0 < len(s):
+		s = s[:len(s)-1]
+	}
+
+	if err != nil && err != io.EOF {
+		return throw(f.vm, err)
+	}
+	rv, _ := f.vm.Object(`({})`)
+	rv.Set("eof", err == io.EOF)
+	rv.Set("buffer", s)
+	return rv.Value()
+}
+
+func (f *file) Write(call otto.FunctionCall) otto.Value {
+	v, _ := call.Argument(0).ToString()
+	_, err := f.f.WriteString(v)
+
+	if err != nil {
+		return throw(f.vm, err)
+	}
+	return otto.UndefinedValue()
 }

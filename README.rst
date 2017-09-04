@@ -170,6 +170,39 @@ perm
     ``os.mkdir`` creates.
 
 
+os.open(path[, mode='r'])
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``os.open`` opens a file named ``path`` with ``mode`` and returns a |os.File|_.
+
+path
+    ``path`` is a ``String``.
+
+mode
+    ``mode`` is a ``String``.
+
+    r
+        open for reading (default).
+
+    r+
+        open for reading and writing.
+
+    w
+        open for writing, truncating file to zero length.
+
+    w+
+        open for reading and writing, truncating file to zero length.
+
+    a
+        open for writing, appending to the end of file.
+
+    a+
+        open for reading and writing, appending to the end of file.
+
+.. |os.File| replace:: ``os.File``
+.. _os.File: `class os.File`_
+
+
 os.remove(path)
 ~~~~~~~~~~~~~~~
 
@@ -194,7 +227,13 @@ dst
 os.stat(path)
 ~~~~~~~~~~~~~
 
-``os.stat`` returns a ``os.FileInfo`` which describes the path.
+``os.stat`` returns a |os.FileInfo|_ which describes the ``path``.
+
+path
+    ``path`` is a ``String``.
+
+.. |os.FileInfo| replace:: ``os.FileInfo``
+.. _os.FileInfo: `class os.FileInfo`_
 
 
 os.system(args[, options])
@@ -223,7 +262,7 @@ options
             The standard output will be discarded.
 
         ``Array``
-            The standard output will be splitted into lines, and added to the
+            The standard output will be split into lines, and added to the
             ``Array``.
 
     stderr
@@ -237,7 +276,7 @@ options
             The standard error will be discarded.
 
         ``Array``
-            The standard error will be splitted into lines, and added to the
+            The standard error will be split into lines, and added to the
             ``Array``.
 
 
@@ -250,6 +289,46 @@ otherwise.
 
 name
     ``name`` to search.
+
+
+class os.File
+~~~~~~~~~~~~~
+
+close()
+    ``close`` closes the ``os.File``.
+
+name()
+    ``name`` returns the name of the file which specified to ``os.open``.
+
+read(n)
+    ``read`` reads up to ``n`` bytes from the ``os.File``, and returns an
+    ``Object``.
+
+    n
+        ``n`` is a ``Number``.
+
+    return value
+        eof
+            It is ``true`` when at end of file.
+
+        buffer
+            It is a ``String`` which read from the file.
+
+readLine()
+    ``readLine`` reads a line from the ``os.File``, and returns an ``Object``.
+
+    return value
+        eof
+            It is ``true`` when at end of file.
+
+        buffer
+            It is a ``String`` which read from the file.
+
+write(data)
+    ``write`` writes the ``data`` to the ``os.File``.
+
+    data
+        ``data`` is a ``String``.
 
 
 class os.FileInfo
@@ -265,16 +344,16 @@ mode
     file mode bits.
 
 mtime
-    time of last miodification. It is a ``Date``.
+    time of last modification. It is a ``Date``.
 
 isDir()
-    ``FileInfo.isDir`` reports whether the file is a directory.
+    ``isDir`` reports whether the file is a directory.
 
 isRegular()
-    ``FileInfo.isRegular`` reports whether the file is a regular file.
+    ``isRegular`` reports whether the file is a regular file.
 
 perm()
-    ``FileInfo.perm`` returns the permission bits.
+    ``perm`` returns the permission bits.
 
 .. _GNTP: http://growl.info/documentation/developer/gntp.php
 .. _runtime: https://golang.org/pkg/runtime/#pkg-constants

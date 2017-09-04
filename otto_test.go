@@ -33,6 +33,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -86,6 +87,374 @@ func TestOS_Mkdir(t *testing.T) {
 		t.Error(err)
 	case !v:
 		t.Error("expected true, got false")
+	}
+}
+
+var os_OpenTests = []struct {
+	in, out string
+	mode    string
+	method  string
+	args    []interface{}
+	rv      interface{}
+	err     string
+}{
+	// mode: r
+	{
+		in:     "",
+		out:    "",
+		mode:   "r",
+		method: "read",
+		args:   []interface{}{-1},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "",
+		out:    "",
+		mode:   "r",
+		method: "read",
+		args:   []interface{}{1},
+		rv: map[string]interface{}{
+			"eof":    true,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\n",
+		mode:   "r",
+		method: "read",
+		args:   []interface{}{11},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1\n",
+		},
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "line 1\nline 2\n",
+		mode:   "r",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "line 1\r\nline 2\r\n",
+		out:    "line 1\r\nline 2\r\n",
+		mode:   "r",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\n",
+		mode:   "r",
+		method: "write",
+		args:   []interface{}{""},
+		err:    "Error: write ",
+	},
+	// mode: r+
+	{
+		in:     "",
+		out:    "",
+		mode:   "r+",
+		method: "read",
+		args:   []interface{}{-1},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "",
+		out:    "",
+		mode:   "r+",
+		method: "read",
+		args:   []interface{}{1},
+		rv: map[string]interface{}{
+			"eof":    true,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\n",
+		mode:   "r+",
+		method: "read",
+		args:   []interface{}{11},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1\n",
+		},
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "line 1\nline 2\n",
+		mode:   "r+",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "line 1\r\nline 2\r\n",
+		out:    "line 1\r\nline 2\r\n",
+		mode:   "r+",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "\n",
+		out:    "line 1\n",
+		mode:   "r+",
+		method: "write",
+		args:   []interface{}{"line 1\n"},
+	},
+	// mode: w
+	{
+		in:     "line 1\n",
+		out:    "",
+		mode:   "w",
+		method: "read",
+		args:   []interface{}{11},
+		err:    "Error: read ",
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "",
+		mode:   "w",
+		method: "readLine",
+		err:    "Error: read ",
+	},
+	{
+		in:     "\n",
+		out:    "line 1\n",
+		mode:   "w",
+		method: "write",
+		args:   []interface{}{"line 1\n"},
+	},
+	// mode: w+
+	{
+		in:     "line 1\n",
+		out:    "",
+		mode:   "w+",
+		method: "read",
+		args:   []interface{}{-1},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "",
+		mode:   "w+",
+		method: "read",
+		args:   []interface{}{11},
+		rv: map[string]interface{}{
+			"eof":    true,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "",
+		mode:   "w+",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    true,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "\n",
+		out:    "line 1\n",
+		mode:   "w+",
+		method: "write",
+		args:   []interface{}{"line 1\n"},
+	},
+	// mode: a
+	{
+		in:     "line 1\n",
+		out:    "line 1\n",
+		mode:   "a",
+		method: "read",
+		args:   []interface{}{11},
+		err:    "Error: read ",
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "line 1\nline 2\n",
+		mode:   "a",
+		method: "readLine",
+		err:    "Error: read ",
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\nline 2\n",
+		mode:   "a",
+		method: "write",
+		args:   []interface{}{"line 2\n"},
+	},
+	// mode: a+
+	{
+		in:     "",
+		out:    "",
+		mode:   "a+",
+		method: "read",
+		args:   []interface{}{-1},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "",
+		out:    "",
+		mode:   "a+",
+		method: "read",
+		args:   []interface{}{1},
+		rv: map[string]interface{}{
+			"eof":    true,
+			"buffer": "",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\n",
+		mode:   "a+",
+		method: "read",
+		args:   []interface{}{11},
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1\n",
+		},
+	},
+	{
+		in:     "line 1\nline 2\n",
+		out:    "line 1\nline 2\n",
+		mode:   "a+",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "line 1\r\nline 2\r\n",
+		out:    "line 1\r\nline 2\r\n",
+		mode:   "a+",
+		method: "readLine",
+		rv: map[string]interface{}{
+			"eof":    false,
+			"buffer": "line 1",
+		},
+	},
+	{
+		in:     "line 1\n",
+		out:    "line 1\nline 2\n",
+		mode:   "a+",
+		method: "write",
+		args:   []interface{}{"line 2\n"},
+	},
+}
+
+func TestOS_Open(t *testing.T) {
+	dir, err := tempDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	vm := newVM()
+
+	src := fmt.Sprintf(`os.open()`)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.open('%v')`, path.Join(dir, "_"))
+	_, err = vm.Run(src)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	touch(filepath.Join(dir, "file"))
+	src = fmt.Sprintf(`os.open('%v')`, path.Join(dir, "file"))
+	v, err := vm.Run(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	o := v.Object()
+	rv, _ := o.Call("name")
+	if g, e := typeof(rv), "string"; g != e {
+		t.Errorf("typeof File.name() = %v, expected %v", g, e)
+	}
+	rv, _ = o.Call("close")
+	if g, e := typeof(rv), "undefined"; g != e {
+		t.Errorf("typeof File.close() = %v, expected %v", g, e)
+	}
+	rv, _ = o.Call("close")
+	if g, e := typeof(rv), "boolean"; g != e {
+		t.Errorf("typeof File.close() = %v, expected %v", g, e)
+	} else if b, _ := v.ToBoolean(); !b {
+		t.Error("File.close() = false, expected true")
+	}
+
+	for _, tt := range os_OpenTests {
+		label := fmt.Sprintf("File.%v(%v):", tt.method, tt.mode)
+		// setup
+		f, err := os.Create(filepath.Join(dir, "file"))
+		if err != nil {
+			t.Fatal(label, err)
+		}
+		if _, err := f.WriteString(tt.in); err != nil {
+			t.Fatal(label, err)
+		}
+		f.Close()
+		// open
+		src = fmt.Sprintf(`os.open('%v', '%v')`, path.Join(dir, "file"), tt.mode)
+		v, err := vm.Run(src)
+		if err != nil {
+			t.Fatal(label, err)
+		}
+		o := v.Object()
+		// call method
+		v, err = o.Call(tt.method, tt.args...)
+		if err != nil && (tt.err == "" || strings.Index(err.Error(), tt.err) == -1) {
+			t.Fatal(label, err)
+		}
+		rv, err := v.Export()
+		if err != nil {
+			t.Fatal(label, err)
+		}
+		if !reflect.DeepEqual(rv, tt.rv) {
+			t.Errorf("%v rv = %v, expected %v", label, rv, tt.rv)
+		}
+		// close
+		v, _ = o.Call("close", 1)
+		if g, e := typeof(v), "undefined"; g != e {
+			t.Errorf("%v typeof rv = %v, expected %v", label, g, e)
+		}
+		// teardown
+		b, err := ioutil.ReadFile(filepath.Join(dir, "file"))
+		if err != nil {
+			t.Fatal(label, err)
+		}
+		if g := string(b); g != tt.out {
+			t.Errorf("%v expected %q, got %q", label, tt.out, g)
+		}
 	}
 }
 
