@@ -32,6 +32,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -47,11 +48,9 @@ func TestOS_Getwd(t *testing.T) {
 	}
 
 	src := `os.getwd();`
-	s, err := testString(vm, src)
-	if err != nil {
+	if s, err := testString(vm, src); err != nil {
 		t.Fatal(err)
-	}
-	if g, e := s, wd; g != e {
+	} else if g, e := s, wd; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
@@ -65,7 +64,12 @@ func TestOS_Mkdir(t *testing.T) {
 
 	vm := newVM()
 
-	src := fmt.Sprintf(`os.mkdir('%v');`, path.Join(dir, "a"))
+	src := `os.mkdir();`
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.mkdir('%v');`, path.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -75,13 +79,13 @@ func TestOS_Mkdir(t *testing.T) {
 		t.Error(err)
 	}
 
-	touch(path.Join(dir, "c"))
+	touch(filepath.Join(dir, "c"))
 	src = fmt.Sprintf(`os.mkdir('%v', 0777);`, path.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
 	case !v:
-		t.Errorf("expected true, got %v", v)
+		t.Error("expected true, got false")
 	}
 }
 
@@ -94,13 +98,18 @@ func TestOS_Remove(t *testing.T) {
 
 	vm := newVM()
 
-	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "a"))
+	src := `os.remove();`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "b"))
+	touch(filepath.Join(dir, "file"))
+	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "file"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "_"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -115,18 +124,23 @@ func TestOS_Rename(t *testing.T) {
 
 	vm := newVM()
 
-	touch(path.Join(dir, "a"))
-	src := fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "b"))
+	src := `os.rename();`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "c"))
+	touch(filepath.Join(dir, "a"))
+	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "b"))
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "_"), path.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
 	case !v:
-		t.Errorf("expected true, got %v", v)
+		t.Error("expected true, got false")
 	}
 }
 
@@ -141,6 +155,16 @@ var os_StatTests = []struct {
 func TestOS_Stat(t *testing.T) {
 	vm := newVM()
 
+	src := `os.stat();`
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
+	src = `os.stat('_');`
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
+
 	for _, tt := range os_StatTests {
 		src := fmt.Sprintf(`os.stat('%v');`, tt.path)
 		v, err := vm.Run(src)
@@ -148,61 +172,45 @@ func TestOS_Stat(t *testing.T) {
 			t.Fatal(err)
 		}
 		fi := v.Object()
-		switch v, err := fi.Get("name"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsString():
-			t.Errorf("expected String, got %v", v)
+		// FileInfo.name
+		v, _ = fi.Get("name")
+		if g, e := typeof(v), "string"; g != e {
+			t.Errorf("typeof FileInfo.name = %v, expected %v", g, e)
 		}
-		switch v, err = fi.Get("size"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsNumber():
-			t.Errorf("expected Number, got %v", v)
+		// FileInfo.size
+		v, _ = fi.Get("size")
+		if g, e := typeof(v), "number"; g != e {
+			t.Errorf("typeof FileInfo.size = %v, expected %v", g, e)
 		}
-		switch v, err := fi.Get("mode"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsNumber():
-			t.Errorf("expected Number, got %v", v)
+		// FileInfo.mode
+		v, _ = fi.Get("mode")
+		if g, e := typeof(v), "number"; g != e {
+			t.Errorf("typeof FileInfo.mode = %v, expected %v", g, e)
 		}
-		switch v, err := fi.Get("mtime"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsObject() || v.Class() != "Date":
-			t.Errorf("expected Date, got %v", v)
+		// FileInfo.mtime
+		v, _ = fi.Get("mtime")
+		if g, e := typeof(v), "Date"; g != e {
+			t.Errorf("typeof FileInfo.mtime = %v, expected %v", g, e)
 		}
-		switch v, err := fi.Call("isDir"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsBoolean():
-			t.Errorf("expected Boolean, got %v", v)
-		default:
-			if g, _ := v.ToBoolean(); g != tt.dir {
-				t.Errorf("expected %v, got %v", tt.dir, g)
-			}
+		// call FileInfo.isDir
+		v, _ = fi.Call("isDir")
+		if g, e := typeof(v), "boolean"; g != e {
+			t.Errorf("typeof FileInfo.isDir() = %v, expected %v", g, e)
+		} else if g, _ := v.ToBoolean(); g != tt.dir {
+			t.Errorf("FileInfo.isDir() = %v, expected %v", g, tt.dir)
 		}
-		switch v, err := fi.Call("isRegular"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsBoolean():
-			t.Errorf("expected Boolean, got %v", v)
-		default:
-			if g, _ := v.ToBoolean(); g != !tt.dir {
-				t.Errorf("expected %v, got %v", !tt.dir, g)
-			}
+		// call FileInfo.isRegular
+		v, _ = fi.Call("isRegular")
+		if g, e := typeof(v), "boolean"; g != e {
+			t.Errorf("typeof FileInfo.isRegular() = %v, expected %v", g, e)
+		} else if g, _ := v.ToBoolean(); g != !tt.dir {
+			t.Errorf("FileInfo.isRegular() = %v, expected %v", g, !tt.dir)
 		}
-		switch v, err := fi.Call("perm"); {
-		case err != nil:
-			t.Error(err)
-		case !v.IsNumber():
-			t.Errorf("expected Number, got %v", v)
+		// call FileInfo.perm
+		v, _ = fi.Call("perm")
+		if g, e := typeof(v), "number"; g != e {
+			t.Errorf("typeof FileInfo.perm = %v, expected %v", g, e)
 		}
-	}
-
-	src := `os.stat('__aster__');`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
 	}
 }
 
@@ -213,13 +221,13 @@ func TestOS_System(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 	// stdout
-	stdout, err := os.Create(path.Join(dir, "stdout"))
+	stdout, err := os.Create(filepath.Join(dir, "stdout"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer stdout.Close()
 	// stderr
-	stderr, err := os.Create(path.Join(dir, "stderr"))
+	stderr, err := os.Create(filepath.Join(dir, "stderr"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,8 +240,8 @@ func TestOS_System(t *testing.T) {
 	}
 
 	vm := newVM()
-	n1 := "'" + stdout.Name() + "'"
-	n2 := "'" + stderr.Name() + "'"
+	n1 := "'" + filepath.ToSlash(stdout.Name()) + "'"
+	n2 := "'" + filepath.ToSlash(stderr.Name()) + "'"
 	tmpl := `os.system(['%v', '-code', '%v'], {'stdout': %v, 'stderr': %v});`
 
 	// String: stdout
@@ -257,7 +265,7 @@ func TestOS_System(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true, got %v", b)
+		t.Error("expected true, got false")
 	}
 	stderr.Seek(0, os.SEEK_SET)
 	data, err = ioutil.ReadAll(stderr)
@@ -281,7 +289,7 @@ func TestOS_System(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true, got %v", b)
+		t.Error("expected true, got false")
 	}
 
 	// Array: stdout
@@ -308,7 +316,7 @@ func TestOS_System(t *testing.T) {
 	case err != nil:
 		t.Error(err)
 	case !b:
-		t.Errorf("expected true")
+		t.Error("expected true, got false")
 	}
 	v, _ = ary.Get("length")
 	n, _ = v.ToInteger()
@@ -334,31 +342,28 @@ func TestOS_System(t *testing.T) {
 	}
 
 	// invalid args
+
 	src = fmt.Sprintf(tmpl, exe, 1, `'.'`, n2)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
-	// invalid args
 	src = fmt.Sprintf(tmpl, exe, 1, n1, `'.'`)
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
-	// invalid args
-	src = fmt.Sprintf(`os.system(['1']);`)
+	src = `os.system(['1']);`
 	if _, err := vm.Run(src); err == nil {
-		t.Errorf("expected error")
+		t.Error("expected error")
 	}
 
-	// invalid args
-	src = fmt.Sprintf(`os.system('1');`)
+	src = `os.system('1');`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	// invalid args
-	src = fmt.Sprintf(`os.system([1]);`)
+	src = `os.system([1]);`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -376,6 +381,11 @@ func TestOS_Whence(t *testing.T) {
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
 	}
+
+	src = `os.whence('_');`
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestBuffer(t *testing.T) {
@@ -385,6 +395,7 @@ func TestBuffer(t *testing.T) {
 	b.Write([]byte("0\n1\n2"))
 	b.Close()
 
+	// ary.length
 	v, _ := ary.Get("length")
 	n, _ := v.ToInteger()
 	if g, e := n, int64(3); g != e {
@@ -393,8 +404,7 @@ func TestBuffer(t *testing.T) {
 	for i := int64(0); i < n; i++ {
 		e := strconv.FormatInt(i, 10)
 		v, _ = ary.Get(e)
-		g, _ := v.ToString()
-		if g != e {
+		if g, _ := v.ToString(); g != e {
 			t.Errorf("ary[%v] = %v, expected %v", i, g, e)
 		}
 	}
@@ -402,8 +412,10 @@ func TestBuffer(t *testing.T) {
 
 func testUndefined(vm *otto.Otto, src string) error {
 	v, err := vm.Run(src)
-	if err == nil && !v.IsUndefined() {
-		err = fmt.Errorf("expected undefined, got %v", v)
+	if err == nil {
+		if g, e := typeof(v), "undefined"; g != e {
+			err = fmt.Errorf("expected %v, got %v", e, g)
+		}
 	}
 	return err
 }
@@ -411,8 +423,8 @@ func testUndefined(vm *otto.Otto, src string) error {
 func testBoolean(vm *otto.Otto, src string) (bool, error) {
 	v, err := vm.Run(src)
 	if err == nil {
-		if !v.IsBoolean() {
-			err = fmt.Errorf("expected Boolean, got %v", v)
+		if g, e := typeof(v), "boolean"; g != e {
+			err = fmt.Errorf("expected %v, got %v", e, g)
 		} else {
 			return v.ToBoolean()
 		}
@@ -423,11 +435,29 @@ func testBoolean(vm *otto.Otto, src string) (bool, error) {
 func testString(vm *otto.Otto, src string) (string, error) {
 	v, err := vm.Run(src)
 	if err == nil {
-		if !v.IsString() {
-			err = fmt.Errorf("expected String, got %v", v)
+		if g, e := typeof(v), "string"; g != e {
+			err = fmt.Errorf("expected %v, got %v", e, g)
 		} else {
 			return v.ToString()
 		}
 	}
 	return "", err
+}
+
+func typeof(v otto.Value) string {
+	switch {
+	case v.IsObject():
+		return v.Class()
+	case v.IsBoolean():
+		return "boolean"
+	case v.IsFunction():
+		return "function"
+	case v.IsNumber():
+		return "number"
+	case v.IsString():
+		return "string"
+	case v.IsUndefined():
+		return "undefined"
+	}
+	return "object"
 }
