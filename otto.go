@@ -38,6 +38,7 @@ import (
 	"time"
 
 	"github.com/hattya/go.binfmt"
+	"github.com/hattya/go.cli"
 	"github.com/robertkrimen/otto"
 	"github.com/robertkrimen/otto/parser"
 )
@@ -54,7 +55,7 @@ func newVM() *otto.Otto {
 	os_.Set("system", os_system)
 	os_.Set("whence", os_whence)
 
-	vm.Run(fmt.Sprintf(`
+	script, _ := vm.Compile("os", fmt.Sprintf(cli.Dedent(`
 		os.FileInfo = function(name, size, mode, mtime) {
 		  this.name = name;
 		  this.size = size;
@@ -73,13 +74,15 @@ func newVM() *otto.Otto {
 		os.FileInfo.prototype.perm = function() {
 		  return this.mode & 0777;
 		};
-	`, uint(os.ModeDir), uint(os.ModeType)))
+	`), uint(os.ModeDir), uint(os.ModeType)))
+	vm.Run(script)
 
 	return vm
 }
 
-func throw(value otto.Value, _ error) otto.Value {
-	panic(value)
+func throw(vm *otto.Otto, err error) otto.Value {
+	v, _ := vm.Call(`new Error`, nil, err.Error())
+	panic(v)
 }
 
 func ottoError(err error) error {
@@ -109,53 +112,61 @@ func os_getwd(call otto.FunctionCall) otto.Value {
 }
 
 func os_mkdir(call otto.FunctionCall) otto.Value {
-	if 1 <= len(call.ArgumentList) {
-		path, _ := call.ArgumentList[0].ToString()
-		var perm os.FileMode
-		v := call.Argument(1)
-		if v.IsNumber() {
-			i, _ := v.ToInteger()
-			perm = os.FileMode(i)
-		}
-		if perm == 0 {
-			perm = os.FileMode(0777)
-		}
-		if os.MkdirAll(path, perm) != nil {
-			return otto.TrueValue()
-		}
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
+	}
+
+	path, _ := call.ArgumentList[0].ToString()
+	var perm os.FileMode
+	if v := call.Argument(1); v.IsNumber() {
+		i, _ := v.ToInteger()
+		perm = os.FileMode(i)
+	}
+	if perm == 0 {
+		perm = os.FileMode(0777)
+	}
+	if os.MkdirAll(path, perm) != nil {
+		return otto.TrueValue()
 	}
 	return otto.UndefinedValue()
 }
 
 func os_remove(call otto.FunctionCall) otto.Value {
-	if 1 <= len(call.ArgumentList) {
-		path, _ := call.ArgumentList[0].ToString()
-		os.RemoveAll(path)
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
 	}
+
+	path, _ := call.ArgumentList[0].ToString()
+	os.RemoveAll(path)
 	return otto.UndefinedValue()
 }
 
 func os_rename(call otto.FunctionCall) otto.Value {
-	if 2 <= len(call.ArgumentList) {
-		src, _ := call.ArgumentList[0].ToString()
-		dst, _ := call.ArgumentList[1].ToString()
-		if os.Rename(src, dst) != nil {
-			return otto.TrueValue()
-		}
+	if len(call.ArgumentList) < 2 {
+		return otto.UndefinedValue()
+	}
+
+	src, _ := call.ArgumentList[0].ToString()
+	dst, _ := call.ArgumentList[1].ToString()
+	if os.Rename(src, dst) != nil {
+		return otto.TrueValue()
 	}
 	return otto.UndefinedValue()
 }
 
 func os_stat(call otto.FunctionCall) otto.Value {
-	if 1 <= len(call.ArgumentList) {
-		path, _ := call.ArgumentList[0].ToString()
-		if fi, err := os.Stat(path); err == nil {
-			mtime, _ := call.Otto.Call(`new Date`, nil, fi.ModTime().Unix()*1000+int64(fi.ModTime().Nanosecond())/int64(time.Millisecond))
-			v, _ := call.Otto.Call(`new os.FileInfo`, nil, fi.Name(), fi.Size(), fi.Mode(), mtime)
-			return v
-		}
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
 	}
-	return otto.UndefinedValue()
+
+	path, _ := call.ArgumentList[0].ToString()
+	fi, err := os.Stat(path)
+	if err != nil {
+		return otto.UndefinedValue()
+	}
+	mtime, _ := call.Otto.Call(`new Date`, nil, fi.ModTime().Unix()*1000+int64(fi.ModTime().Nanosecond())/int64(time.Millisecond))
+	v, _ := call.Otto.Call(`new os.FileInfo`, nil, fi.Name(), fi.Size(), fi.Mode(), mtime)
+	return v
 }
 
 func os_system(call otto.FunctionCall) otto.Value {
@@ -205,7 +216,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		// stdout
 		switch w, err := redir(options, "stdout"); {
 		case err != nil:
-			return throw(call.Otto.ToValue(err.Error()))
+			return throw(call.Otto, err)
 		case w != nil:
 			stdout = w
 			defer w.Close()
@@ -213,7 +224,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		// stderr
 		switch w, err := redir(options, "stderr"); {
 		case err != nil:
-			return throw(call.Otto.ToValue(err.Error()))
+			return throw(call.Otto, err)
 		case w != nil:
 			stderr = w
 			defer w.Close()
@@ -229,21 +240,23 @@ func os_system(call otto.FunctionCall) otto.Value {
 		if _, ok := err.(*exec.ExitError); ok {
 			return otto.TrueValue()
 		}
-		return throw(call.Otto.ToValue(err.Error()))
+		return throw(call.Otto, err)
 	}
 	return otto.UndefinedValue()
 }
 
 func os_whence(call otto.FunctionCall) otto.Value {
-	if 1 <= len(call.ArgumentList) {
-		s, _ := call.ArgumentList[0].ToString()
-		path, err := exec.LookPath(s)
-		if err == nil {
-			v, _ := call.Otto.ToValue(path)
-			return v
-		}
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
 	}
-	return otto.UndefinedValue()
+
+	s, _ := call.ArgumentList[0].ToString()
+	name, err := exec.LookPath(s)
+	if err != nil {
+		return otto.UndefinedValue()
+	}
+	v, _ := call.Otto.ToValue(name)
+	return v
 }
 
 type buffer struct {

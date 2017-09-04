@@ -122,21 +122,25 @@ func (a *Aster) watch(call otto.FunctionCall) otto.Value {
 }
 
 func (a *Aster) notify(call otto.FunctionCall) otto.Value {
-	if 3 <= len(call.ArgumentList) {
-		var args [3]string
-		for i := range args {
-			args[i], _ = call.ArgumentList[i].ToString()
-		}
-		notify(a.gntp, args[0], args[1], args[2])
+	if len(call.ArgumentList) < 3 {
+		return otto.UndefinedValue()
 	}
+
+	var args [3]string
+	for i := range args {
+		args[i], _ = call.ArgumentList[i].ToString()
+	}
+	notify(a.gntp, args[0], args[1], args[2])
 	return otto.UndefinedValue()
 }
 
 func (a *Aster) title(call otto.FunctionCall) otto.Value {
-	if 1 <= len(call.ArgumentList) {
-		title, _ := call.ArgumentList[0].ToString()
-		app.Title(title)
+	if len(call.ArgumentList) < 1 {
+		return otto.UndefinedValue()
 	}
+
+	title, _ := call.ArgumentList[0].ToString()
+	app.Title(title)
 	return otto.UndefinedValue()
 }
 
@@ -163,8 +167,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	}
 	title, _ := a.vm.ToValue("Aster reload")
 	// call aster.notify
-	aster, _ := a.vm.Object(`aster`)
-	v, _ := aster.Call("notify", name, title, text)
+	v, _ := a.vm.Call(`aster.notify`, nil, name, title, text)
 	return v
 }
 
@@ -213,7 +216,7 @@ func (a *Aster) OnChange(files map[string]int) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := w.fn.Call("call", nil, ary)
 			if err != nil {
-				warn(err)
+				warn(ottoError(err))
 			}
 			return
 		}
