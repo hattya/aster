@@ -209,6 +209,7 @@ func (a *Aster) OnChange(files map[string]int) {
 			v, _ := w.rx.Call("test", n)
 			if b, _ := v.ToBoolean(); b {
 				cl = append(cl, n)
+				delete(files, n)
 			}
 		}
 		// call callback
@@ -218,7 +219,10 @@ func (a *Aster) OnChange(files map[string]int) {
 			if err != nil {
 				warn(ottoError(err))
 			}
-			return
+		}
+
+		if len(files) == 0 {
+			break
 		}
 	}
 }
