@@ -10,6 +10,9 @@ is inspired by Guard_.
 .. image:: https://ci.appveyor.com/api/projects/status/qc3luxk7q7jmx2ut/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hattya/aster
 
+.. image:: https://codecov.io/gh/hattya/aster/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/hattya/aster
+
 .. _Guard: http://guardgem.org/
 
 
@@ -81,21 +84,31 @@ Asterfile is evaluated as JavaScript by otto_.
 Reference
 ---------
 
-aster.watch(pattern, callback)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+aster.arch
+~~~~~~~~~~
 
-``aster.watch`` defines which files should be watched by Aster.
+``aster.arch`` is a ``String``. It is a synonym of |runtime.GOARCH|_.
 
-pattern
-    ``pattern`` is a ``RegExp``.
+.. |runtime.GOARCH| replace:: ``runtime.GOARCH``
+.. _runtime.GOARCH: runtime_
 
-callback
-    ``callback`` is a ``Function``. It is invoked on each file system
-    modifications when ``pattern`` is matched.
 
-    ``callback`` is invoked with one argument:
+aster.ignore
+~~~~~~~~~~~~
 
-    * ``Array`` of paths
+``aster.ignore`` is an ``Array`` of ``RegExp``. It will be ignored recursively
+by Aster when a directory is matched to any of ``aster.ignore``.
+
+A path to be matched is a relative path from where the Asterfile exists.
+
+
+aster.os
+~~~~~~~~
+
+``aster.os`` is a ``String``. It is a synonym of |runtime.GOOS|_.
+
+.. |runtime.GOOS| replace:: ``runtime.GOOS``
+.. _runtime.GOOS: runtime_
 
 
 aster.notify(name, title, text)
@@ -122,31 +135,21 @@ aster.title(title)
 on Windows.
 
 
-aster.arch
-~~~~~~~~~~
+aster.watch(pattern, callback)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``aster.arch`` is a ``String``. It is a synonym of |runtime.GOARCH|_.
+``aster.watch`` defines which files should be watched by Aster.
 
-.. |runtime.GOARCH| replace:: ``runtime.GOARCH``
-.. _runtime.GOARCH: runtime_
+pattern
+    ``pattern`` is a ``RegExp``.
 
+callback
+    ``callback`` is a ``Function``. It is invoked on each file system
+    modifications when ``pattern`` is matched.
 
-aster.os
-~~~~~~~~
+    ``callback`` is invoked with one argument:
 
-``aster.os`` is a ``String``. It is a synonym of |runtime.GOOS|_.
-
-.. |runtime.GOOS| replace:: ``runtime.GOOS``
-.. _runtime.GOOS: runtime_
-
-
-aster.ignore
-~~~~~~~~~~~~
-
-``aster.ignore`` is an ``Array`` of ``RegExp``. It will be ignored recursively
-by Aster when a directory is matched to any of ``aster.ignore``.
-
-A path to be matched is a relative path from where the Asterfile exists.
+    * ``Array`` of paths
 
 
 os.getwd()
