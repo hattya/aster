@@ -87,17 +87,14 @@ func newNotifier() *gntp.Client {
 	return c
 }
 
-func notify(c *gntp.Client, name, title, text string) {
+func notify(c *gntp.Client, name, title, text string) error {
 	if c == nil {
-		return
+		return nil
 	}
 
-	err := c.Notify(&gntp.Message{
+	return c.Notify(&gntp.Message{
 		Event: name,
 		Title: title,
 		Text:  text,
 	})
-	if err != nil {
-		warn(err)
-	}
 }

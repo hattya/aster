@@ -29,6 +29,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -107,26 +108,18 @@ func newVM() *otto.Otto {
 }
 
 func throw(vm *otto.Otto, err error) otto.Value {
-	v, _ := vm.Call(`new Error`, nil, err.Error())
-	panic(v)
+	if _, ok := err.(*otto.Error); ok {
+		panic(err)
+	}
+	panic(vm.MakeCustomError("Error", err.Error()))
 }
 
 func ottoError(err error) error {
 	switch e := err.(type) {
 	case *otto.Error:
-		return fmt.Errorf(strings.TrimSpace(e.String()))
+		err = errors.New(strings.TrimSpace(e.String()))
 	case parser.ErrorList:
-		var b bytes.Buffer
-		for i, pe := range e {
-			if 0 < i {
-				fmt.Fprintln(&b)
-			}
-			fmt.Fprintf(&b, "%v:%v:%v: %v", pe.Position.Filename, pe.Position.Line, pe.Position.Column, pe.Message)
-			if pe.Message == "Unexpected end of input" {
-				break
-			}
-		}
-		return fmt.Errorf(b.String())
+		err = fmt.Errorf("%v:%v:%v: %v", e[0].Position.Filename, e[0].Position.Line, e[0].Position.Column, e[0].Message)
 	}
 	return err
 }
@@ -337,8 +330,7 @@ func (b *buffer) Write(p []byte) (int, error) {
 	b.b.Write(p)
 	for {
 		if s, err := b.b.ReadString('\n'); err == nil {
-			v, _ := b.vm.ToValue(s[:len(s)-1])
-			b.ary.Call("push", v)
+			b.ary.Call("push", trimNewline(s))
 		} else {
 			b.b.WriteString(s)
 			break
@@ -352,8 +344,7 @@ func (b *buffer) Close() error {
 	defer b.mu.Unlock()
 
 	if 0 < b.b.Len() {
-		v, _ := b.vm.ToValue(b.b.String())
-		b.ary.Call("push", v)
+		b.ary.Call("push", b.b.String())
 	}
 	return nil
 }
@@ -407,19 +398,13 @@ func (f *file) Read(call otto.FunctionCall) otto.Value {
 
 func (f *file) ReadLine(call otto.FunctionCall) otto.Value {
 	s, err := f.br.ReadString('\n')
-	switch {
-	case 1 < len(s) && s[len(s)-2] == '\r':
-		s = s[:len(s)-2]
-	case 0 < len(s):
-		s = s[:len(s)-1]
-	}
 
 	if err != nil && err != io.EOF {
 		return throw(f.vm, err)
 	}
 	rv, _ := f.vm.Object(`({})`)
 	rv.Set("eof", err == io.EOF)
-	rv.Set("buffer", s)
+	rv.Set("buffer", trimNewline(s))
 	return rv.Value()
 }
 

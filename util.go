@@ -1,7 +1,7 @@
 //
 // aster :: util.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -31,6 +31,16 @@ import "io"
 func warn(a ...interface{}) {
 	app.Error("aster: ")
 	app.Errorln(a...)
+}
+
+func trimNewline(s string) string {
+	switch {
+	case 1 < len(s) && s[len(s)-2:] == "\r\n":
+		s = s[:len(s)-2]
+	case 0 < len(s) && s[len(s)-1:] == "\n":
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 type DevNull int

@@ -31,7 +31,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"reflect"
 	"strconv"
@@ -70,18 +69,18 @@ func TestOS_Mkdir(t *testing.T) {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.mkdir('%v');`, path.Join(dir, "a"))
+	src = fmt.Sprintf(`os.mkdir(%q);`, filepath.Join(dir, "a"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.mkdir('%v', 0777);`, path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.mkdir(%q, 0777);`, filepath.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
 	touch(filepath.Join(dir, "c"))
-	src = fmt.Sprintf(`os.mkdir('%v', 0777);`, path.Join(dir, "c"))
+	src = fmt.Sprintf(`os.mkdir(%q, 0777);`, filepath.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -384,14 +383,14 @@ func TestOS_Open(t *testing.T) {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.open('%v')`, path.Join(dir, "_"))
+	src = fmt.Sprintf(`os.open(%q)`, filepath.Join(dir, "_"))
 	_, err = vm.Run(src)
 	if err == nil {
 		t.Fatal("expected error")
 	}
 
 	touch(filepath.Join(dir, "file"))
-	src = fmt.Sprintf(`os.open('%v')`, path.Join(dir, "file"))
+	src = fmt.Sprintf(`os.open(%q)`, filepath.Join(dir, "file"))
 	v, err := vm.Run(src)
 	if err != nil {
 		t.Fatal(err)
@@ -424,7 +423,7 @@ func TestOS_Open(t *testing.T) {
 		}
 		f.Close()
 		// open
-		src = fmt.Sprintf(`os.open('%v', '%v')`, path.Join(dir, "file"), tt.mode)
+		src = fmt.Sprintf(`os.open(%q, %q)`, filepath.Join(dir, "file"), tt.mode)
 		v, err := vm.Run(src)
 		if err != nil {
 			t.Fatal(label, err)
@@ -473,12 +472,12 @@ func TestOS_Remove(t *testing.T) {
 	}
 
 	touch(filepath.Join(dir, "file"))
-	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "file"))
+	src = fmt.Sprintf(`os.remove(%q);`, filepath.Join(dir, "file"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.remove('%v');`, path.Join(dir, "_"))
+	src = fmt.Sprintf(`os.remove(%q);`, filepath.Join(dir, "_"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -499,12 +498,12 @@ func TestOS_Rename(t *testing.T) {
 	}
 
 	touch(filepath.Join(dir, "a"))
-	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "a"), path.Join(dir, "b"))
+	src = fmt.Sprintf(`os.rename(%q, %q);`, filepath.Join(dir, "a"), filepath.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.rename('%v', '%v');`, path.Join(dir, "_"), path.Join(dir, "c"))
+	src = fmt.Sprintf(`os.rename(%q, %q);`, filepath.Join(dir, "_"), filepath.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -535,7 +534,7 @@ func TestOS_Stat(t *testing.T) {
 	}
 
 	for _, tt := range os_StatTests {
-		src := fmt.Sprintf(`os.stat('%v');`, tt.path)
+		src := fmt.Sprintf(`os.stat(%q);`, tt.path)
 		v, err := vm.Run(src)
 		if err != nil {
 			t.Fatal(err)
@@ -602,16 +601,16 @@ func TestOS_System(t *testing.T) {
 	}
 	defer stderr.Close()
 	// exe
-	exe := path.Join(dir, "otto_cmd.exe")
+	exe := filepath.Join(dir, "otto_cmd.exe")
 	out, err := exec.Command("go", "build", "-o", exe, "otto_test_cmd.go").CombinedOutput()
 	if err != nil {
 		t.Fatalf("build failed\n%s", out)
 	}
 
 	vm := newVM()
-	n1 := "'" + filepath.ToSlash(stdout.Name()) + "'"
-	n2 := "'" + filepath.ToSlash(stderr.Name()) + "'"
-	tmpl := `os.system(['%v', '-code', '%v'], {'stdout': %v, 'stderr': %v});`
+	n1 := fmt.Sprintf("%q", stdout.Name())
+	n2 := fmt.Sprintf("%q", stderr.Name())
+	tmpl := `os.system([%q, '-code', '%v'], {'stdout': %v, 'stderr': %v});`
 
 	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
@@ -705,7 +704,7 @@ func TestOS_System(t *testing.T) {
 	}
 
 	// dir
-	src = fmt.Sprintf(`os.system(['./%v'], {'dir': '%v', 'stdout': null});`, path.Base(exe), dir)
+	src = fmt.Sprintf(`os.system([%q], {'dir': %q, 'stdout': null});`, "."+string(filepath.Separator)+filepath.Base(exe), dir)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}

@@ -1,7 +1,7 @@
 //
 // aster :: init.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -70,7 +70,7 @@ func init_(ctx *cli.Context) error {
 		return nil
 	}
 
-	f, err := os.OpenFile("Asterfile", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0666)
+	f, err := os.OpenFile("Asterfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}

@@ -41,6 +41,16 @@ var app = cli.NewCLI()
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
+	if err := app.Run(os.Args[1:]); err != nil {
+		switch err.(type) {
+		case cli.FlagError:
+			os.Exit(2)
+		}
+		os.Exit(1)
+	}
+}
+
+func init() {
 	app.Version = version
 	app.Usage = []string{
 		"[options]",
@@ -51,14 +61,6 @@ func main() {
 		"s", "m", and "h"
 	`))
 	app.Action = cli.Option(watch)
-
-	if err := app.Run(os.Args[1:]); err != nil {
-		switch err.(type) {
-		case cli.FlagError:
-			os.Exit(2)
-		}
-		os.Exit(1)
-	}
 }
 
 func watch(*cli.Context) error {

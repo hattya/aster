@@ -84,27 +84,23 @@ func (a *Aster) eval() error {
 	aster, _ := a.vm.Object(fmt.Sprintf(`
 		aster = {
 		  arch:   %q,
-		  os:     %q,
 		  ignore: [/%v/],
+		  os:     %q,
 		}
-	`, runtime.GOARCH, runtime.GOOS, defaultIgnore))
-	aster.Set("watch", a.watch)
+	`, runtime.GOARCH, defaultIgnore, runtime.GOOS))
 	aster.Set("notify", a.notify)
 	aster.Set("title", a.title)
+	aster.Set("watch", a.watch)
 	// watch Asterfile
 	rx, _ := a.vm.Call(`new RegExp`, nil, `^Asterfile$`)
-	fn, _ := a.vm.ToValue(a.reload)
-	aster.Call("watch", rx, fn)
+	aster.Call("watch", rx, a.reload)
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
 		return ottoError(err)
 	}
 	_, err = a.vm.Run(script)
-	if err != nil {
-		return ottoError(err)
-	}
-	return nil
+	return ottoError(err)
 }
 
 func (a *Aster) watch(call otto.FunctionCall) otto.Value {
@@ -130,7 +126,10 @@ func (a *Aster) notify(call otto.FunctionCall) otto.Value {
 	for i := range args {
 		args[i], _ = call.ArgumentList[i].ToString()
 	}
-	notify(a.gntp, args[0], args[1], args[2])
+	err := notify(a.gntp, args[0], args[1], args[2])
+	if err != nil {
+		warn(err)
+	}
 	return otto.UndefinedValue()
 }
 
@@ -149,7 +148,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	vm := a.vm
 	watches := a.watches
 	// eval
-	var name, text otto.Value
+	var name, text string
 	if err := a.eval(); err != nil {
 		// report error
 		warn("failed to reload\n", err)
@@ -157,15 +156,15 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 		a.vm = vm
 		a.watches = watches
 
-		name, _ = a.vm.ToValue("failure")
-		text, _ = a.vm.ToValue("Error occurred while reloading Asterfile")
+		name = "failure"
+		text = "Error occurred while reloading Asterfile"
 	} else {
 		atomic.AddInt32(&a.n, 1)
 
-		name, _ = a.vm.ToValue("success")
-		text, _ = a.vm.ToValue("Asterfile has been reloaded")
+		name = "success"
+		text = "Asterfile has been reloaded"
 	}
-	title, _ := a.vm.ToValue("Aster reload")
+	title := "Aster reload"
 	// call aster.notify
 	v, _ := a.vm.Call(`aster.notify`, nil, name, title, text)
 	return v
@@ -212,7 +211,7 @@ func (a *Aster) OnChange(files map[string]int) {
 				delete(files, n)
 			}
 		}
-		// call callback
+		// call Function.call
 		if 0 < len(cl) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := w.fn.Call("call", nil, ary)
