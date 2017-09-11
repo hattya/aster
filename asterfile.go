@@ -60,11 +60,12 @@ func init() {
 }
 
 type Aster struct {
-	vm      *otto.Otto
-	n       int32
-	watches []*watchExpr
-	gntp    *gntp.Client
+	n    int32
+	gntp *gntp.Client
+
 	mu      sync.Mutex
+	vm      *otto.Otto
+	watches []*watchExpr
 }
 
 func newAsterfile() (*Aster, error) {
@@ -83,9 +84,9 @@ func (a *Aster) eval() error {
 	// aster object
 	aster, _ := a.vm.Object(fmt.Sprintf(`
 		aster = {
-		  arch:   %q,
+		  arch: %q,
 		  ignore: [/%v/],
-		  os:     %q,
+		  os: %q,
 		}
 	`, runtime.GOARCH, defaultIgnore, runtime.GOOS))
 	aster.Set("notify", a.notify)

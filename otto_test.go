@@ -610,7 +610,7 @@ func TestOS_System(t *testing.T) {
 	vm := newVM()
 	n1 := fmt.Sprintf("%q", stdout.Name())
 	n2 := fmt.Sprintf("%q", stderr.Name())
-	tmpl := `os.system([%q, '-code', '%v'], {'stdout': %v, 'stderr': %v});`
+	tmpl := `os.system([%q, '-code', '%v'], { stdout: %v, stderr: %v });`
 
 	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
@@ -704,7 +704,7 @@ func TestOS_System(t *testing.T) {
 	}
 
 	// dir
-	src = fmt.Sprintf(`os.system([%q], {'dir': %q, 'stdout': null});`, "."+string(filepath.Separator)+filepath.Base(exe), dir)
+	src = fmt.Sprintf(`os.system([%q], { dir: %q, stdout: null });`, "."+string(filepath.Separator)+filepath.Base(exe), dir)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
