@@ -34,7 +34,7 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-const version = "0.1"
+const version = "0.1+"
 
 var app = cli.NewCLI()
 
