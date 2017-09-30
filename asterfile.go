@@ -28,6 +28,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"regexp"
 	"runtime"
@@ -198,7 +199,7 @@ func (a *Aster) Reloaded() bool {
 	return 0 < atomic.SwapInt32(&a.n, 0)
 }
 
-func (a *Aster) OnChange(files map[string]int) {
+func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
@@ -223,6 +224,11 @@ func (a *Aster) OnChange(files map[string]int) {
 
 		if len(files) == 0 {
 			break
+		}
+		select {
+		case <-ctx.Done():
+			return
+		default:
 		}
 	}
 }

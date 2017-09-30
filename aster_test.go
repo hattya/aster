@@ -28,6 +28,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -183,7 +184,10 @@ func aster(tt *asterTest) (string, error) {
 				tt.before(a)
 			}
 
-			w, err := newWatcher(a)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			w, err := newWatcher(ctx, a)
 			if err != nil {
 				return err
 			}

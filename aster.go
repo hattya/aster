@@ -27,6 +27,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"runtime"
 	"strings"
@@ -69,12 +70,14 @@ func watch(*cli.Context) error {
 		return err
 	}
 
-	w, err := newWatcher(a)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	w, err := newWatcher(ctx, a)
 	if err != nil {
 		return err
 	}
 	defer w.Close()
 
-	w.Watch()
-	return nil
+	return w.Watch()
 }

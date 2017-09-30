@@ -27,6 +27,7 @@
 package main
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -45,18 +46,20 @@ func init() {
 type Watcher struct {
 	*fsnotify.Watcher
 
+	ctx  context.Context
 	a    *Aster
 	done chan struct{}
 	quit chan struct{}
 }
 
-func newWatcher(a *Aster) (*Watcher, error) {
+func newWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
 	fsw, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
 	w := &Watcher{
 		Watcher: fsw,
+		ctx:     ctx,
 		a:       a,
 		done:    make(chan struct{}),
 		quit:    make(chan struct{}, 1),
@@ -108,11 +111,16 @@ func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) (err error) {
 				return
 			}
 		}
+		select {
+		case <-w.ctx.Done():
+			return w.ctx.Err()
+		default:
+		}
 	}
 	return
 }
 
-func (w *Watcher) Watch() {
+func (w *Watcher) Watch() error {
 	var mu sync.Mutex
 	files := make(map[string]int)
 	fire := make(chan struct{}, 1)
@@ -188,7 +196,7 @@ func (w *Watcher) Watch() {
 				}
 				mu.Unlock()
 				// process
-				w.a.OnChange(ss)
+				w.a.OnChange(w.ctx, ss)
 				if w.a.Reloaded() {
 					if err := w.Update("."); err != nil {
 						warn(err)
@@ -212,7 +220,12 @@ func (w *Watcher) Watch() {
 			<-done
 			close(w.done)
 			w.quit <- struct{}{}
-			return
+			return w.ctx.Err()
+		case <-w.ctx.Done():
+			select {
+			case w.quit <- struct{}{}:
+			default:
+			}
 		}
 	}
 }
