@@ -46,6 +46,7 @@ type Watcher struct {
 	*fsnotify.Watcher
 
 	a    *Aster
+	done chan struct{}
 	quit chan struct{}
 }
 
@@ -57,7 +58,8 @@ func newWatcher(a *Aster) (*Watcher, error) {
 	w := &Watcher{
 		Watcher: fsw,
 		a:       a,
-		quit:    make(chan struct{}),
+		done:    make(chan struct{}),
+		quit:    make(chan struct{}, 1),
 	}
 	if err := w.Update("."); err != nil {
 		w.Close()
@@ -67,6 +69,12 @@ func newWatcher(a *Aster) (*Watcher, error) {
 }
 
 func (w *Watcher) Close() error {
+	select {
+	case <-w.done:
+		return nil
+	default:
+	}
+
 	w.quit <- struct{}{}
 	<-w.quit
 	return w.Watcher.Close()
@@ -197,11 +205,13 @@ func (w *Watcher) Watch() {
 			}()
 		case err := <-w.Errors:
 			warn(err)
+		case <-w.done:
 		case <-w.quit:
 			timer.Stop()
 			atomic.SwapInt32(&retry, 0)
 			<-done
-			close(w.quit)
+			close(w.done)
+			w.quit <- struct{}{}
 			return
 		}
 	}
