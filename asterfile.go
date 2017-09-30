@@ -50,6 +50,7 @@ func init() {
 		".git",
 		".hg",
 		".svn",
+		"CVS",
 	} {
 		if 0 < i {
 			b.WriteRune('|')
