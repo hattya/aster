@@ -54,23 +54,14 @@ func newWatcher(a *Aster) (*Watcher, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = filepath.Walk(".", func(path string, fi os.FileInfo, err error) error {
-		if err != nil || !fi.IsDir() {
-			return err
-		}
-		if a.Ignore(path) {
-			return filepath.SkipDir
-		}
-		return fsw.Add(path)
-	})
-	if err != nil {
-		fsw.Close()
-		return nil, err
-	}
 	w := &Watcher{
 		Watcher: fsw,
 		a:       a,
 		quit:    make(chan struct{}),
+	}
+	if err := w.Update("."); err != nil {
+		w.Close()
+		return nil, err
 	}
 	return w, nil
 }
@@ -83,40 +74,34 @@ func (w *Watcher) Close() error {
 
 func (w *Watcher) Update(root string) error {
 	fi, err := os.Lstat(root)
-	if err != nil {
+	if err != nil || !fi.IsDir() {
 		return err
 	}
 	return w.update(root, fi, false)
 }
 
-func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) error {
-	if !fi.IsDir() {
-		return nil
-	}
-
+func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) (err error) {
 	if !ignore {
 		ignore = w.a.Ignore(path)
 	}
 	if ignore {
 		w.Remove(path)
-	} else {
-		if err := w.Add(path); err != nil {
-			return err
-		}
+	} else if err = w.Add(path); err != nil {
+		return
 	}
 
 	list, err := ioutil.ReadDir(path)
 	if err != nil {
-		return err
+		return
 	}
 	for _, fi := range list {
 		if fi.IsDir() {
-			if err := w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
-				return err
+			if err = w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
+				return
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (w *Watcher) Watch() {
@@ -137,16 +122,10 @@ func (w *Watcher) Watch() {
 			}
 		}
 	})
-	done <- struct{}{}
 
+	done <- struct{}{}
 	for {
 		select {
-		case <-w.quit:
-			timer.Stop()
-			atomic.SwapInt32(&retry, 0)
-			<-done
-			close(w.quit)
-			return
 		case ev := <-w.Events:
 			// remove "./" prefix
 			if 2 < len(ev.Name) && ev.Name[0] == '.' && os.IsPathSeparator(ev.Name[1]) {
@@ -159,12 +138,11 @@ func (w *Watcher) Watch() {
 					// removed immediately?
 					continue
 				case fi.IsDir():
-					w.Update(ev.Name)
+					if err := w.Update(ev.Name); err != nil {
+						warn(err)
+					}
 					continue
 				}
-			}
-			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
-				w.Remove(ev.Name)
 			}
 			if ev.Op == fsnotify.Chmod {
 				continue
@@ -173,6 +151,7 @@ func (w *Watcher) Watch() {
 			mu.Lock()
 			n := len(files)
 			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
+				w.Remove(ev.Name)
 				delete(files, ev.Name)
 			} else {
 				files[ev.Name]++
@@ -182,8 +161,6 @@ func (w *Watcher) Watch() {
 			if n == 0 {
 				timer.Reset(app.Flags.Get("s").(time.Duration))
 			}
-		case err := <-w.Errors:
-			warn(err)
 		case <-fire:
 			go func() {
 				select {
@@ -218,6 +195,14 @@ func (w *Watcher) Watch() {
 				}
 				done <- struct{}{}
 			}()
+		case err := <-w.Errors:
+			warn(err)
+		case <-w.quit:
+			timer.Stop()
+			atomic.SwapInt32(&retry, 0)
+			<-done
+			close(w.quit)
+			return
 		}
 	}
 }
