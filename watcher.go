@@ -24,7 +24,7 @@
 //   SOFTWARE.
 //
 
-package main
+package aster
 
 import (
 	"context"
@@ -38,13 +38,9 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-func init() {
-	app.Flags.Duration("s", 727*time.Millisecond, "squash events during <duration> (default: 727ms)")
-	app.Flags.MetaVar("s", " <duration>")
-}
-
 type Watcher struct {
 	*fsnotify.Watcher
+	Squash time.Duration
 
 	ctx  context.Context
 	a    *Aster
@@ -52,7 +48,7 @@ type Watcher struct {
 	quit chan struct{}
 }
 
-func newWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
+func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
 	fsw, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
@@ -155,7 +151,7 @@ func (w *Watcher) Watch() error {
 					continue
 				case fi.IsDir():
 					if err := w.Update(ev.Name); err != nil {
-						warn(err)
+						warn(w.a.ui, err)
 					}
 					continue
 				}
@@ -175,7 +171,7 @@ func (w *Watcher) Watch() error {
 			mu.Unlock()
 			// new cycle has begun
 			if n == 0 {
-				timer.Reset(app.Flags.Get("s").(time.Duration))
+				timer.Reset(w.Squash)
 			}
 		case <-fire:
 			go func() {
@@ -199,7 +195,7 @@ func (w *Watcher) Watch() error {
 				w.a.OnChange(w.ctx, ss)
 				if w.a.Reloaded() {
 					if err := w.Update("."); err != nil {
-						warn(err)
+						warn(w.a.ui, err)
 					}
 				}
 				// retry
@@ -212,7 +208,7 @@ func (w *Watcher) Watch() error {
 				done <- struct{}{}
 			}()
 		case err := <-w.Errors:
-			warn(err)
+			warn(w.a.ui, err)
 		case <-w.done:
 		case <-w.quit:
 			timer.Stop()

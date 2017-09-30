@@ -1,5 +1,5 @@
 //
-// aster :: aster.go
+// test :: test.go
 //
 //   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
@@ -24,6 +24,46 @@
 //   SOFTWARE.
 //
 
-package aster
+package test
 
-const Version = "0.1+"
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+
+	"github.com/hattya/aster"
+	"github.com/hattya/aster/internal/sh"
+	"github.com/hattya/go.cli"
+)
+
+func Gen(src string) error {
+	return ioutil.WriteFile("Asterfile", []byte(src), 0666)
+}
+
+func New() (*aster.Aster, error) {
+	return aster.New(cli.NewCLI(), "")
+}
+
+func Sandbox(test interface{}) error {
+	dir, err := sh.Mkdtemp()
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	popd, err := sh.Pushd(dir)
+	if err != nil {
+		return err
+	}
+	defer popd()
+
+	switch t := test.(type) {
+	case func():
+		t()
+		return nil
+	case func() error:
+		return t()
+	default:
+		return fmt.Errorf("unknown type: %T", test)
+	}
+}

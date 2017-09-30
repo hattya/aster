@@ -1,7 +1,7 @@
 //
 // aster :: init_test.go
 //
-//   Copyright (c) 2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -34,6 +34,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/hattya/aster/internal/sh"
+	"github.com/hattya/aster/internal/test"
 	"github.com/hattya/go.cli"
 )
 
@@ -56,9 +58,9 @@ func TestInit(t *testing.T) {
 	args := []string{"init", "go"}
 	tmpl := filepath.Join("template", "go")
 
-	err := sandbox(func() error {
+	err := test.Sandbox(func() error {
 		configDir = os.Getwd
-		if err := mkdir("template"); err != nil {
+		if err := sh.Mkdir("template"); err != nil {
 			return err
 		}
 		if err := ioutil.WriteFile(tmpl, []byte("template go\n"), 0666); err != nil {
@@ -66,7 +68,7 @@ func TestInit(t *testing.T) {
 		}
 
 		for _, tt := range initTests {
-			if err := genAsterfile(tt.src); err != nil {
+			if err := test.Gen(tt.src); err != nil {
 				return err
 			}
 			if err := app.Run(args); err != nil {
@@ -96,7 +98,7 @@ func TestInitError(t *testing.T) {
 	app.Action = cli.Option(watch)
 	args := []string{"init", "go"}
 
-	err := sandbox(func() error {
+	err := test.Sandbox(func() error {
 		// error
 		configDir = func() (string, error) {
 			return "", fmt.Errorf("error")
@@ -112,10 +114,10 @@ func TestInitError(t *testing.T) {
 		}
 
 		// cannot open Asterfile
-		if err := mkdir("template"); err != nil {
+		if err := sh.Mkdir("template"); err != nil {
 			return err
 		}
-		if err := mkdir("Asterfile"); err != nil {
+		if err := sh.Mkdir("Asterfile"); err != nil {
 			return err
 		}
 		if err := app.Run(args); err == nil {
@@ -131,7 +133,7 @@ func TestInitError(t *testing.T) {
 		}
 
 		// cannot read template
-		if err := mkdir(filepath.Join("template", "go")); err != nil {
+		if err := sh.Mkdir("template", "go"); err != nil {
 			return err
 		}
 		if err := app.Run(args); err == nil {

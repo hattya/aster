@@ -24,7 +24,7 @@
 //   SOFTWARE.
 //
 
-package main
+package aster
 
 import (
 	"strconv"
@@ -55,22 +55,15 @@ func (g *GNTPValue) Get() interface{} { return string(*g) }
 func (g *GNTPValue) String() string   { return string(*g) }
 func (g *GNTPValue) IsBoolFlag() bool { return true }
 
-func init() {
-	var g GNTPValue
-	app.Flags.Var("g", &g, "notify to Growl (default: localhost:23053)")
-	app.Flags.MetaVar("g", "[=<host>[:<port>]]")
-}
-
-func newNotifier() *gntp.Client {
-	g := app.Flags.Get("g").(string)
-	if g == "" {
-		return nil
+func newNotifier(server string) (c *gntp.Client, err error) {
+	if server == "" {
+		return
 	}
 
-	c := gntp.NewClient()
-	c.Server = g
+	c = gntp.NewClient()
+	c.Server = server
 	c.AppName = "Aster"
-	err := c.Register([]gntp.Notification{
+	err = c.Register([]gntp.Notification{
 		{
 			Event:   "success",
 			Enabled: true,
@@ -80,11 +73,7 @@ func newNotifier() *gntp.Client {
 			Enabled: true,
 		},
 	})
-	if err != nil {
-		warn(err)
-		return nil
-	}
-	return c
+	return
 }
 
 func notify(c *gntp.Client, name, title, text string) error {

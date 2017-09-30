@@ -24,7 +24,7 @@
 //   SOFTWARE.
 //
 
-package main
+package aster
 
 import (
 	"bytes"
@@ -36,6 +36,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/hattya/go.cli"
 	"github.com/mattn/go-gntp"
 	"github.com/robertkrimen/otto"
 )
@@ -62,17 +63,23 @@ func init() {
 }
 
 type Aster struct {
+	ui   *cli.CLI
 	n    int32
 	gntp *gntp.Client
 
 	mu      sync.Mutex
 	vm      *otto.Otto
-	watches []*watchExpr
+	watches []*watch
 }
 
-func newAsterfile() (*Aster, error) {
+func New(ui *cli.CLI, server string) (*Aster, error) {
+	n, err := newNotifier(server)
+	if err != nil {
+		return nil, err
+	}
 	a := &Aster{
-		gntp: newNotifier(),
+		ui:   ui,
+		gntp: n,
 	}
 	if err := a.eval(); err != nil {
 		return nil, err
@@ -111,7 +118,7 @@ func (a *Aster) watch(call otto.FunctionCall) otto.Value {
 	if rx.Class() == "RegExp" {
 		fn := call.Argument(1)
 		if fn.Class() == "Function" {
-			a.watches = append(a.watches, &watchExpr{
+			a.watches = append(a.watches, &watch{
 				rx: rx.Object(),
 				fn: fn.Object(),
 			})
@@ -131,7 +138,7 @@ func (a *Aster) notify(call otto.FunctionCall) otto.Value {
 	}
 	err := notify(a.gntp, args[0], args[1], args[2])
 	if err != nil {
-		warn(err)
+		warn(a.ui, err)
 	}
 	return otto.UndefinedValue()
 }
@@ -142,7 +149,7 @@ func (a *Aster) title(call otto.FunctionCall) otto.Value {
 	}
 
 	title, _ := call.ArgumentList[0].ToString()
-	app.Title(title)
+	a.ui.Title(title)
 	return otto.UndefinedValue()
 }
 
@@ -154,7 +161,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	var name, text string
 	if err := a.eval(); err != nil {
 		// report error
-		warn("failed to reload\n", err)
+		warn(a.ui, "failed to reload\n", err)
 		// rollback to snapshot
 		a.vm = vm
 		a.watches = watches
@@ -226,7 +233,7 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := w.fn.Call("call", nil, ary)
 			if err != nil {
-				warn(ottoError(err))
+				warn(a.ui, ottoError(err))
 			}
 		}
 
@@ -241,7 +248,7 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	}
 }
 
-type watchExpr struct {
+type watch struct {
 	rx *otto.Object // RegExp
 	fn *otto.Object // Function
 }

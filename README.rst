@@ -21,7 +21,7 @@ Installation
 
 .. code:: console
 
-   $ go get -u github.com/hattya/aster
+   $ go get -u github.com/hattya/aster/cmd/aster
 
 
 Usage

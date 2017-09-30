@@ -24,9 +24,13 @@
 //   SOFTWARE.
 //
 
-package main
+package aster_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/hattya/aster"
+)
 
 var gntpValueTests = []struct {
 	in, out string
@@ -39,7 +43,7 @@ var gntpValueTests = []struct {
 }
 
 func TestGNTPValue(t *testing.T) {
-	var v GNTPValue
+	var v aster.GNTPValue
 	if g, e := v.IsBoolFlag(), true; g != e {
 		t.Errorf("IsBoolFlag() = %v, expected %v", g, e)
 	}
@@ -48,7 +52,7 @@ func TestGNTPValue(t *testing.T) {
 	}
 
 	for _, tt := range gntpValueTests {
-		var v GNTPValue
+		var v aster.GNTPValue
 		v.Set(tt.in)
 		if g, e := v.String(), tt.out; g != e {
 			t.Errorf("String() = %q, expected %q", g, e)

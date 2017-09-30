@@ -24,13 +24,17 @@
 //   SOFTWARE.
 //
 
-package main
+package aster
 
-import "io"
+import (
+	"io"
 
-func warn(a ...interface{}) {
-	app.Error("aster: ")
-	app.Errorln(a...)
+	"github.com/hattya/go.cli"
+)
+
+func warn(ui *cli.CLI, a ...interface{}) {
+	ui.Error("aster: ")
+	ui.Errorln(a...)
 }
 
 func trimNewline(s string) string {

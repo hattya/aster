@@ -24,7 +24,7 @@
 //   SOFTWARE.
 //
 
-package main
+package aster
 
 import (
 	"bufio"

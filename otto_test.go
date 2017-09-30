@@ -24,7 +24,7 @@
 //   SOFTWARE.
 //
 
-package main
+package aster_test
 
 import (
 	"fmt"
@@ -37,11 +37,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hattya/aster"
+	"github.com/hattya/aster/internal/sh"
 	"github.com/robertkrimen/otto"
 )
 
 func TestOS_Getwd(t *testing.T) {
-	vm := newVM()
+	vm := aster.NewVM()
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -56,13 +58,13 @@ func TestOS_Getwd(t *testing.T) {
 }
 
 func TestOS_Mkdir(t *testing.T) {
-	dir, err := tempDir()
+	dir, err := sh.Mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
 
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := `os.mkdir();`
 	if err := testUndefined(vm, src); err != nil {
@@ -79,7 +81,7 @@ func TestOS_Mkdir(t *testing.T) {
 		t.Error(err)
 	}
 
-	touch(filepath.Join(dir, "c"))
+	sh.Touch(dir, "c")
 	src = fmt.Sprintf(`os.mkdir(%q, 0777);`, filepath.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
@@ -370,13 +372,13 @@ var os_OpenTests = []struct {
 }
 
 func TestOS_Open(t *testing.T) {
-	dir, err := tempDir()
+	dir, err := sh.Mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
 
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := fmt.Sprintf(`os.open()`)
 	if err := testUndefined(vm, src); err != nil {
@@ -389,7 +391,7 @@ func TestOS_Open(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	touch(filepath.Join(dir, "file"))
+	sh.Touch(dir, "file")
 	src = fmt.Sprintf(`os.open(%q)`, filepath.Join(dir, "file"))
 	v, err := vm.Run(src)
 	if err != nil {
@@ -458,20 +460,20 @@ func TestOS_Open(t *testing.T) {
 }
 
 func TestOS_Remove(t *testing.T) {
-	dir, err := tempDir()
+	dir, err := sh.Mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
 
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := `os.remove();`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	touch(filepath.Join(dir, "file"))
+	sh.Touch(dir, "file")
 	src = fmt.Sprintf(`os.remove(%q);`, filepath.Join(dir, "file"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
@@ -484,20 +486,20 @@ func TestOS_Remove(t *testing.T) {
 }
 
 func TestOS_Rename(t *testing.T) {
-	dir, err := tempDir()
+	dir, err := sh.Mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(dir)
 
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := `os.rename();`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	touch(filepath.Join(dir, "a"))
+	sh.Touch(dir, "a")
 	src = fmt.Sprintf(`os.rename(%q, %q);`, filepath.Join(dir, "a"), filepath.Join(dir, "b"))
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
@@ -521,7 +523,7 @@ var os_StatTests = []struct {
 }
 
 func TestOS_Stat(t *testing.T) {
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := `os.stat();`
 	if err := testUndefined(vm, src); err != nil {
@@ -583,7 +585,7 @@ func TestOS_Stat(t *testing.T) {
 }
 
 func TestOS_System(t *testing.T) {
-	dir, err := tempDir()
+	dir, err := sh.Mkdtemp()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -607,7 +609,7 @@ func TestOS_System(t *testing.T) {
 		t.Fatalf("build failed\n%s", out)
 	}
 
-	vm := newVM()
+	vm := aster.NewVM()
 	n1 := fmt.Sprintf("%q", stdout.Name())
 	n2 := fmt.Sprintf("%q", stderr.Name())
 	tmpl := `os.system([%q, '-code', '%v'], { stdout: %v, stderr: %v });`
@@ -738,7 +740,7 @@ func TestOS_System(t *testing.T) {
 }
 
 func TestOS_Whence(t *testing.T) {
-	vm := newVM()
+	vm := aster.NewVM()
 
 	src := `os.whence();`
 	if err := testUndefined(vm, src); err != nil {
@@ -759,7 +761,7 @@ func TestOS_Whence(t *testing.T) {
 func TestBuffer(t *testing.T) {
 	vm := otto.New()
 	ary, _ := vm.Object(`ary = []`)
-	b := newBuffer(vm, ary)
+	b := aster.NewBuffer(vm, ary)
 	b.Write([]byte("0\n1\n2"))
 	b.Close()
 

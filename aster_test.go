@@ -24,20 +24,20 @@
 //   SOFTWARE.
 //
 
-package main
+package aster_test
 
 import (
 	"bytes"
 	"context"
-	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/hattya/aster"
+	"github.com/hattya/aster/internal/sh"
+	"github.com/hattya/aster/internal/test"
 	"github.com/hattya/go.cli"
 )
 
@@ -48,32 +48,32 @@ func TestWatch(t *testing.T) {
 			  cycles.push(files);
 			});
 		`),
-		before: func(a *Aster) {
-			mkdir(".git")
+		before: func(a *aster.Aster) {
+			sh.Mkdir(".git")
 			a.Eval(`var cycles = [];`)
 		},
 		test: func(d time.Duration) {
-			touch("a.go")
+			sh.Touch("a.go")
 			os.Remove("a.go")
 
-			touch("b.go")
+			sh.Touch("b.go")
 			os.Rename("b.go", "b_.go")
 			os.Remove("b_.go")
 
-			touch("c.go")
-			mkdir("dir.go")
+			sh.Touch("c.go")
+			sh.Mkdir("dir.go")
 			time.Sleep(d)
 
 			os.Rename("c.go", "c_.go")
 			os.Rename("dir.go", "dir_.go")
 
-			touch(filepath.Join(".git", "git.go"))
+			sh.Touch(".git", "git.go")
 
-			mkdir(".hg")
-			touch(filepath.Join(".hg", "hg.go"))
+			sh.Mkdir(".hg")
+			sh.Touch(".hg", "hg.go")
 			time.Sleep(d)
 		},
-		after: func(a *Aster) {
+		after: func(a *aster.Aster) {
 			v, _ := a.Eval(`cycles;`)
 			cycles := v.Object()
 			// cycles.length
@@ -112,7 +112,7 @@ func TestWatch(t *testing.T) {
 			}
 		},
 	}
-	stderr, err := aster(tt)
+	stderr, err := aster_(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func TestReload(t *testing.T) {
 	tt := &asterTest{
 		src: ``,
 		test: func(d time.Duration) {
-			if err := mkdir("build"); err != nil {
+			if err := sh.Mkdir("build"); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
@@ -135,7 +135,7 @@ func TestReload(t *testing.T) {
 				os.Remove("Asterfile")
 			}
 			src := `aster.ignore.push(/^build$/);`
-			if err := genAsterfile(src); err != nil {
+			if err := test.Gen(src); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
@@ -144,13 +144,13 @@ func TestReload(t *testing.T) {
 				os.Remove("Asterfile")
 			}
 			src = `+;`
-			if err := genAsterfile(src); err != nil {
+			if err := test.Gen(src); err != nil {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
 		},
 	}
-	stderr, err := aster(tt)
+	stderr, err := aster_(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,21 +162,22 @@ func TestReload(t *testing.T) {
 
 type asterTest struct {
 	src    string
-	before func(*Aster)
+	before func(*aster.Aster)
 	test   func(time.Duration)
-	after  func(*Aster)
+	after  func(*aster.Aster)
 }
 
-func aster(tt *asterTest) (string, error) {
+func aster_(tt *asterTest) (string, error) {
 	s := 101 * time.Millisecond
 	var b bytes.Buffer
+	app := cli.NewCLI()
 	app.Stderr = &b
 	app.Action = func(*cli.Context) error {
-		return sandbox(func() error {
-			if err := genAsterfile(tt.src); err != nil {
+		return test.Sandbox(func() error {
+			if err := test.Gen(tt.src); err != nil {
 				return err
 			}
-			a, err := newAsterfile()
+			a, err := aster.New(app, "")
 			if err != nil {
 				return err
 			}
@@ -188,77 +189,22 @@ func aster(tt *asterTest) (string, error) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			w, err := newWatcher(ctx, a)
+			w, err := aster.NewWatcher(ctx, a)
 			if err != nil {
 				return err
 			}
+			w.Squash = s
 			go w.Watch()
 			tt.test(time.Duration(float64(s.Nanoseconds()) * 1.4))
-			w.Close()
+			err = w.Close()
 
 			if tt.after != nil {
 				tt.after(a)
 			}
-			return nil
+			return err
 		})
 	}
 
-	err := app.Run([]string{"-s", s.String()})
-	// reset
-	app.Stderr = nil
-	app.Flags.Reset()
-
+	err := app.Run(nil)
 	return b.String(), err
-}
-
-func genAsterfile(src string) error {
-	return ioutil.WriteFile("Asterfile", []byte(src), 0666)
-}
-
-func sandbox(test interface{}) error {
-	dir, err := tempDir()
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(dir)
-
-	popd, err := pushd(dir)
-	if err != nil {
-		return err
-	}
-	defer popd()
-
-	switch t := test.(type) {
-	case func():
-		t()
-		return nil
-	case func() error:
-		return t()
-	default:
-		return fmt.Errorf("unknown type: %T", test)
-	}
-}
-
-func pushd(path string) (func() error, error) {
-	wd, err := os.Getwd()
-	popd := func() error {
-		if err == nil {
-			return os.Chdir(wd)
-		}
-		return err
-	}
-	return popd, os.Chdir(path)
-}
-
-func mkdir(path string) error {
-	return os.MkdirAll(path, 0777)
-}
-
-func touch(name string) error {
-	return ioutil.WriteFile(name, []byte{}, 0666)
-}
-
-func tempDir() (string, error) {
-	dir, err := ioutil.TempDir("", "aster.test")
-	return filepath.ToSlash(dir), err
 }

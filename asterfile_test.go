@@ -24,17 +24,19 @@
 //   SOFTWARE.
 //
 
-package main
+package aster_test
 
 import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/hattya/aster/internal/test"
 )
 
 func TestAsterfileNotFound(t *testing.T) {
-	err := sandbox(func() {
-		if _, err := newAsterfile(); err == nil {
+	err := test.Sandbox(func() {
+		if _, err := test.New(); err == nil {
 			t.Error("expected error")
 		}
 	})
@@ -44,12 +46,12 @@ func TestAsterfileNotFound(t *testing.T) {
 }
 
 func TestInvalidAsterfile(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		src := `[].join(;`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := newAsterfile(); err == nil {
+		if _, err := test.New(); err == nil {
 			t.Error("expected error")
 		}
 	})
@@ -59,17 +61,17 @@ func TestInvalidAsterfile(t *testing.T) {
 }
 
 func TestWatchArgs(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		src := `aster.watch(/.+\.go/, function(files) {});`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 2; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 2; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -78,13 +80,13 @@ func TestWatchArgs(t *testing.T) {
 }
 
 func TestWatchInvalidArgs(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		// syntax error
 		src := `aster.watch(//, 1);`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		switch _, err := newAsterfile(); {
+		switch _, err := test.New(); {
 		case err == nil:
 			t.Error("expected error")
 		case !regexp.MustCompile(` end of input$`).MatchString(err.Error()):
@@ -92,11 +94,11 @@ func TestWatchInvalidArgs(t *testing.T) {
 		}
 
 		// type error
-		src = `aster.watc();`
-		if err := genAsterfile(src); err != nil {
+		src = `test.watc();`
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		switch _, err := newAsterfile(); {
+		switch _, err := test.New(); {
 		case err == nil:
 			t.Error("expected error")
 		case strings.HasPrefix(err.Error(), "TypeError: 'watch'"):
@@ -105,41 +107,41 @@ func TestWatchInvalidArgs(t *testing.T) {
 
 		// too few args
 		src = `aster.watch();`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 
 		// invalid args
 		src = `aster.watch('', 1);`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err = newAsterfile()
+		a, err = test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 
 		// invalid args
 		src = `aster.watch(/.+/, 1);`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err = newAsterfile()
+		a, err = test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -148,17 +150,17 @@ func TestWatchInvalidArgs(t *testing.T) {
 }
 
 func TestNotifyArgs(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		src := `aster.notify('name', 'title', 'text');`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -167,18 +169,18 @@ func TestNotifyArgs(t *testing.T) {
 }
 
 func TestNotifyInvalidArgs(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		// too few args
 		src := `aster.notify();`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -187,17 +189,17 @@ func TestNotifyInvalidArgs(t *testing.T) {
 }
 
 func TestTitleArgs(t *testing.T) {
-	err := sandbox(func() {
-		src := `aster.title('aster.test');`
-		if err := genAsterfile(src); err != nil {
+	err := test.Sandbox(func() {
+		src := `aster.title('test.test');`
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -206,18 +208,18 @@ func TestTitleArgs(t *testing.T) {
 }
 
 func TestTitleInvalidArgs(t *testing.T) {
-	err := sandbox(func() {
+	err := test.Sandbox(func() {
 		// too few args
 		src := `aster.title();`
-		if err := genAsterfile(src); err != nil {
+		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := newAsterfile()
+		a, err := test.New()
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := len(a.watches), 1; g != e {
-			t.Errorf("len(watches) = %v, expected %v", g, e)
+		if g, e := a.NWatch(), 1; g != e {
+			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {

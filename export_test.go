@@ -1,7 +1,7 @@
 //
-// aster :: aster.go
+// aster :: export_test.go
 //
-//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -26,4 +26,11 @@
 
 package aster
 
-const Version = "0.1+"
+var (
+	NewVM     = newVM
+	NewBuffer = newBuffer
+)
+
+func (a *Aster) NWatch() int {
+	return len(a.watches)
+}
