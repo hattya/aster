@@ -29,6 +29,7 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 	"runtime"
 	"strings"
 
@@ -72,6 +73,13 @@ func watch(*cli.Context) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	go func() {
+		<-sig
+		cancel()
+	}()
 
 	w, err := newWatcher(ctx, a)
 	if err != nil {
