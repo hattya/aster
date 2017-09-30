@@ -172,6 +172,13 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	return v
 }
 
+func (a *Aster) Eval(src interface{}) (otto.Value, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	return a.vm.Run(src)
+}
+
 func (a *Aster) Ignore(name string) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()

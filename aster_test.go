@@ -50,7 +50,7 @@ func TestWatch(t *testing.T) {
 		`),
 		before: func(a *Aster) {
 			mkdir(".git")
-			a.vm.Run(`var cycles = [];`)
+			a.Eval(`var cycles = [];`)
 		},
 		test: func(d time.Duration) {
 			touch("a.go")
@@ -74,9 +74,10 @@ func TestWatch(t *testing.T) {
 			time.Sleep(d)
 		},
 		after: func(a *Aster) {
-			cycles, _ := a.vm.Object(`cycles`)
+			v, _ := a.Eval(`cycles;`)
+			cycles := v.Object()
 			// cycles.length
-			v, _ := cycles.Get("length")
+			v, _ = cycles.Get("length")
 			n, _ := v.ToInteger()
 			if g, e := n, int64(2); g != e {
 				t.Fatalf("cycles.length = %v, expected %v", g, e)
@@ -95,7 +96,7 @@ func TestWatch(t *testing.T) {
 			if g, e := s, "c.go"; g != e {
 				t.Fatalf("cycles[0][0] = %q, expected %q", g, e)
 			}
-			// cyles[1].length
+			// cycles[1].length
 			v, _ = cycles.Get("1")
 			files = v.Object()
 			v, _ = files.Get("length")
