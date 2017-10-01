@@ -1,5 +1,5 @@
 //
-// aster :: aster.go
+// aster/cmd/aster :: aster.go
 //
 //   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //

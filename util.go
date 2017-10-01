@@ -47,14 +47,14 @@ func trimNewline(s string) string {
 	return s
 }
 
-type DevNull int
+var discard io.WriteCloser = devNull(0)
 
-func (DevNull) Write(p []byte) (int, error) {
+type devNull int
+
+func (devNull) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (DevNull) Close() error {
+func (devNull) Close() error {
 	return nil
 }
-
-var discard io.WriteCloser = DevNull(0)

@@ -1,5 +1,5 @@
 //
-// test :: test.go
+// aster/internal/test :: test.go
 //
 //   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //

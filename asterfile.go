@@ -219,6 +219,11 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	defer a.mu.Unlock()
 
 	for _, w := range a.watches {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
 		// call RegExp.test
 		var cl []interface{}
 		for n := range files {
@@ -239,11 +244,6 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 
 		if len(files) == 0 {
 			break
-		}
-		select {
-		case <-ctx.Done():
-			return
-		default:
 		}
 	}
 }

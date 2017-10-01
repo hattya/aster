@@ -1,5 +1,5 @@
 //
-// aster :: init_test.go
+// aster/cmd/aster :: init_test.go
 //
 //   Copyright (c) 2015-2017 Akinori Hattori <hattya@gmail.com>
 //

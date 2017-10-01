@@ -102,15 +102,16 @@ func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) (err error) {
 		return
 	}
 	for _, fi := range list {
-		if fi.IsDir() {
-			if err = w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
-				return
-			}
-		}
 		select {
 		case <-w.ctx.Done():
 			return w.ctx.Err()
 		default:
+		}
+
+		if fi.IsDir() {
+			if err = w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
+				return
+			}
 		}
 	}
 	return

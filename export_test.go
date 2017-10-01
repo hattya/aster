@@ -27,8 +27,8 @@
 package aster
 
 var (
-	NewVM     = newVM
 	NewBuffer = newBuffer
+	NewVM     = newVM
 )
 
 func (a *Aster) NWatch() int {
