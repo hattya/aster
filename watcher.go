@@ -209,7 +209,9 @@ func (w *Watcher) Watch() error {
 				done <- struct{}{}
 			}()
 		case err := <-w.Errors:
-			warn(w.a.ui, err)
+			if err != nil {
+				warn(w.a.ui, err)
+			}
 		case <-w.done:
 		case <-w.quit:
 			timer.Stop()

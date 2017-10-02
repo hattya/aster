@@ -27,16 +27,32 @@
 package test
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
+	"runtime"
+	"strings"
+	"sync"
 
 	"github.com/hattya/aster"
 	"github.com/hattya/aster/internal/sh"
 	"github.com/hattya/go.cli"
 )
 
+var ci bool
+
+func init() {
+	// Ubuntu 14.04 never reports Write
+	ci = os.Getenv("CI") != "" && runtime.GOOS == "linux"
+}
+
 func Gen(src string) error {
+	if ci {
+		os.Remove("Asterfile")
+	}
 	return ioutil.WriteFile("Asterfile", []byte(src), 0666)
 }
 
@@ -65,5 +81,97 @@ func Sandbox(test interface{}) error {
 		return t()
 	default:
 		return fmt.Errorf("unknown type: %T", test)
+	}
+}
+
+var GNTPError = errors.New("INTERNAL_SERVER_ERROR")
+
+type GNTPServer struct {
+	Server string
+
+	l    net.Listener
+	done chan struct{}
+	wg   sync.WaitGroup
+
+	mu     sync.Mutex
+	reject map[string]struct{}
+}
+
+func NewGNTPServer() *GNTPServer {
+	l, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		panic(fmt.Sprintf("test: cannot listen: %v", err))
+	}
+	return &GNTPServer{
+		l:      l,
+		done:   make(chan struct{}),
+		reject: make(map[string]struct{}),
+	}
+}
+
+func (s *GNTPServer) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.reject = make(map[string]struct{})
+}
+
+func (s *GNTPServer) Close() {
+	select {
+	case <-s.done:
+		return
+	default:
+	}
+
+	close(s.done)
+	s.l.Close()
+	s.wg.Wait()
+}
+
+func (s *GNTPServer) Reject(msgtype string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.reject[strings.ToUpper(msgtype)] = struct{}{}
+}
+
+func (s *GNTPServer) Start() {
+	s.Server = s.l.Addr().String()
+
+	s.wg.Add(1)
+	go s.serve()
+}
+
+func (s *GNTPServer) serve() {
+	defer s.wg.Done()
+	for {
+		conn, err := s.l.Accept()
+		if err != nil {
+			select {
+			case <-s.done:
+				return
+			default:
+			}
+			panic(fmt.Sprintf("test: cannot accept: %v", err))
+		}
+
+		r := bufio.NewReader(conn)
+		l, err := r.ReadString('\n')
+		if err != nil {
+			panic(fmt.Sprintf("test: cannot read: %v", err))
+		}
+		v := strings.Split(l, " ")
+		if _, ok := s.reject[v[1]]; ok {
+			conn.Write([]byte("GNTP/1.0 -ERROR\r\n"))
+			conn.Write([]byte("Error-Code: 500\r\n"))
+			fmt.Fprintf(conn, "Error-Description: %v\r\n", GNTPError)
+		}
+		conn.Close()
+
+		select {
+		case <-s.done:
+			return
+		default:
+		}
 	}
 }

@@ -30,7 +30,6 @@ import (
 	"bytes"
 	"context"
 	"os"
-	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -41,18 +40,118 @@ import (
 	"github.com/hattya/go.cli"
 )
 
+func TestInterrupt(t *testing.T) {
+	at := &asterTest{
+		src: ``,
+		before: func(_ *aster.Aster, cancel context.CancelFunc) {
+			cancel()
+		},
+		test: func(_ time.Duration, cancel context.CancelFunc) {
+			cancel()
+		},
+		after: func(_ *aster.Aster, w *aster.Watcher) {
+			if err := w.Close(); err != nil {
+				t.Fatal(err)
+			}
+		},
+	}
+	if _, err := at.Run(); err != context.Canceled {
+		t.Fatal(err)
+	}
+
+	at.before = nil
+	if _, err := at.Run(); err != context.Canceled {
+		t.Fatal(err)
+	}
+}
+
+func TestNotifyError(t *testing.T) {
+	s := test.NewGNTPServer()
+	s.Start()
+	defer s.Close()
+
+	at := &asterTest{
+		src: cli.Dedent(`
+			aster.watch(/.+\.go$/, function() {
+				aster.notify("success", "title", "text");
+			});
+		`),
+		server: s.Server,
+		test: func(d time.Duration, _ context.CancelFunc) {
+			sh.Touch("a.go")
+			time.Sleep(d)
+		},
+	}
+
+	s.Clear()
+	s.Reject("REGISTER")
+	stderr, err := at.Run()
+	switch {
+	case err == nil:
+		t.Error("expected error")
+	case err.Error() != test.GNTPError.Error():
+		t.Error("unexpected error:", err)
+	}
+	if g, e := stderr, ""; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+
+	s.Clear()
+	s.Reject("NOTIFY")
+	stderr, err = at.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.SplitN(stderr, "\n", 2)
+	if g, e := lines[0], "aster: "+test.GNTPError.Error(); g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
+func TestReload(t *testing.T) {
+	at := &asterTest{
+		src: ``,
+		test: func(d time.Duration, _ context.CancelFunc) {
+			if err := sh.Mkdir("build"); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+
+			src := `aster.ignore.push(/^build$/);`
+			if err := test.Gen(src); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+
+			src = `++;`
+			if err := test.Gen(src); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+		},
+	}
+	stderr, err := at.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.SplitN(stderr, "\n", 2)
+	if g, e := lines[0], "aster: failed to reload"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
 func TestWatch(t *testing.T) {
-	tt := &asterTest{
+	at := &asterTest{
 		src: cli.Dedent(`
 			aster.watch(/.+\.go$/, function(files) {
 			  cycles.push(files);
 			});
 		`),
-		before: func(a *aster.Aster) {
+		before: func(a *aster.Aster, _ context.CancelFunc) {
 			sh.Mkdir(".git")
 			a.Eval(`var cycles = [];`)
 		},
-		test: func(d time.Duration) {
+		test: func(d time.Duration, _ context.CancelFunc) {
 			sh.Touch("a.go")
 			os.Remove("a.go")
 
@@ -73,7 +172,7 @@ func TestWatch(t *testing.T) {
 			sh.Touch(".hg", "hg.go")
 			time.Sleep(d)
 		},
-		after: func(a *aster.Aster) {
+		after: func(a *aster.Aster, _ *aster.Watcher) {
 			v, _ := a.Eval(`cycles;`)
 			cycles := v.Object()
 			// cycles.length
@@ -112,7 +211,7 @@ func TestWatch(t *testing.T) {
 			}
 		},
 	}
-	stderr, err := aster_(tt)
+	stderr, err := at.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,87 +220,72 @@ func TestWatch(t *testing.T) {
 	}
 }
 
-func TestReload(t *testing.T) {
-	ci := os.Getenv("CI") != "" && runtime.GOOS == "linux"
-	tt := &asterTest{
-		src: ``,
-		test: func(d time.Duration) {
-			if err := sh.Mkdir("build"); err != nil {
-				t.Fatal(err)
-			}
-			time.Sleep(d)
-
-			if ci {
-				os.Remove("Asterfile")
-			}
-			src := `aster.ignore.push(/^build$/);`
-			if err := test.Gen(src); err != nil {
-				t.Fatal(err)
-			}
-			time.Sleep(d)
-
-			if ci {
-				os.Remove("Asterfile")
-			}
-			src = `+;`
-			if err := test.Gen(src); err != nil {
-				t.Fatal(err)
-			}
+func TestWatchError(t *testing.T) {
+	at := &asterTest{
+		src: cli.Dedent(`
+			aster.watch(/.+\.go$/, function() {
+				throw new Error();
+			});
+		`),
+		test: func(d time.Duration, _ context.CancelFunc) {
+			sh.Touch("a.go")
 			time.Sleep(d)
 		},
 	}
-	stderr, err := aster_(tt)
+	stderr, err := at.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], "aster: failed to reload"; g != e {
+	if g, e := lines[0], "aster: Error"; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 
 type asterTest struct {
 	src    string
-	before func(*aster.Aster)
-	test   func(time.Duration)
-	after  func(*aster.Aster)
+	server string
+	before func(*aster.Aster, context.CancelFunc)
+	test   func(time.Duration, context.CancelFunc)
+	after  func(*aster.Aster, *aster.Watcher)
 }
 
-func aster_(tt *asterTest) (string, error) {
+func (t *asterTest) Run() (string, error) {
 	s := 101 * time.Millisecond
 	var b bytes.Buffer
 	app := cli.NewCLI()
 	app.Stderr = &b
 	app.Action = func(*cli.Context) error {
 		return test.Sandbox(func() error {
-			if err := test.Gen(tt.src); err != nil {
+			if err := test.Gen(t.src); err != nil {
 				return err
 			}
-			a, err := aster.New(app, "")
+			a, err := aster.New(app, t.server)
 			if err != nil {
 				return err
-			}
-
-			if tt.before != nil {
-				tt.before(a)
 			}
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
+			if t.before != nil {
+				t.before(a, cancel)
+			}
+
 			w, err := aster.NewWatcher(ctx, a)
 			if err != nil {
 				return err
 			}
+			defer w.Close()
+
 			w.Squash = s
 			go w.Watch()
-			tt.test(time.Duration(float64(s.Nanoseconds()) * 1.4))
-			err = w.Close()
+			t.test(time.Duration(s.Nanoseconds()*2), cancel)
 
-			if tt.after != nil {
-				tt.after(a)
+			if t.after != nil {
+				t.after(a, w)
 			}
-			return err
+			return ctx.Err()
 		})
 	}
 

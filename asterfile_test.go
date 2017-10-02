@@ -27,14 +27,12 @@
 package aster_test
 
 import (
-	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hattya/aster/internal/test"
 )
 
-func TestAsterfileNotFound(t *testing.T) {
+func TestNoAsterfile(t *testing.T) {
 	err := test.Sandbox(func() {
 		if _, err := test.New(); err == nil {
 			t.Error("expected error")
@@ -45,9 +43,9 @@ func TestAsterfileNotFound(t *testing.T) {
 	}
 }
 
-func TestInvalidAsterfile(t *testing.T) {
+func TestError(t *testing.T) {
 	err := test.Sandbox(func() {
-		src := `[].join(;`
+		src := `++;`
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
@@ -62,7 +60,7 @@ func TestInvalidAsterfile(t *testing.T) {
 
 func TestWatchArgs(t *testing.T) {
 	err := test.Sandbox(func() {
-		src := `aster.watch(/.+\.go/, function(files) {});`
+		src := `aster.watch(/.+\.go/, function() { });`
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
@@ -81,32 +79,8 @@ func TestWatchArgs(t *testing.T) {
 
 func TestWatchInvalidArgs(t *testing.T) {
 	err := test.Sandbox(func() {
-		// syntax error
-		src := `aster.watch(//, 1);`
-		if err := test.Gen(src); err != nil {
-			t.Fatal(err)
-		}
-		switch _, err := test.New(); {
-		case err == nil:
-			t.Error("expected error")
-		case !regexp.MustCompile(` end of input$`).MatchString(err.Error()):
-			t.Error("unexpected error:", err)
-		}
-
-		// type error
-		src = `test.watc();`
-		if err := test.Gen(src); err != nil {
-			t.Fatal(err)
-		}
-		switch _, err := test.New(); {
-		case err == nil:
-			t.Error("expected error")
-		case strings.HasPrefix(err.Error(), "TypeError: 'watch'"):
-			t.Error("unexpected error:", err)
-		}
-
 		// too few args
-		src = `aster.watch();`
+		src := `aster.watch();`
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
@@ -155,12 +129,8 @@ func TestNotifyArgs(t *testing.T) {
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := test.New()
-		if err != nil {
+		if _, err := test.New(); err != nil {
 			t.Fatal("unexpected error:", err)
-		}
-		if g, e := a.NWatch(), 1; g != e {
-			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -175,12 +145,8 @@ func TestNotifyInvalidArgs(t *testing.T) {
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := test.New()
-		if err != nil {
+		if _, err := test.New(); err != nil {
 			t.Fatal("unexpected error:", err)
-		}
-		if g, e := a.NWatch(), 1; g != e {
-			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -190,16 +156,12 @@ func TestNotifyInvalidArgs(t *testing.T) {
 
 func TestTitleArgs(t *testing.T) {
 	err := test.Sandbox(func() {
-		src := `aster.title('test.test');`
+		src := `aster.title('aster.test');`
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := test.New()
-		if err != nil {
+		if _, err := test.New(); err != nil {
 			t.Fatal("unexpected error:", err)
-		}
-		if g, e := a.NWatch(), 1; g != e {
-			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
@@ -214,12 +176,8 @@ func TestTitleInvalidArgs(t *testing.T) {
 		if err := test.Gen(src); err != nil {
 			t.Fatal(err)
 		}
-		a, err := test.New()
-		if err != nil {
+		if _, err := test.New(); err != nil {
 			t.Fatal("unexpected error:", err)
-		}
-		if g, e := a.NWatch(), 1; g != e {
-			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
 	if err != nil {
