@@ -77,10 +77,11 @@ aster.watch(/.+\.go$/, function(files) {
       return -1;
     }
     return a === b ? 0 : a < b ? -1 : 1;
-  }).forEach(function(p) {
+  }).some(function(p) {
     if (go('test', '-v', aster.arch === 'amd64' ? '-race' : '-cover', '-covermode', 'atomic', '-coverprofile', p + '/cover.out', p)) {
       ok = false;
     }
+    return !ok;
   });
   if (ok) {
     var all = os.open('cover.all.out', 'w');
