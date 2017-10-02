@@ -48,6 +48,9 @@ func main() {
 		case cli.FlagError:
 			os.Exit(2)
 		}
+		if err == context.Canceled {
+			os.Exit(128 + 2)
+		}
 		os.Exit(1)
 	}
 }
