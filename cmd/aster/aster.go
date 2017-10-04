@@ -27,7 +27,6 @@
 package main
 
 import (
-	"context"
 	"os"
 	"os/signal"
 	"runtime"
@@ -47,8 +46,7 @@ func main() {
 		switch err.(type) {
 		case cli.FlagError:
 			os.Exit(2)
-		}
-		if err == context.Canceled {
+		case cli.Interrupt:
 			os.Exit(128 + 2)
 		}
 		os.Exit(1)
@@ -79,17 +77,14 @@ func watch(ctx *cli.Context) error {
 		return err
 	}
 
-	ctx_, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
 	go func() {
 		<-sig
-		cancel()
+		ctx.Interrupt()
 	}()
 
-	w, err := aster.NewWatcher(ctx_, a)
+	w, err := aster.NewWatcher(ctx.Context(), a)
 	if err != nil {
 		return err
 	}

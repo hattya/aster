@@ -33,7 +33,7 @@ import (
 )
 
 func warn(ui *cli.CLI, a ...interface{}) {
-	ui.Error("aster: ")
+	ui.Errorf("%v: ", ui.Name)
 	ui.Errorln(a...)
 }
 

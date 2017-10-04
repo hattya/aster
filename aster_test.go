@@ -29,6 +29,7 @@ package aster_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -92,7 +93,8 @@ func TestNotifyError(t *testing.T) {
 	case err.Error() != test.GNTPError.Error():
 		t.Error("unexpected error:", err)
 	}
-	if g, e := stderr, ""; g != e {
+	lines := strings.SplitN(stderr, "\n", 2)
+	if g, e := lines[0], fmt.Sprintf("aster.test: %v", test.GNTPError); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
@@ -102,8 +104,8 @@ func TestNotifyError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], "aster: "+test.GNTPError.Error(); g != e {
+	lines = strings.SplitN(stderr, "\n", 2)
+	if g, e := lines[0], fmt.Sprintf("aster.test: %v", test.GNTPError); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
@@ -135,7 +137,7 @@ func TestReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], "aster: failed to reload"; g != e {
+	if g, e := lines[0], "aster.test: failed to reload"; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
@@ -237,7 +239,7 @@ func TestWatchError(t *testing.T) {
 		t.Fatal(err)
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], "aster: Error"; g != e {
+	if g, e := lines[0], "aster.test: Error"; g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
@@ -254,6 +256,7 @@ func (t *asterTest) Run() (string, error) {
 	s := 101 * time.Millisecond
 	var b bytes.Buffer
 	app := cli.NewCLI()
+	app.Name = "aster.test"
 	app.Stderr = &b
 	app.Action = func(*cli.Context) error {
 		return test.Sandbox(func() error {
