@@ -66,6 +66,32 @@ func TestInterrupt(t *testing.T) {
 	}
 }
 
+func TestNotify(t *testing.T) {
+	s := test.NewGNTPServer()
+	s.Start()
+	defer s.Close()
+
+	at := &asterTest{
+		src: cli.Dedent(`
+			aster.watch(/.+\.go$/, function() {
+				aster.notify("success", "title", "text");
+			});
+		`),
+		server: s.Server,
+		test: func(d time.Duration, _ context.CancelFunc) {
+			sh.Touch("a.go")
+			time.Sleep(d)
+		},
+	}
+	stderr, err := at.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g, e := stderr, ""; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
 func TestNotifyError(t *testing.T) {
 	s := test.NewGNTPServer()
 	s.Start()

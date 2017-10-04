@@ -31,6 +31,6 @@ var (
 	NewVM     = newVM
 )
 
-func (a *Aster) NWatch() int {
+func (a *Aster) NumWatches() int {
 	return len(a.watches)
 }

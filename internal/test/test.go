@@ -144,6 +144,7 @@ func (s *GNTPServer) Start() {
 
 func (s *GNTPServer) serve() {
 	defer s.wg.Done()
+
 	for {
 		conn, err := s.l.Accept()
 		if err != nil {

@@ -68,7 +68,7 @@ func TestWatchArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := a.NWatch(), 2; g != e {
+		if g, e := a.NumWatches(), 2; g != e {
 			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
@@ -88,7 +88,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := a.NWatch(), 1; g != e {
+		if g, e := a.NumWatches(), 1; g != e {
 			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 
@@ -101,7 +101,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := a.NWatch(), 1; g != e {
+		if g, e := a.NumWatches(), 1; g != e {
 			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 
@@ -114,7 +114,7 @@ func TestWatchInvalidArgs(t *testing.T) {
 		if err != nil {
 			t.Fatal("unexpected error:", err)
 		}
-		if g, e := a.NWatch(), 1; g != e {
+		if g, e := a.NumWatches(), 1; g != e {
 			t.Errorf("len(Aster.watches) = %v, expected %v", g, e)
 		}
 	})
