@@ -27,7 +27,7 @@ aster.watch(/.+\.go$/, function(files) {
   list = list.map(function(l) {
     l = l.split(/\t/);
     var p = {
-      dir: '.' + l[0].slice(wd.length),
+      dir: '.' + l[0].slice(wd.length).replace(/\\/g, '/'),
       importPath: l[1],
       imports: l[2].split(/,/).filter(function(e, i, a) {
         return e && a.indexOf(e) === i;
@@ -81,6 +81,7 @@ aster.watch(/.+\.go$/, function(files) {
     if (go('test', '-v', aster.arch === 'amd64' ? '-race' : '-cover', '-covermode', 'atomic', '-coverprofile', p + '/cover.out', p)) {
       ok = false;
     }
+    aster.title(title);
     return !ok;
   });
   if (ok) {
