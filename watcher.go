@@ -199,6 +199,7 @@ func (w *Watcher) Watch() error {
 						warn(w.a.ui, err)
 					}
 				}
+				done <- struct{}{}
 				// retry
 				if 0 < atomic.SwapInt32(&retry, 0) {
 					select {
@@ -206,7 +207,6 @@ func (w *Watcher) Watch() error {
 					default:
 					}
 				}
-				done <- struct{}{}
 			}()
 		case err := <-w.Errors:
 			if err != nil {
@@ -214,9 +214,9 @@ func (w *Watcher) Watch() error {
 			}
 		case <-w.done:
 		case <-w.quit:
+			<-done
 			timer.Stop()
 			atomic.SwapInt32(&retry, 0)
-			<-done
 			close(w.done)
 			w.quit <- struct{}{}
 			return w.ctx.Err()
