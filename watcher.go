@@ -164,7 +164,6 @@ func (w *Watcher) Watch() error {
 			mu.Lock()
 			n := len(files)
 			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
-				w.Remove(ev.Name)
 				delete(files, ev.Name)
 			} else {
 				files[ev.Name]++

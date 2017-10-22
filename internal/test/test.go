@@ -117,6 +117,8 @@ func (s *GNTPServer) Clear() {
 }
 
 func (s *GNTPServer) Close() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	select {
 	case <-s.done:
 		return
