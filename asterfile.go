@@ -218,6 +218,8 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
+	n := atomic.LoadInt32(&a.n)
+L:
 	for _, w := range a.watches {
 		select {
 		case <-ctx.Done():
@@ -244,6 +246,10 @@ func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 
 		if len(files) == 0 {
 			break
+		} else if v := atomic.LoadInt32(&a.n); n != v {
+			// Asterfile has been reloaded
+			n = v
+			goto L
 		}
 	}
 }

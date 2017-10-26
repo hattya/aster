@@ -47,7 +47,9 @@ func TestInterrupt(t *testing.T) {
 		before: func(_ *aster.Aster, cancel context.CancelFunc) {
 			cancel()
 		},
-		test: func(_ time.Duration, cancel context.CancelFunc) {
+		test: func(d time.Duration, cancel context.CancelFunc) {
+			time.Sleep(d)
+
 			cancel()
 		},
 		after: func(_ *aster.Aster, w *aster.Watcher) {
@@ -144,6 +146,8 @@ func TestReload(t *testing.T) {
 				t.Fatal(err)
 			}
 			time.Sleep(d)
+
+			sh.Touch("a.go")
 
 			src := `aster.ignore.push(/^build$/);`
 			if err := test.Gen(src); err != nil {
