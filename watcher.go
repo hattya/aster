@@ -155,9 +155,11 @@ func (w *Watcher) Watch() error {
 					// removed immediately?
 					continue
 				case fi.IsDir():
-					if err := w.Update(ev.Name); err != nil {
-						warn(w.a.ui, err)
-					}
+					go func() {
+						if err := w.Update(ev.Name); err != nil {
+							warn(w.a.ui, err)
+						}
+					}()
 					continue
 				}
 			}
