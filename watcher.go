@@ -44,8 +44,10 @@ type Watcher struct {
 
 	ctx  context.Context
 	a    *Aster
-	done chan struct{}
 	quit chan struct{}
+
+	mu   sync.Mutex
+	done chan struct{}
 }
 
 func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
@@ -61,13 +63,15 @@ func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
 		quit:    make(chan struct{}, 1),
 	}
 	if err := w.Update("."); err != nil {
-		w.Close()
+		fsw.Close()
 		return nil, err
 	}
 	return w, nil
 }
 
 func (w *Watcher) Close() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	select {
 	case <-w.done:
 		return nil
@@ -75,7 +79,7 @@ func (w *Watcher) Close() error {
 	}
 
 	w.quit <- struct{}{}
-	<-w.quit
+	<-w.done
 	return w.Watcher.Close()
 }
 
@@ -217,7 +221,6 @@ func (w *Watcher) Watch() error {
 			timer.Stop()
 			atomic.SwapInt32(&retry, 0)
 			close(w.done)
-			w.quit <- struct{}{}
 			return w.ctx.Err()
 		case <-w.ctx.Done():
 			select {
