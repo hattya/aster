@@ -30,6 +30,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"os"
@@ -84,16 +85,16 @@ func Sandbox(test interface{}) error {
 	}
 }
 
-var GNTPError = errors.New("INTERNAL_SERVER_ERROR")
+var GNTPError = errors.New("INVALID_REQUEST")
 
 type GNTPServer struct {
 	Server string
 
-	l    net.Listener
-	done chan struct{}
-	wg   sync.WaitGroup
+	l  net.Listener
+	wg sync.WaitGroup
 
 	mu     sync.Mutex
+	done   chan struct{}
 	reject map[string]struct{}
 }
 
@@ -158,15 +159,25 @@ func (s *GNTPServer) serve() {
 			panic(fmt.Sprintf("test: cannot accept: %v", err))
 		}
 
+		var mt string
 		r := bufio.NewReader(conn)
-		l, err := r.ReadString('\n')
-		if err != nil {
-			panic(fmt.Sprintf("test: cannot read: %v", err))
+		for crlf := 0; crlf < 2; {
+			l, err := r.ReadString('\n')
+			if err != nil {
+				panic(fmt.Sprintf("test: cannot read: %v", err))
+			}
+			switch {
+			case mt == "":
+				mt = strings.Split(l, " ")[1]
+			case l == "\r\n":
+				crlf++
+			default:
+				crlf = 0
+			}
 		}
-		v := strings.Split(l, " ")
-		if _, ok := s.reject[v[1]]; ok {
-			conn.Write([]byte("GNTP/1.0 -ERROR\r\n"))
-			conn.Write([]byte("Error-Code: 500\r\n"))
+		if _, ok := s.reject[mt]; ok {
+			io.WriteString(conn, "GNTP/1.0 -ERROR\r\n")
+			io.WriteString(conn, "Error-Code: 300\r\n")
 			fmt.Fprintf(conn, "Error-Description: %v\r\n", GNTPError)
 		}
 		conn.Close()
