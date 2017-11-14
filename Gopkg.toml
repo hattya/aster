@@ -1,0 +1,19 @@
+[[constraint]]
+  name = "github.com/fsnotify/fsnotify"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/hattya/go.binfmt"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/hattya/go.cli"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/mattn/go-gntp"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/robertkrimen/otto"
+  branch = "master"

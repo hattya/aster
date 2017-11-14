@@ -2,6 +2,7 @@ var proj = os.getwd().split(/[/\\]+/).slice(-1);
 var title = 'Aster ☆ ' + proj;
 
 aster.title(title);
+aster.ignore.push(/^vendor(?:\.orig)?$/);
 
 // go
 aster.watch(/.+\.go$/, function(files) {
