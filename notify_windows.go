@@ -1,5 +1,5 @@
 //
-// aster :: notify.go
+// aster :: notify_windows.go
 //
 //   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
@@ -27,34 +27,22 @@
 package aster
 
 import (
-	"strconv"
-	"strings"
+	"github.com/hattya/go.notify"
+	"github.com/hattya/go.notify/windows"
 )
 
-type GNTPValue string
-
-func (g *GNTPValue) Set(s string) error {
-	if v, err := strconv.ParseBool(s); err == nil || s == "" {
-		if v {
-			*g = "localhost:23053"
-		} else {
-			*g = ""
+func events(n notify.Notifier) error {
+	if n != nil {
+		icon := make(map[string]notify.Icon)
+		if _, ok := n.Sys().(*windows.NotifyIcon); ok {
+			icon["success"] = windows.IconInfo
+			icon["failure"] = windows.IconError
 		}
-	} else {
-		if !strings.Contains(s, ":") {
-			s += ":23053"
+		for _, ev := range []string{"success", "failure"} {
+			if err := n.Register(ev, icon[ev], notifierOpts); err != nil {
+				return err
+			}
 		}
-		*g = GNTPValue(s)
 	}
 	return nil
-}
-
-func (g *GNTPValue) Get() interface{} { return string(*g) }
-func (g *GNTPValue) String() string   { return string(*g) }
-func (g *GNTPValue) IsBoolFlag() bool { return true }
-
-var notifierOpts = map[string]interface{}{
-	"freedesktop:timeout": -1,
-	"gntp:enabled":        true,
-	"windows:sound":       true,
 }

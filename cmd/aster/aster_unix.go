@@ -1,7 +1,7 @@
 //
-// aster :: notify.go
+// aster/cmd/aster :: aster_unix.go
 //
-//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -24,37 +24,37 @@
 //   SOFTWARE.
 //
 
-package aster
+// +build !plan9,!windows
+
+package main
 
 import (
-	"strconv"
-	"strings"
+	"github.com/hattya/go.notify"
+	"github.com/hattya/go.notify/freedesktop"
 )
 
-type GNTPValue string
-
-func (g *GNTPValue) Set(s string) error {
-	if v, err := strconv.ParseBool(s); err == nil || s == "" {
-		if v {
-			*g = "localhost:23053"
-		} else {
-			*g = ""
-		}
-	} else {
-		if !strings.Contains(s, ":") {
-			s += ":23053"
-		}
-		*g = GNTPValue(s)
-	}
-	return nil
+var impls = map[string]interface{}{
+	"fdo":         "freedesktop",
+	"freedesktop": "freedesktop",
+	"gntp":        "gntp",
 }
 
-func (g *GNTPValue) Get() interface{} { return string(*g) }
-func (g *GNTPValue) String() string   { return string(*g) }
-func (g *GNTPValue) IsBoolFlag() bool { return true }
-
-var notifierOpts = map[string]interface{}{
-	"freedesktop:timeout": -1,
-	"gntp:enabled":        true,
-	"windows:sound":       true,
+func newNotifier(name, impl string) (n notify.Notifier) {
+	switch impl {
+	case "freedesktop":
+		n, _ = freedesktop.NewNotifier(name)
+		if n != nil {
+			// discard signals
+			go func() {
+				c := n.Sys().(*freedesktop.Client)
+				for {
+					select {
+					case <-c.ActionInvoked:
+					case <-c.NotificationClosed:
+					}
+				}
+			}()
+		}
+	}
+	return
 }

@@ -8,6 +8,12 @@
   revision = "4da3e2cfbabc9f751898f250b49f2439785783a1"
 
 [[projects]]
+  name = "github.com/godbus/dbus"
+  packages = ["."]
+  revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
+  version = "v4.1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/hattya/go.binfmt"
   packages = ["."]
@@ -22,7 +28,7 @@
 [[projects]]
   branch = "master"
   name = "github.com/hattya/go.notify"
-  packages = [".","gntp","internal/util"]
+  packages = [".","freedesktop","gntp","internal/sys","internal/util","windows"]
   revision = "5691a5718f1cc47e7d970341a9af113e33734e86"
 
 [[projects]]
@@ -52,6 +58,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8e566cabd43a6c270a399f453eebca57d3d46a304dc4ab98648fb4d783d103cb"
+  inputs-digest = "57b46e628a968c30c20bb0be47e32d1a48a2d7d501b1a2e3d012d7af56fe63e7"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -111,21 +111,21 @@ aster.os
 .. _runtime.GOOS: runtime_
 
 
-aster.notify(name, title, text)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+aster.notify(event, title, body)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``aster.notify`` sends a GNTP_ notification. It does nothing when ``-g`` flag
-is not specified to Aster.
+``aster.notify`` sends a notification. It does nothing when ``-g`` flag and/or
+``-n`` flag are not specified to Aster.
 
-name
-    ``name`` is the name (type) of a GNTP_ notification and which is either
+event
+    ``event`` is the event name of a notification, and which is either
     ``success`` or ``failure``.
 
 title
-    ``title`` is the title of a GNTP_ notification.
+    ``title`` is the title of a notification.
 
-text
-    ``text`` is the text of a GNTP_ notification.
+body
+    ``body`` is the body text of a notification.
 
 
 aster.title(title)
@@ -358,7 +358,6 @@ isRegular()
 perm()
     ``perm`` returns the permission bits.
 
-.. _GNTP: http://www.growlforwindows.com/gfw/help/gntp.aspx
 .. _runtime: https://golang.org/pkg/runtime/#pkg-constants
 
 
