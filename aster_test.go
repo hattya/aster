@@ -39,6 +39,7 @@ import (
 	"github.com/hattya/aster/internal/sh"
 	"github.com/hattya/aster/internal/test"
 	"github.com/hattya/go.cli"
+	"github.com/hattya/go.notify"
 )
 
 func TestInterrupt(t *testing.T) {
@@ -69,9 +70,7 @@ func TestInterrupt(t *testing.T) {
 }
 
 func TestNotify(t *testing.T) {
-	s := test.NewGNTPServer()
-	s.Start()
-	defer s.Close()
+	n := test.NewNotifier()
 
 	at := &asterTest{
 		src: cli.Dedent(`
@@ -79,7 +78,7 @@ func TestNotify(t *testing.T) {
 				aster.notify("success", "title", "text");
 			});
 		`),
-		server: s.Server,
+		notifier: n,
 		test: func(d time.Duration, _ context.CancelFunc) {
 			sh.Touch("a.go")
 			time.Sleep(d)
@@ -95,45 +94,39 @@ func TestNotify(t *testing.T) {
 }
 
 func TestNotifyError(t *testing.T) {
-	s := test.NewGNTPServer()
-	s.Start()
-	defer s.Close()
-
+	n := test.NewNotifier()
 	at := &asterTest{
 		src: cli.Dedent(`
 			aster.watch(/.+\.go$/, function() {
 				aster.notify("success", "title", "text");
 			});
 		`),
-		server: s.Server,
+		notifier: n,
 		test: func(d time.Duration, _ context.CancelFunc) {
 			sh.Touch("a.go")
 			time.Sleep(d)
 		},
 	}
 
-	s.Clear()
-	s.Reject("REGISTER")
+	e := fmt.Errorf("Register error")
+	n.MockCall("Register", e)
 	stderr, err := at.Run()
-	switch {
-	case err == nil:
-		t.Error("expected error")
-	case err.Error() != test.GNTPError.Error():
+	if err != e {
 		t.Error("unexpected error:", err)
 	}
 	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], fmt.Sprintf("aster.test: %v", test.GNTPError); g != e {
+	if g, e := lines[0], fmt.Sprintf("aster.test: %v", e); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 
-	s.Clear()
-	s.Reject("NOTIFY")
+	e = fmt.Errorf("Notify error")
+	n.MockCall("Notify", e)
 	stderr, err = at.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
 	lines = strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], fmt.Sprintf("aster.test: %v", test.GNTPError); g != e {
+	if g, e := lines[0], fmt.Sprintf("aster.test: %v", e); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 }
@@ -275,11 +268,11 @@ func TestWatchError(t *testing.T) {
 }
 
 type asterTest struct {
-	src    string
-	server string
-	before func(*aster.Aster, context.CancelFunc)
-	test   func(time.Duration, context.CancelFunc)
-	after  func(*aster.Aster, *aster.Watcher)
+	src      string
+	notifier notify.Notifier
+	before   func(*aster.Aster, context.CancelFunc)
+	test     func(time.Duration, context.CancelFunc)
+	after    func(*aster.Aster, *aster.Watcher)
 }
 
 func (t *asterTest) Run() (string, error) {
@@ -293,7 +286,7 @@ func (t *asterTest) Run() (string, error) {
 			if err := test.Gen(t.src); err != nil {
 				return err
 			}
-			a, err := aster.New(app, t.server)
+			a, err := aster.New(app, t.notifier)
 			if err != nil {
 				return err
 			}

@@ -11,7 +11,7 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/mattn/go-gntp"
+  name = "github.com/hattya/go.notify"
   branch = "master"
 
 [[constraint]]

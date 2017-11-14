@@ -358,7 +358,7 @@ isRegular()
 perm()
     ``perm`` returns the permission bits.
 
-.. _GNTP: http://growl.info/documentation/developer/gntp.php
+.. _GNTP: http://www.growlforwindows.com/gfw/help/gntp.aspx
 .. _runtime: https://golang.org/pkg/runtime/#pkg-constants
 
 

@@ -27,20 +27,15 @@
 package test
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"runtime"
-	"strings"
-	"sync"
 
 	"github.com/hattya/aster"
 	"github.com/hattya/aster/internal/sh"
 	"github.com/hattya/go.cli"
+	"github.com/hattya/go.notify"
 )
 
 var ci bool
@@ -58,7 +53,7 @@ func Gen(src string) error {
 }
 
 func New() (*aster.Aster, error) {
-	return aster.New(cli.NewCLI(), "")
+	return aster.New(cli.NewCLI(), nil)
 }
 
 func Sandbox(test interface{}) error {
@@ -85,107 +80,39 @@ func Sandbox(test interface{}) error {
 	}
 }
 
-var GNTPError = errors.New("INVALID_REQUEST")
-
-type GNTPServer struct {
-	Server string
-
-	l  net.Listener
-	wg sync.WaitGroup
-
-	mu     sync.Mutex
-	done   chan struct{}
-	reject map[string]struct{}
+type Notifier struct {
+	calls map[string][]error
 }
 
-func NewGNTPServer() *GNTPServer {
-	l, err := net.Listen("tcp", "localhost:0")
-	if err != nil {
-		panic(fmt.Sprintf("test: cannot listen: %v", err))
+func NewNotifier() *Notifier {
+	return &Notifier{calls: make(map[string][]error)}
+}
+
+func (p *Notifier) MockCall(method string, err error) {
+	p.calls[method] = append(p.calls[method], err)
+}
+
+func (p *Notifier) Close() error {
+	return p.mock("Close")
+}
+
+func (p *Notifier) Register(string, notify.Icon, map[string]interface{}) error {
+	return p.mock("Register")
+}
+
+func (p *Notifier) Notify(string, string, string) error {
+	return p.mock("Notify")
+}
+
+func (p *Notifier) mock(method string) error {
+	if len(p.calls[method]) == 0 {
+		return nil
 	}
-	return &GNTPServer{
-		l:      l,
-		done:   make(chan struct{}),
-		reject: make(map[string]struct{}),
-	}
+	err := p.calls[method][0]
+	p.calls[method] = p.calls[method][1:]
+	return err
 }
 
-func (s *GNTPServer) Clear() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.reject = make(map[string]struct{})
-}
-
-func (s *GNTPServer) Close() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	select {
-	case <-s.done:
-		return
-	default:
-	}
-
-	close(s.done)
-	s.l.Close()
-	s.wg.Wait()
-}
-
-func (s *GNTPServer) Reject(msgtype string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.reject[strings.ToUpper(msgtype)] = struct{}{}
-}
-
-func (s *GNTPServer) Start() {
-	s.Server = s.l.Addr().String()
-
-	s.wg.Add(1)
-	go s.serve()
-}
-
-func (s *GNTPServer) serve() {
-	defer s.wg.Done()
-
-	for {
-		conn, err := s.l.Accept()
-		if err != nil {
-			select {
-			case <-s.done:
-				return
-			default:
-			}
-			panic(fmt.Sprintf("test: cannot accept: %v", err))
-		}
-
-		var mt string
-		r := bufio.NewReader(conn)
-		for crlf := 0; crlf < 2; {
-			l, err := r.ReadString('\n')
-			if err != nil {
-				panic(fmt.Sprintf("test: cannot read: %v", err))
-			}
-			switch {
-			case mt == "":
-				mt = strings.Split(l, " ")[1]
-			case l == "\r\n":
-				crlf++
-			default:
-				crlf = 0
-			}
-		}
-		if _, ok := s.reject[mt]; ok {
-			io.WriteString(conn, "GNTP/1.0 -ERROR\r\n")
-			io.WriteString(conn, "Error-Code: 300\r\n")
-			fmt.Fprintf(conn, "Error-Description: %v\r\n", GNTPError)
-		}
-		conn.Close()
-
-		select {
-		case <-s.done:
-			return
-		default:
-		}
-	}
+func (p *Notifier) Sys() interface{} {
+	return nil
 }

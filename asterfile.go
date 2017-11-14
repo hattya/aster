@@ -37,7 +37,7 @@ import (
 	"sync/atomic"
 
 	"github.com/hattya/go.cli"
-	"github.com/mattn/go-gntp"
+	"github.com/hattya/go.notify"
 	"github.com/robertkrimen/otto"
 )
 
@@ -63,23 +63,22 @@ func init() {
 }
 
 type Aster struct {
-	ui   *cli.CLI
-	n    int32
-	gntp *gntp.Client
+	ui *cli.CLI
+	i  int32
+	n  notify.Notifier
 
 	mu      sync.Mutex
 	vm      *otto.Otto
 	watches []*watch
 }
 
-func New(ui *cli.CLI, server string) (*Aster, error) {
-	n, err := newNotifier(server)
-	if err != nil {
+func New(ui *cli.CLI, n notify.Notifier) (*Aster, error) {
+	if err := events(n); err != nil {
 		return nil, err
 	}
 	a := &Aster{
-		ui:   ui,
-		gntp: n,
+		ui: ui,
+		n:  n,
 	}
 	if err := a.eval(); err != nil {
 		return nil, err
@@ -128,7 +127,7 @@ func (a *Aster) watch(call otto.FunctionCall) otto.Value {
 }
 
 func (a *Aster) notify(call otto.FunctionCall) otto.Value {
-	if len(call.ArgumentList) < 3 {
+	if a.n == nil || len(call.ArgumentList) < 3 {
 		return otto.UndefinedValue()
 	}
 
@@ -136,8 +135,7 @@ func (a *Aster) notify(call otto.FunctionCall) otto.Value {
 	for i := range args {
 		args[i], _ = call.ArgumentList[i].ToString()
 	}
-	err := notify(a.gntp, args[0], args[1], args[2])
-	if err != nil {
+	if err := a.n.Notify(args[0], args[1], args[2]); err != nil {
 		warn(a.ui, err)
 	}
 	return otto.UndefinedValue()
@@ -169,7 +167,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 		name = "failure"
 		text = "Error occurred while reloading Asterfile"
 	} else {
-		atomic.AddInt32(&a.n, 1)
+		atomic.AddInt32(&a.i, 1)
 
 		name = "success"
 		text = "Asterfile has been reloaded"
@@ -211,14 +209,14 @@ func (a *Aster) Ignore(name string) bool {
 }
 
 func (a *Aster) Reloaded() bool {
-	return 0 < atomic.SwapInt32(&a.n, 0)
+	return 0 < atomic.SwapInt32(&a.i, 0)
 }
 
 func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	n := atomic.LoadInt32(&a.n)
+	i := atomic.LoadInt32(&a.i)
 L:
 	for _, w := range a.watches {
 		select {
@@ -246,9 +244,9 @@ L:
 
 		if len(files) == 0 {
 			break
-		} else if v := atomic.LoadInt32(&a.n); n != v {
+		} else if v := atomic.LoadInt32(&a.i); i != v {
 			// Asterfile has been reloaded
-			n = v
+			i = v
 			goto L
 		}
 	}

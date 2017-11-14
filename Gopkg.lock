@@ -21,9 +21,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/mattn/go-gntp"
-  packages = ["."]
-  revision = "d20bc996b11f19bb4203fdafb869a709198bd0a1"
+  name = "github.com/hattya/go.notify"
+  packages = [".","gntp","internal/util"]
+  revision = "5691a5718f1cc47e7d970341a9af113e33734e86"
 
 [[projects]]
   branch = "master"
@@ -52,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "52882a5c345033db18f23688d99f78353c3d230c84b0632bf001b7b746bafa75"
+  inputs-digest = "8e566cabd43a6c270a399f453eebca57d3d46a304dc4ab98648fb4d783d103cb"
   solver-name = "gps-cdcl"
   solver-version = 1

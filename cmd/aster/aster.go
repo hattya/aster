@@ -35,6 +35,8 @@ import (
 
 	"github.com/hattya/aster"
 	"github.com/hattya/go.cli"
+	"github.com/hattya/go.notify"
+	"github.com/hattya/go.notify/gntp"
 )
 
 var app = cli.NewCLI()
@@ -66,13 +68,20 @@ func init() {
 	var g aster.GNTPValue
 	app.Flags.Var("g", &g, "notify to Growl (default: localhost:23053)")
 	app.Flags.MetaVar("g", "[=<host>[:<port>]]")
-	app.Flags.Duration("s", 727*time.Millisecond, "squash events during <duration> (default: 727ms)")
+	app.Flags.Duration("s", 727*time.Millisecond, "squash events during <duration> (default: %v)")
 	app.Flags.MetaVar("s", " <duration>")
 	app.Action = cli.Option(watch)
 }
 
 func watch(ctx *cli.Context) error {
-	a, err := aster.New(ctx.UI, ctx.String("g"))
+	var n notify.Notifier
+	if ctx.String("g") != "" {
+		c := gntp.New()
+		c.Server = ctx.String("g")
+		c.Name = "Aster"
+		n = gntp.NewNotifier(c)
+	}
+	a, err := aster.New(ctx.UI, n)
 	if err != nil {
 		return err
 	}

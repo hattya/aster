@@ -30,7 +30,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattn/go-gntp"
+	"github.com/hattya/go.notify"
 )
 
 type GNTPValue string
@@ -55,35 +55,17 @@ func (g *GNTPValue) Get() interface{} { return string(*g) }
 func (g *GNTPValue) String() string   { return string(*g) }
 func (g *GNTPValue) IsBoolFlag() bool { return true }
 
-func newNotifier(server string) (c *gntp.Client, err error) {
-	if server == "" {
-		return
-	}
-
-	c = gntp.NewClient()
-	c.Server = server
-	c.AppName = "Aster"
-	err = c.Register([]gntp.Notification{
-		{
-			Event:   "success",
-			Enabled: true,
-		},
-		{
-			Event:   "failure",
-			Enabled: true,
-		},
-	})
-	return
+var notifierOpts = map[string]interface{}{
+	"gntp:enabled": true,
 }
 
-func notify(c *gntp.Client, name, title, text string) error {
-	if c == nil {
-		return nil
+func events(n notify.Notifier) error {
+	if n != nil {
+		for _, ev := range []string{"success", "failure"} {
+			if err := n.Register(ev, nil, notifierOpts); err != nil {
+				return err
+			}
+		}
 	}
-
-	return c.Notify(&gntp.Message{
-		Event: name,
-		Title: title,
-		Text:  text,
-	})
+	return nil
 }
