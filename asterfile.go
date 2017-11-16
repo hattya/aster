@@ -38,6 +38,7 @@ import (
 
 	"github.com/hattya/go.cli"
 	"github.com/hattya/go.notify"
+	"github.com/hattya/otto.module"
 	"github.com/robertkrimen/otto"
 )
 
@@ -68,7 +69,7 @@ type Aster struct {
 	n  notify.Notifier
 
 	mu      sync.Mutex
-	vm      *otto.Otto
+	vm      *module.Otto
 	watches []*watch
 }
 
@@ -106,10 +107,10 @@ func (a *Aster) eval() error {
 	// eval Asterfile
 	script, err := a.vm.Compile("Asterfile", nil)
 	if err != nil {
-		return ottoError(err)
+		return module.Wrap(err)
 	}
 	_, err = a.vm.Run(script)
-	return ottoError(err)
+	return module.Wrap(err)
 }
 
 func (a *Aster) watch(call otto.FunctionCall) otto.Value {
@@ -238,7 +239,7 @@ L:
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := w.fn.Call("call", nil, ary)
 			if err != nil {
-				warn(a.ui, ottoError(err))
+				warn(a.ui, module.Wrap(err))
 			}
 		}
 

@@ -1,4 +1,6 @@
-var proj = os.getwd().split(/[/\\]+/).slice(-1);
+var path = require('path');
+
+var proj = path.basename(os.getwd());
 var title = 'Aster ☆ ' + proj;
 
 aster.title(title);

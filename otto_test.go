@@ -39,6 +39,7 @@ import (
 
 	"github.com/hattya/aster"
 	"github.com/hattya/aster/internal/sh"
+	"github.com/hattya/otto.module"
 	"github.com/robertkrimen/otto"
 )
 
@@ -780,7 +781,7 @@ func TestBuffer(t *testing.T) {
 	}
 }
 
-func testUndefined(vm *otto.Otto, src string) error {
+func testUndefined(vm *module.Otto, src string) error {
 	v, err := vm.Run(src)
 	if err == nil {
 		if g, e := typeof(v), "undefined"; g != e {
@@ -790,7 +791,7 @@ func testUndefined(vm *otto.Otto, src string) error {
 	return err
 }
 
-func testBoolean(vm *otto.Otto, src string) (bool, error) {
+func testBoolean(vm *module.Otto, src string) (bool, error) {
 	v, err := vm.Run(src)
 	if err == nil {
 		if g, e := typeof(v), "boolean"; g != e {
@@ -802,7 +803,7 @@ func testBoolean(vm *otto.Otto, src string) (bool, error) {
 	return false, err
 }
 
-func testString(vm *otto.Otto, src string) (string, error) {
+func testString(vm *module.Otto, src string) (string, error) {
 	v, err := vm.Run(src)
 	if err == nil {
 		if g, e := typeof(v), "string"; g != e {

@@ -29,24 +29,34 @@ package aster
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/hattya/go.binfmt"
 	"github.com/hattya/go.cli"
+	"github.com/hattya/otto.module"
 	"github.com/robertkrimen/otto"
-	"github.com/robertkrimen/otto/parser"
 )
 
-func newVM() *otto.Otto {
-	vm := otto.New()
+func newVM() *module.Otto {
+	vm, err := module.New()
+	if err != nil {
+		panic(err)
+	}
+
+	file := new(module.FileLoader)
+	folder := &module.FolderLoader{File: file}
+	vm.Register(file)
+	vm.Register(folder)
+	vm.Register(&module.NodeModulesLoader{
+		File:   file,
+		Folder: folder,
+	})
 	// os object
 	os_, _ := vm.Object(`os = {}`)
 	os_.Set("getwd", os_getwd)
@@ -107,23 +117,6 @@ func newVM() *otto.Otto {
 	return vm
 }
 
-func throw(vm *otto.Otto, err error) otto.Value {
-	if _, ok := err.(*otto.Error); ok {
-		panic(err)
-	}
-	panic(vm.MakeCustomError("Error", err.Error()))
-}
-
-func ottoError(err error) error {
-	switch e := err.(type) {
-	case *otto.Error:
-		err = errors.New(strings.TrimSpace(e.String()))
-	case parser.ErrorList:
-		err = fmt.Errorf("%v:%v:%v: %v", e[0].Position.Filename, e[0].Position.Line, e[0].Position.Column, e[0].Message)
-	}
-	return err
-}
-
 func os_getwd(call otto.FunctionCall) otto.Value {
 	wd, _ := os.Getwd()
 	v, _ := call.Otto.ToValue(wd)
@@ -174,7 +167,7 @@ func os_open(call otto.FunctionCall) otto.Value {
 
 	f, err := os.OpenFile(name, flag, 0666)
 	if err != nil {
-		return throw(call.Otto, err)
+		return module.Throw(call.Otto, err)
 	}
 	v, _ := call.Otto.Call(`new os.File`, nil, newFile(call.Otto, f))
 	return v
@@ -265,7 +258,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		// stdout
 		switch w, err := redir(options, "stdout"); {
 		case err != nil:
-			return throw(call.Otto, err)
+			return module.Throw(call.Otto, err)
 		case w != nil:
 			stdout = w
 			defer w.Close()
@@ -273,7 +266,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		// stderr
 		switch w, err := redir(options, "stderr"); {
 		case err != nil:
-			return throw(call.Otto, err)
+			return module.Throw(call.Otto, err)
 		case w != nil:
 			stderr = w
 			defer w.Close()
@@ -289,7 +282,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 		if _, ok := err.(*exec.ExitError); ok {
 			return otto.TrueValue()
 		}
-		return throw(call.Otto, err)
+		return module.Throw(call.Otto, err)
 	}
 	return otto.UndefinedValue()
 }
@@ -388,7 +381,7 @@ func (f *file) Read(call otto.FunctionCall) otto.Value {
 	n, err := f.br.Read(p)
 
 	if err != nil && err != io.EOF {
-		return throw(f.vm, err)
+		return module.Throw(f.vm, err)
 	}
 	rv, _ := f.vm.Object(`({})`)
 	rv.Set("eof", err == io.EOF)
@@ -400,7 +393,7 @@ func (f *file) ReadLine(call otto.FunctionCall) otto.Value {
 	s, err := f.br.ReadString('\n')
 
 	if err != nil && err != io.EOF {
-		return throw(f.vm, err)
+		return module.Throw(f.vm, err)
 	}
 	rv, _ := f.vm.Object(`({})`)
 	rv.Set("eof", err == io.EOF)
@@ -413,7 +406,7 @@ func (f *file) Write(call otto.FunctionCall) otto.Value {
 	_, err := f.f.WriteString(v)
 
 	if err != nil {
-		return throw(f.vm, err)
+		return module.Throw(f.vm, err)
 	}
 	return otto.UndefinedValue()
 }

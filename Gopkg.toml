@@ -15,5 +15,9 @@
   branch = "master"
 
 [[constraint]]
+  name = "github.com/hattya/otto.module"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/robertkrimen/otto"
   branch = "master"

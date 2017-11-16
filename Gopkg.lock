@@ -33,6 +33,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/hattya/otto.module"
+  packages = ["."]
+  revision = "0a9ef0d725dba877cc29c586694b7c950e0ad510"
+
+[[projects]]
+  branch = "master"
   name = "github.com/robertkrimen/otto"
   packages = [".","ast","dbg","file","parser","registry","token"]
   revision = "68a29f5e29b18d7367e686c43cf74eba1900f548"
@@ -47,7 +53,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "665f6529cca930e27b831a0d1dafffbe1c172924"
+  revision = "bf42f188b9bc6f2cf5b8ee5a912ef1aedd0eba4c"
 
 [[projects]]
   name = "gopkg.in/sourcemap.v1"
@@ -58,6 +64,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "57b46e628a968c30c20bb0be47e32d1a48a2d7d501b1a2e3d012d7af56fe63e7"
+  inputs-digest = "b5898de0a3b1ff5cef8f552a536c035385e3299edf5b1059f5f90fe702511f23"
   solver-name = "gps-cdcl"
   solver-version = 1
