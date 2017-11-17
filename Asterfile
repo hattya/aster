@@ -1,13 +1,25 @@
+var os = require('os');
 var path = require('path');
 
 var proj = path.basename(os.getwd());
 var title = 'Aster ☆ ' + proj;
 
 aster.title(title);
+aster.ignore.push(/^node_modules$/);
 aster.ignore.push(/^vendor(?:\.orig)?$/);
+
+// js
+aster.watch(/.+\.js$/, function() {
+  go('generate', './...');
+});
 
 // go
 aster.watch(/.+\.go$/, function(files) {
+  if (files.some(function(e) { return e === 'aster.go'; })) {
+    if (go('generate', './...')) {
+      return;
+    }
+  }
   if (go('get', '-t', '-v', './...')) {
     return;
   }

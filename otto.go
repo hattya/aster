@@ -29,7 +29,6 @@ package aster
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -38,7 +37,6 @@ import (
 	"time"
 
 	"github.com/hattya/go.binfmt"
-	"github.com/hattya/go.cli"
 	"github.com/hattya/otto.module"
 	"github.com/robertkrimen/otto"
 )
@@ -48,6 +46,7 @@ func newVM() *module.Otto {
 	if err != nil {
 		panic(err)
 	}
+	vm.Register(new(stdLoader))
 
 	file := new(module.FileLoader)
 	folder := &module.FolderLoader{File: file}
@@ -57,73 +56,38 @@ func newVM() *module.Otto {
 		File:   file,
 		Folder: folder,
 	})
-	// os object
-	os_, _ := vm.Object(`os = {}`)
-	os_.Set("getwd", os_getwd)
-	os_.Set("mkdir", os_mkdir)
-	os_.Set("open", os_open)
-	os_.Set("remove", os_remove)
-	os_.Set("rename", os_rename)
-	os_.Set("stat", os_stat)
-	os_.Set("system", os_system)
-	os_.Set("whence", os_whence)
+	// os binding
+	vm.Bind("os", func(o *otto.Object) error {
+		o.Set("MODE_DIR", os.ModeDir)
+		o.Set("MODE_TYPE", os.ModeType)
+		o.Set("MODE_PERM", os.ModePerm)
 
-	script, _ := vm.Compile("os", fmt.Sprintf(cli.Dedent(`
-		os.File = function(impl) {
-		  this._impl = impl;
-		};
-
-		os.File.prototype.close = function() {
-		  return this._impl.Close.apply(this, arguments);
-		};
-
-		os.File.prototype.name = function() {
-		  return this._impl.Name.apply(this, arguments);
-		};
-
-		os.File.prototype.read = function() {
-		  return this._impl.Read.apply(this, arguments);
-		};
-
-		os.File.prototype.readLine = function() {
-		  return this._impl.ReadLine.apply(this, arguments);
-		};
-
-		os.File.prototype.write = function() {
-		  return this._impl.Write.apply(this, arguments);
-		};
-
-		os.FileInfo = function(name, size, mode, mtime) {
-		  this.name = name;
-		  this.size = size;
-		  this.mode = mode;
-		  this.mtime = mtime;
-		};
-
-		os.FileInfo.prototype.isDir = function() {
-		  return (this.mode & %v) !== 0;
-		};
-
-		os.FileInfo.prototype.isRegular = function() {
-		  return (this.mode & %v) === 0;
-		};
-
-		os.FileInfo.prototype.perm = function() {
-		  return this.mode & 0777;
-		};
-	`), uint(os.ModeDir), uint(os.ModeType)))
-	vm.Run(script)
-
+		m := new(os_)
+		o.Set("getwd", m.getwd)
+		o.Set("mkdir", m.mkdir)
+		o.Set("open", m.open)
+		o.Set("remove", m.remove)
+		o.Set("rename", m.rename)
+		o.Set("stat", m.stat)
+		o.Set("system", m.system)
+		o.Set("whence", m.whence)
+		return nil
+	})
+	// for backward compatibility
+	vm.Run(`var os = require('os');`)
 	return vm
 }
 
-func os_getwd(call otto.FunctionCall) otto.Value {
+type os_ struct {
+}
+
+func (*os_) getwd(call otto.FunctionCall) otto.Value {
 	wd, _ := os.Getwd()
 	v, _ := call.Otto.ToValue(wd)
 	return v
 }
 
-func os_mkdir(call otto.FunctionCall) otto.Value {
+func (*os_) mkdir(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 1 {
 		return otto.UndefinedValue()
 	}
@@ -143,7 +107,7 @@ func os_mkdir(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func os_open(call otto.FunctionCall) otto.Value {
+func (*os_) open(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 1 {
 		return otto.UndefinedValue()
 	}
@@ -169,11 +133,12 @@ func os_open(call otto.FunctionCall) otto.Value {
 	if err != nil {
 		return module.Throw(call.Otto, err)
 	}
-	v, _ := call.Otto.Call(`new os.File`, nil, newFile(call.Otto, f))
-	return v
+	this := call.This.Object()
+	this.Set("_impl", newFile(call.Otto, f))
+	return call.This
 }
 
-func os_remove(call otto.FunctionCall) otto.Value {
+func (*os_) remove(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 1 {
 		return otto.UndefinedValue()
 	}
@@ -183,7 +148,7 @@ func os_remove(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func os_rename(call otto.FunctionCall) otto.Value {
+func (*os_) rename(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 2 {
 		return otto.UndefinedValue()
 	}
@@ -196,7 +161,7 @@ func os_rename(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func os_stat(call otto.FunctionCall) otto.Value {
+func (*os_) stat(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 1 {
 		return otto.UndefinedValue()
 	}
@@ -206,12 +171,16 @@ func os_stat(call otto.FunctionCall) otto.Value {
 	if err != nil {
 		return otto.UndefinedValue()
 	}
+	this := call.This.Object()
+	this.Set("name", fi.Name())
+	this.Set("size", fi.Size())
+	this.Set("mode", fi.Mode())
 	mtime, _ := call.Otto.Call(`new Date`, nil, fi.ModTime().Unix()*1000+int64(fi.ModTime().Nanosecond())/int64(time.Millisecond))
-	v, _ := call.Otto.Call(`new os.FileInfo`, nil, fi.Name(), fi.Size(), fi.Mode(), mtime)
-	return v
+	this.Set("mtime", mtime)
+	return call.This
 }
 
-func os_system(call otto.FunctionCall) otto.Value {
+func (*os_) system(call otto.FunctionCall) otto.Value {
 	// defaults
 	var dir string
 	var stdout io.WriteCloser = os.Stdout
@@ -287,7 +256,7 @@ func os_system(call otto.FunctionCall) otto.Value {
 	return otto.UndefinedValue()
 }
 
-func os_whence(call otto.FunctionCall) otto.Value {
+func (*os_) whence(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) < 1 {
 		return otto.UndefinedValue()
 	}

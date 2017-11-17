@@ -50,7 +50,7 @@ func TestOS_Getwd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	src := `os.getwd();`
+	src := `require('os').getwd();`
 	if s, err := testString(vm, src); err != nil {
 		t.Fatal(err)
 	} else if g, e := s, wd; g != e {
@@ -67,23 +67,18 @@ func TestOS_Mkdir(t *testing.T) {
 
 	vm := aster.NewVM()
 
-	src := `os.mkdir();`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
-	src = fmt.Sprintf(`os.mkdir(%q);`, filepath.Join(dir, "a"))
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
-	src = fmt.Sprintf(`os.mkdir(%q, 0777);`, filepath.Join(dir, "b"))
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
+	for _, src := range []string{
+		`require('os').mkdir();`,
+		fmt.Sprintf(`require('os').mkdir(%q);`, filepath.Join(dir, "a")),
+		fmt.Sprintf(`require('os').mkdir(%q, 0777);`, filepath.Join(dir, "b")),
+	} {
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
 	}
 
 	sh.Touch(dir, "c")
-	src = fmt.Sprintf(`os.mkdir(%q, 0777);`, filepath.Join(dir, "c"))
+	src := fmt.Sprintf(`require('os').mkdir(%q, 0777);`, filepath.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -381,19 +376,19 @@ func TestOS_Open(t *testing.T) {
 
 	vm := aster.NewVM()
 
-	src := fmt.Sprintf(`os.open()`)
+	src := fmt.Sprintf(`require('os').open()`)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = fmt.Sprintf(`os.open(%q)`, filepath.Join(dir, "_"))
+	src = fmt.Sprintf(`require('os').open(%q)`, filepath.Join(dir, "_"))
 	_, err = vm.Run(src)
 	if err == nil {
 		t.Fatal("expected error")
 	}
 
 	sh.Touch(dir, "file")
-	src = fmt.Sprintf(`os.open(%q)`, filepath.Join(dir, "file"))
+	src = fmt.Sprintf(`require('os').open(%q)`, filepath.Join(dir, "file"))
 	v, err := vm.Run(src)
 	if err != nil {
 		t.Fatal(err)
@@ -426,7 +421,7 @@ func TestOS_Open(t *testing.T) {
 		}
 		f.Close()
 		// open
-		src = fmt.Sprintf(`os.open(%q, %q)`, filepath.Join(dir, "file"), tt.mode)
+		src = fmt.Sprintf(`require('os').open(%q, %q)`, filepath.Join(dir, "file"), tt.mode)
 		v, err := vm.Run(src)
 		if err != nil {
 			t.Fatal(label, err)
@@ -468,21 +463,16 @@ func TestOS_Remove(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	vm := aster.NewVM()
-
-	src := `os.remove();`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
 	sh.Touch(dir, "file")
-	src = fmt.Sprintf(`os.remove(%q);`, filepath.Join(dir, "file"))
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
 
-	src = fmt.Sprintf(`os.remove(%q);`, filepath.Join(dir, "_"))
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
+	for _, src := range []string{
+		`require('os').remove();`,
+		fmt.Sprintf(`require('os').remove(%q);`, filepath.Join(dir, "file")),
+		fmt.Sprintf(`require('os').remove(%q);`, filepath.Join(dir, "_")),
+	} {
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -494,19 +484,18 @@ func TestOS_Rename(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	vm := aster.NewVM()
-
-	src := `os.rename();`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
 	sh.Touch(dir, "a")
-	src = fmt.Sprintf(`os.rename(%q, %q);`, filepath.Join(dir, "a"), filepath.Join(dir, "b"))
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
+
+	for _, src := range []string{
+		`require('os').rename();`,
+		fmt.Sprintf(`require('os').rename(%q, %q);`, filepath.Join(dir, "a"), filepath.Join(dir, "b")),
+	} {
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
 	}
 
-	src = fmt.Sprintf(`os.rename(%q, %q);`, filepath.Join(dir, "_"), filepath.Join(dir, "c"))
+	src := fmt.Sprintf(`require('os').rename(%q, %q);`, filepath.Join(dir, "_"), filepath.Join(dir, "c"))
 	switch v, err := testBoolean(vm, src); {
 	case err != nil:
 		t.Error(err)
@@ -526,18 +515,17 @@ var os_StatTests = []struct {
 func TestOS_Stat(t *testing.T) {
 	vm := aster.NewVM()
 
-	src := `os.stat();`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
-	src = `os.stat('_');`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
+	for _, src := range []string{
+		`require('os').stat();`,
+		`require('os').stat('_');`,
+	} {
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
 	}
 
 	for _, tt := range os_StatTests {
-		src := fmt.Sprintf(`os.stat(%q);`, tt.path)
+		src := fmt.Sprintf(`require('os').stat(%q);`, tt.path)
 		v, err := vm.Run(src)
 		if err != nil {
 			t.Fatal(err)
@@ -613,7 +601,7 @@ func TestOS_System(t *testing.T) {
 	vm := aster.NewVM()
 	n1 := fmt.Sprintf("%q", stdout.Name())
 	n2 := fmt.Sprintf("%q", stderr.Name())
-	tmpl := `os.system([%q, '-code', '%v'], { stdout: %v, stderr: %v });`
+	tmpl := `require('os').system([%q, '-code', '%v'], { stdout: %v, stderr: %v });`
 
 	// String: stdout
 	src := fmt.Sprintf(tmpl, exe, 0, n1, n2)
@@ -707,7 +695,7 @@ func TestOS_System(t *testing.T) {
 	}
 
 	// dir
-	src = fmt.Sprintf(`os.system([%q], { dir: %q, stdout: null });`, "."+string(filepath.Separator)+filepath.Base(exe), dir)
+	src = fmt.Sprintf(`require('os').system([%q], { dir: %q, stdout: null });`, "."+string(filepath.Separator)+filepath.Base(exe), dir)
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -724,17 +712,17 @@ func TestOS_System(t *testing.T) {
 		t.Error("expected error")
 	}
 
-	src = `os.system(['1']);`
+	src = `require('os').system(['1']);`
 	if _, err := vm.Run(src); err == nil {
 		t.Error("expected error")
 	}
 
-	src = `os.system('1');`
+	src = `require('os').system('1');`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = `os.system([1]);`
+	src = `require('os').system([1]);`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -743,19 +731,18 @@ func TestOS_System(t *testing.T) {
 func TestOS_Whence(t *testing.T) {
 	vm := aster.NewVM()
 
-	src := `os.whence();`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
-	}
-
-	src = `os.whence('go');`
+	src := `require('os').whence('go');`
 	if _, err := testString(vm, src); err != nil {
 		t.Error(err)
 	}
 
-	src = `os.whence('_');`
-	if err := testUndefined(vm, src); err != nil {
-		t.Error(err)
+	for _, src := range []string{
+		`require('os').whence();`,
+		`require('os').whence('_');`,
+	} {
+		if err := testUndefined(vm, src); err != nil {
+			t.Error(err)
+		}
 	}
 }
 

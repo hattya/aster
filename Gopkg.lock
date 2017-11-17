@@ -35,7 +35,7 @@
   branch = "master"
   name = "github.com/hattya/otto.module"
   packages = ["."]
-  revision = "0a9ef0d725dba877cc29c586694b7c950e0ad510"
+  revision = "c360f76c459d8d189641403b8e3aaf2785e87172"
 
 [[projects]]
   branch = "master"
@@ -53,7 +53,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "bf42f188b9bc6f2cf5b8ee5a912ef1aedd0eba4c"
+  revision = "0dd5e194bbf5eb84a39666eb4c98a4d007e4203a"
 
 [[projects]]
   name = "gopkg.in/sourcemap.v1"

@@ -24,6 +24,8 @@
 //   SOFTWARE.
 //
 
+//go:generate modulizer -l std -o std.go lib
+
 package aster
 
 const Version = "0.1+"
