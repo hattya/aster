@@ -59,25 +59,17 @@ Asterfile is evaluated as JavaScript by otto_.
 .. code:: javascript
 
    var os = require('os');
+   var go = require('language/go').go;
 
-   aster.watch(/.+\.go$/, function(files) {
+   aster.watch(/.+\.go$/, function() {
      // build
-     if (os.system('go get -t -v ./...'.split(/\s+/))) {
-       aster.notify('failure', 'build', 'failure');
+     if (go.get('-t', '-v', './...')) {
        return;
      }
-     aster.notify('success', 'build', 'success');
-
      // test
-     if (os.system('go test -v -cover -coverprofile cover.out ./...'.split(/\s+/))) {
-       aster.notify('failure', 'test', 'failure');
+     if (go.test('-v', '-covermode', 'atomic', './...')) {
        return;
      }
-     aster.notify('success', 'test', 'success');
-
-     // coverage
-     os.system('go tool cover -func cover.out'.split(/\s+/));
-     os.system('go tool cover -html cover.out -o coverage.html'.split(/\s+/));
    });
 
 .. _otto: https://github.com/robertkrimen/otto
@@ -89,6 +81,8 @@ Reference
 * `Global Objects <doc/global-objects.rst>`_
 * `OS <doc/os.rst>`_
 * `Language <doc/language.rst>`_
+
+  * `Go <doc/language.go.rst>`_
 
 
 License

@@ -1,0 +1,82 @@
+language/go
+===========
+
+.. contents::
+
+
+go.go(...args)
+--------------
+
+``go.go`` represents the ``go`` command, and its commands are defined as
+properties of this function.
+
+
+go.generate(...args)
+~~~~~~~~~~~~~~~~~~~~
+
+``go.generate`` represents ``go generate``.
+
+
+go.get(...args)
+~~~~~~~~~~~~~~~
+
+``go.get`` represents ``go get``.
+
+
+go.list(...args)
+~~~~~~~~~~~~~~~~
+
+``go.list`` represents ``go list``, and returns ``-f {{.Dir}}`` of the
+specified packages.
+
+It eliminates ``-f`` flag and ``-json`` flag.
+
+
+go.test(...args)
+~~~~~~~~~~~~~~~~
+
+``go.test`` represents ``go test``.
+
+It eliminates ``-race`` flag when the runtime architecture is not x64.
+
+
+go.tool.cover(...args)
+~~~~~~~~~~~~~~~~~~~~~~
+
+``go.tool.cover`` represents ``go tool cover``.
+
+
+go.vet(...args)
+~~~~~~~~~~~~~~~
+
+``go.vet`` represents ``go vet``.
+
+
+go.combine(object)
+------------------
+
+``go.combine`` combines the specified coverage profiles, and returns the name
+of the combined coverage profile.
+
+object
+    ``object`` is an ``Object``.
+
+    packages
+        ``packages`` is an ``Array`` of package names.
+
+    profile
+        ``profile`` is a name of the coverage profile to be search.
+
+    out
+        ``out`` is a name of the combined coverage profile. It will be
+        overwritten if exists.
+
+
+go.packagesOf(...files)
+-----------------------
+
+``go.packagesOf`` returns an ``Array`` of package names and its dependencies
+in order of dependency.
+
+files
+    ``files`` is an ``Array`` of ``Stirng``.
