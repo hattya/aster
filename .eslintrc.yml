@@ -33,3 +33,7 @@ rules:
   object-shorthand: off
   prefer-rest-params: off
   prefer-template: off
+
+  # plugin: import
+  import/no-unresolved: off
+  import/no-extraneous-dependencies: off

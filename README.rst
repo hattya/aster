@@ -88,6 +88,7 @@ Reference
 
 * `Global Objects <doc/global-objects.rst>`_
 * `OS <doc/os.rst>`_
+* `Language <doc/language.rst>`_
 
 
 License
