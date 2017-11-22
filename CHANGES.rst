@@ -13,6 +13,7 @@ Version 0.2
   backward compatiblity.
 * Add ``language`` module.
 * Add ``language/go`` module.
+* Add ``language/restructuredtext`` module.
 
 
 Version 0.1

@@ -83,6 +83,7 @@ Reference
 * `Language <doc/language.rst>`_
 
   * `Go <doc/language.go.rst>`_
+  * `reStructuredText <doc/language.restructuredtext.rst>`_
 
 
 License
