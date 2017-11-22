@@ -46,7 +46,11 @@ var defaultIgnore string
 
 func init() {
 	var b bytes.Buffer
-	b.WriteString(`^(?:`)
+	b.WriteString(`(?:^|.+[/`)
+	if runtime.GOOS == "windows" {
+		b.WriteString(`\\`)
+	}
+	b.WriteString(`])(?:`)
 	for i, s := range []string{
 		".bzr",
 		".git",
