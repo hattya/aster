@@ -4,6 +4,28 @@ language/go
 .. contents::
 
 
+go.dep(...args)
+---------------
+
+``go.dep`` represents the ``dep`` command, and its commands are defined as
+properties of this function.
+
+You need to install the ``dep`` command from https://github.com/golang/dep,
+before you can use it.
+
+
+dep.ensure(...args)
+~~~~~~~~~~~~~~~~~~~
+
+``dep.ensure`` represents ``dep ensure``.
+
+
+dep.prune(...args)
+~~~~~~~~~~~~~~~~~~
+
+``dep.prune`` represents ``dep prune``.
+
+
 go.go(...args)
 --------------
 

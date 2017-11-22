@@ -1,6 +1,7 @@
 var os = require('os');
 var path = require('path');
 var go_ = require('language/go');
+var dep = go_.dep;
 var go = go_.go;
 
 var proj = path.basename(os.getwd());
@@ -34,6 +35,12 @@ aster.watch(/.+\.go$/, function(files) {
     go.tool.cover('-func', out);
     go.tool.cover('-html', out, '-o', 'coverage.html');
     os.remove(out);
+  }
+});
+
+aster.watch(/^Gopkg\.(?:lock|toml)$/, function() {
+  if (os.stat('vendor')) {
+    dep.ensure('-v');
   }
 });
 
