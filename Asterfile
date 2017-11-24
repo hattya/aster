@@ -3,6 +3,7 @@ var path = require('path');
 var go_ = require('language/go');
 var dep = go_.dep;
 var go = go_.go;
+var npm = require('language/javascript').npm;
 var rst2html = require('language/restructuredtext').rst2html;
 
 var title = 'Aster ☆ ' + path.basename(os.getwd());
@@ -13,6 +14,7 @@ aster.ignore.push(/^vendor(?:\.orig)?$/);
 
 // js
 aster.watch(/.+\.js$/, function() {
+  if (npm.run('lint')) return;
   go.generate('./...');
 });
 
