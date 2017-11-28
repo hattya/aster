@@ -29,13 +29,13 @@
   branch = "master"
   name = "github.com/hattya/go.notify"
   packages = [".","freedesktop","gntp","internal/sys","internal/util","windows"]
-  revision = "5691a5718f1cc47e7d970341a9af113e33734e86"
+  revision = "e2a6d94e270aad97152bd8b281080f07cf168e1d"
 
 [[projects]]
   branch = "master"
   name = "github.com/hattya/otto.module"
   packages = ["."]
-  revision = "c360f76c459d8d189641403b8e3aaf2785e87172"
+  revision = "f25ee222cf28268bc61612b2edf2614d921876f3"
 
 [[projects]]
   branch = "master"
@@ -47,13 +47,13 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "9f005a07e0d31d45e6656d241bb5c0f2efd4bc94"
+  revision = "365904b0f3154c6e11a9cf541c9803d1dca0445a"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "0dd5e194bbf5eb84a39666eb4c98a4d007e4203a"
+  revision = "a204229cd828a74741ee7b5da9bf4794497f85ed"
 
 [[projects]]
   name = "gopkg.in/sourcemap.v1"

@@ -27,7 +27,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -36,7 +35,6 @@ import (
 
 	"github.com/hattya/aster/internal/sh"
 	"github.com/hattya/aster/internal/test"
-	"github.com/hattya/go.cli"
 )
 
 var initTests = []struct {
@@ -49,36 +47,30 @@ var initTests = []struct {
 }
 
 func TestInit(t *testing.T) {
-	fn := configDir
-	defer func() { configDir = fn }()
+	save := configDir
+	defer func() { configDir = save }()
 
-	var b bytes.Buffer
-	app.Stderr = &b
-	app.Action = cli.Option(watch)
-	args := []string{"init", "go"}
-	tmpl := filepath.Join("template", "go")
-
+	configDir = os.Getwd
+	tmpl := "template go"
 	err := test.Sandbox(func() error {
-		configDir = os.Getwd
 		if err := sh.Mkdir("template"); err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(tmpl, []byte("template go\n"), 0666); err != nil {
+		if err := ioutil.WriteFile(filepath.Join("template", "go"), []byte(tmpl+"\n"), 0666); err != nil {
 			return err
 		}
-
 		for _, tt := range initTests {
 			if err := test.Gen(tt.src); err != nil {
 				return err
 			}
-			if err := app.Run(args); err != nil {
+			if err := app.Run([]string{"init", "go"}); err != nil {
 				return err
 			}
 			data, err := ioutil.ReadFile("Asterfile")
 			if err != nil {
 				return err
 			}
-			if g, e := string(data), tt.src+tt.newline+"template go"+tt.newline; g != e {
+			if g, e := string(data), tt.src+tt.newline+tmpl+tt.newline; g != e {
 				t.Fatalf("expected %q, got %q", e, g)
 			}
 		}
@@ -90,19 +82,16 @@ func TestInit(t *testing.T) {
 }
 
 func TestInitError(t *testing.T) {
-	fn := configDir
-	defer func() { configDir = fn }()
+	save := configDir
+	defer func() { configDir = save }()
 
-	var b bytes.Buffer
-	app.Stderr = &b
-	app.Action = cli.Option(watch)
+	app.Stderr = ioutil.Discard
+	defer func() { app.Stderr = nil }()
+
 	args := []string{"init", "go"}
-
 	err := test.Sandbox(func() error {
 		// error
-		configDir = func() (string, error) {
-			return "", fmt.Errorf("error")
-		}
+		configDir = func() (string, error) { return "", fmt.Errorf("error") }
 		if err := app.Run(args); err == nil {
 			t.Fatal("expected error")
 		}
@@ -147,7 +136,25 @@ func TestInitError(t *testing.T) {
 }
 
 func TestConfigDir(t *testing.T) {
+	environ := map[string]string{
+		"HOME":    os.Getenv("HOME"),
+		"APPDATA": os.Getenv("APPDATA"),
+	}
+	defer func() {
+		for k, v := range environ {
+			os.Setenv(k, v)
+		}
+	}()
+
 	if _, err := configDir(); err != nil {
 		t.Fatal(err)
+	}
+
+	// error
+	for k := range environ {
+		os.Setenv(k, "")
+	}
+	if _, err := configDir(); err != ErrEnv {
+		t.Fatalf("expected ErrEnv, got %#v", err)
 	}
 }

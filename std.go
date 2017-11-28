@@ -7,9 +7,11 @@ import "github.com/hattya/otto.module"
 type stdLoader struct {
 }
 
-func (*stdLoader) Load(id string) ([]byte, error) {
-	if b, ok := files[id]; ok {
-		return b, nil
+func (l *stdLoader) Load(id string) ([]byte, error) {
+	for _, ext := range []string{"", ".js", ".json"} {
+		if b, ok := files[id+ext]; ok {
+			return b, nil
+		}
 	}
 	return nil, module.ErrModule
 }

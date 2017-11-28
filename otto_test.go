@@ -43,6 +43,33 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+func TestBuiltin(t *testing.T) {
+	vm := aster.NewVM()
+
+	for _, tt := range []struct {
+		id  string
+		err bool
+	}{
+		{"os", false},
+		{"os.js", false},
+		// error
+		{"_", true},
+	} {
+		for _, tmpl := range []string{
+			`require(%q);`,
+			`process.binding('vm').load(%q);`,
+		} {
+			src := fmt.Sprintf(tmpl, tt.id)
+			switch _, err := vm.Run(src); {
+			case tt.err && err == nil:
+				t.Errorf("%v: expected error", strings.Trim(src, ";"))
+			case !tt.err && err != nil:
+				t.Errorf("%v = %v", strings.Trim(src, ";"), err)
+			}
+		}
+	}
+}
+
 func TestOS_Getwd(t *testing.T) {
 	vm := aster.NewVM()
 	wd, err := os.Getwd()
