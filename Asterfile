@@ -15,7 +15,7 @@ aster.ignore.push(/^vendor(?:\.orig)?$/);
 // js
 aster.watch(/.+\.js$/, function() {
   if (npm.run('lint')) return;
-  go.generate('./...');
+  if (go.generate('./...')) return;
 });
 
 // go
