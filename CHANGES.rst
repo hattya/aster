@@ -15,6 +15,7 @@ Version 0.2
 * Add ``language/go`` module.
 * Add ``language/javascript`` module.
 * Add ``language/restructuredtext`` module.
+* Add ``language/vimscript`` module.
 
 
 Version 0.1
