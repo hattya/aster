@@ -108,24 +108,13 @@ func TestNotifyError(t *testing.T) {
 		},
 	}
 
-	e := fmt.Errorf("Register error")
-	n.MockCall("Register", e)
-	stderr, err := at.Run()
-	if err != e {
-		t.Error("unexpected error:", err)
-	}
-	lines := strings.SplitN(stderr, "\n", 2)
-	if g, e := lines[0], fmt.Sprintf("aster.test: %v", e); g != e {
-		t.Errorf("expected %q, got %q", e, g)
-	}
-
-	e = fmt.Errorf("Notify error")
+	e := fmt.Errorf("Notify error")
 	n.MockCall("Notify", e)
-	stderr, err = at.Run()
+	stderr, err := at.Run()
 	if err != nil {
 		t.Fatal(err)
 	}
-	lines = strings.SplitN(stderr, "\n", 2)
+	lines := strings.SplitN(stderr, "\n", 2)
 	if g, e := lines[0], fmt.Sprintf("aster.test: %v", e); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}

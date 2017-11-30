@@ -78,9 +78,6 @@ type Aster struct {
 }
 
 func New(ui *cli.CLI, n notify.Notifier) (*Aster, error) {
-	if err := events(n); err != nil {
-		return nil, err
-	}
 	a := &Aster{
 		ui: ui,
 		n:  n,

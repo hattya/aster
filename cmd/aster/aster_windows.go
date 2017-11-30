@@ -58,6 +58,8 @@ func newNotifier(name, impl string) (n notify.Notifier) {
 	case "windows":
 		n, _ = windows.NewNotifier(name, nil)
 		if n != nil {
+			icon["success"] = windows.IconInfo
+			icon["failure"] = windows.IconError
 			// discard events
 			go func() {
 				ni := n.Sys().(*windows.NotifyIcon)

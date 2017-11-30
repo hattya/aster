@@ -35,6 +35,7 @@ import (
 
 	"github.com/hattya/aster"
 	"github.com/hattya/go.cli"
+	"github.com/hattya/go.notify"
 	"github.com/hattya/go.notify/gntp"
 )
 
@@ -81,6 +82,15 @@ func init() {
 	app.Action = cli.Option(watch)
 }
 
+var (
+	icon = make(map[string]notify.Icon)
+	opts = map[string]interface{}{
+		"freedesktop:timeout": -1,
+		"gntp:enabled":        true,
+		"windows:sound":       true,
+	}
+)
+
 func watch(ctx *cli.Context) error {
 	n := newNotifier("Aster", ctx.String("n"))
 	if n == nil {
@@ -92,6 +102,13 @@ func watch(ctx *cli.Context) error {
 			c.Server = g
 			c.Name = "Aster"
 			n = gntp.NewNotifier(c)
+		}
+	}
+	if n != nil {
+		for _, ev := range []string{"success", "failure"} {
+			if err := n.Register(ev, icon[ev], opts); err != nil {
+				return err
+			}
 		}
 	}
 	a, err := aster.New(ctx.UI, n)

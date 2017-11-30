@@ -52,9 +52,3 @@ func (g *GNTPValue) Set(s string) error {
 func (g *GNTPValue) Get() interface{} { return string(*g) }
 func (g *GNTPValue) String() string   { return string(*g) }
 func (g *GNTPValue) IsBoolFlag() bool { return true }
-
-var notifierOpts = map[string]interface{}{
-	"freedesktop:timeout": -1,
-	"gntp:enabled":        true,
-	"windows:sound":       true,
-}
