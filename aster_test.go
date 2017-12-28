@@ -52,6 +52,8 @@ func TestInterrupt(t *testing.T) {
 			time.Sleep(d)
 
 			cancel()
+
+			time.Sleep(d)
 		},
 		after: func(_ *aster.Aster, w *aster.Watcher) {
 			if err := w.Close(); err != nil {
@@ -177,7 +179,9 @@ func TestWatch(t *testing.T) {
 			sh.Mkdir("dir.go")
 			time.Sleep(d)
 
+			os.Chmod("c.go", 0755)
 			os.Rename("c.go", "c_.go")
+
 			os.Rename("dir.go", "dir_.go")
 
 			sh.Touch(".git", "git.go")

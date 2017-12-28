@@ -59,8 +59,8 @@ func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
 		Watcher: fsw,
 		ctx:     ctx,
 		a:       a,
-		done:    make(chan struct{}),
 		quit:    make(chan struct{}, 1),
+		done:    make(chan struct{}),
 	}
 	if err := w.Update("."); err != nil {
 		fsw.Close()
@@ -217,7 +217,6 @@ func (w *Watcher) Watch() error {
 			if err != nil {
 				warn(w.a.ui, err)
 			}
-		case <-w.done:
 		case <-w.quit:
 			<-done
 			timer.Stop()
