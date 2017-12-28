@@ -28,9 +28,9 @@ package aster
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -39,15 +39,16 @@ import (
 )
 
 type Watcher struct {
-	*fsnotify.Watcher
 	Squash time.Duration
 
 	ctx  context.Context
 	a    *Aster
+	w    *fsnotify.Watcher
 	quit chan struct{}
 
-	mu   sync.Mutex
-	done chan struct{}
+	mu    sync.Mutex
+	paths map[string]struct{}
+	done  chan struct{}
 }
 
 func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
@@ -56,11 +57,12 @@ func NewWatcher(ctx context.Context, a *Aster) (*Watcher, error) {
 		return nil, err
 	}
 	w := &Watcher{
-		Watcher: fsw,
-		ctx:     ctx,
-		a:       a,
-		quit:    make(chan struct{}, 1),
-		done:    make(chan struct{}),
+		ctx:   ctx,
+		a:     a,
+		w:     fsw,
+		quit:  make(chan struct{}, 1),
+		paths: make(map[string]struct{}),
+		done:  make(chan struct{}),
 	}
 	if err := w.Update("."); err != nil {
 		fsw.Close()
@@ -80,45 +82,80 @@ func (w *Watcher) Close() error {
 
 	w.quit <- struct{}{}
 	<-w.done
-	return w.Watcher.Close()
+	return w.w.Close()
 }
 
-func (w *Watcher) Update(root string) error {
-	fi, err := os.Lstat(root)
-	if err != nil || !fi.IsDir() {
-		return err
-	}
-	return w.update(root, fi, false)
+func (w *Watcher) Add(name string) error {
+	return w.walk(name, func(path string) error {
+		if w.a.Ignore(path) {
+			return filepath.SkipDir
+		}
+		return w.add(path)
+	})
 }
 
-func (w *Watcher) update(path string, fi os.FileInfo, ignore bool) (err error) {
-	if !ignore {
-		ignore = w.a.Ignore(path)
-	}
-	if ignore {
-		w.Remove(path)
-	} else if err = w.Add(path); err != nil {
-		return
-	}
+func (w *Watcher) Remove(name string) error {
+	return w.walk(name, func(path string) error {
+		if err := w.remove(path); err != nil {
+			return err
+		}
+		return filepath.SkipDir
+	})
+}
 
-	list, err := ioutil.ReadDir(path)
-	if err != nil {
-		return
+func (w *Watcher) Update(name string) error {
+	return w.walk(name, func(path string) error {
+		if w.a.Ignore(path) {
+			if err := w.remove(path); err != nil {
+				return err
+			}
+			return filepath.SkipDir
+		}
+		return w.add(path)
+	})
+}
+
+func (w *Watcher) add(name string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	w.paths[name] = struct{}{}
+	return w.w.Add(name)
+}
+
+func (w *Watcher) remove(name string) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if _, ok := w.paths[name]; ok {
+		delete(w.paths, name)
+
+		name += string(os.PathSeparator)
+		for k := range w.paths {
+			if strings.HasPrefix(k, name) {
+				delete(w.paths, k)
+				if err := w.w.Remove(k); err != nil {
+					return err
+				}
+			}
+		}
 	}
-	for _, fi := range list {
+	return nil
+}
+
+func (w *Watcher) walk(root string, fn func(string) error) error {
+	return filepath.Walk(filepath.Clean(root), func(path string, fi os.FileInfo, err error) error {
 		select {
 		case <-w.ctx.Done():
 			return w.ctx.Err()
 		default:
 		}
 
-		if fi.IsDir() {
-			if err = w.update(filepath.Join(path, fi.Name()), fi, ignore); err != nil {
-				return
-			}
+		if err != nil || !fi.IsDir() {
+			return err
 		}
-	}
-	return
+		return fn(path)
+	})
 }
 
 func (w *Watcher) Watch() error {
@@ -143,7 +180,7 @@ func (w *Watcher) Watch() error {
 	done <- struct{}{}
 	for {
 		select {
-		case ev := <-w.Events:
+		case ev := <-w.w.Events:
 			// remove "./" prefix
 			if 2 < len(ev.Name) && ev.Name[0] == '.' && os.IsPathSeparator(ev.Name[1]) {
 				ev.Name = ev.Name[2:]
@@ -213,7 +250,7 @@ func (w *Watcher) Watch() error {
 					}
 				}
 			}()
-		case err := <-w.Errors:
+		case err := <-w.w.Errors:
 			if err != nil {
 				warn(w.a.ui, err)
 			}

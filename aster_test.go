@@ -42,6 +42,43 @@ import (
 	"github.com/hattya/go.notify"
 )
 
+func TestIgnore(t *testing.T) {
+	at := &asterTest{
+		src: ``,
+		test: func(d time.Duration, cancel context.CancelFunc) {
+			sh.Touch("a.go")
+			sh.Mkdir("doc")
+
+			sh.Mkdir("build", "html")
+			sh.Touch("build", "html", "index.html")
+			time.Sleep(d)
+
+			src := `aster.ignore.push(/^build$/);`
+			if err := test.Gen(src); err != nil {
+				t.Fatal(err)
+			}
+			time.Sleep(d)
+		},
+		after: func(_ *aster.Aster, w *aster.Watcher) {
+			for _, n := range []string{"a.go", "doc", "build"} {
+				if err := w.Add(n); err != nil {
+					t.Error(err)
+				}
+				if err := w.Remove(n); err != nil {
+					t.Error(err)
+				}
+			}
+		},
+	}
+	stderr, err := at.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if g, e := stderr, ""; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
 func TestInterrupt(t *testing.T) {
 	at := &asterTest{
 		src: ``,
