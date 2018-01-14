@@ -547,6 +547,19 @@ func TestOS_Rename(t *testing.T) {
 	}
 }
 
+func TestOS_Setenv(t *testing.T) {
+	vm := aster.NewVM()
+	k := "__ASTER__"
+	v := "setenv"
+
+	src := fmt.Sprintf(`require('os').setenv(%q, %q)`, k, v)
+	if err := testUndefined(vm, src); err != nil {
+		t.Error(err)
+	} else if g, e := os.Getenv(k), v; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
 var os_StatTests = []struct {
 	path string
 	dir  bool

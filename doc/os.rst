@@ -90,6 +90,18 @@ dst
     ``dst`` is a ``String``.
 
 
+os.setenv(key, value)
+~~~~~~~~~~~~~~~~~~~~~
+
+``os.setenv`` sets the ``value`` of the environment variable named by the ``key``.
+
+key
+    ``key`` is a ``String``.
+
+value
+    ``value`` is a ``String``.
+
+
 os.stat(path)
 ~~~~~~~~~~~~~
 

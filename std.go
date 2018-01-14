@@ -576,6 +576,7 @@ module.exports = {
   open: open,
   remove: os.remove,
   rename: os.rename,
+  setenv: process.env.__set__,
   stat: stat,
   system: os.system,
   whence: os.whence,
