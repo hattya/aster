@@ -4,6 +4,16 @@ os
 .. contents::
 
 
+os.getenv(key)
+~~~~~~~~~~~~~~
+
+``os.getenv()`` retrieves the value of the environment variable named by the
+``key``. It returns an empty ``String`` if the variable is not present.
+
+key
+    ``key`` is a ``String``.
+
+
 os.getwd()
 ~~~~~~~~~~
 

@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
-  revision = "4da3e2cfbabc9f751898f250b49f2439785783a1"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
 
 [[projects]]
   name = "github.com/godbus/dbus"
@@ -17,43 +17,43 @@
   branch = "master"
   name = "github.com/hattya/go.binfmt"
   packages = ["."]
-  revision = "0bf836a4c48b07d454254eeac1a653f027d40b8f"
+  revision = "2c02f549b5b8b1b41add156ba4a365488a552c9b"
 
 [[projects]]
   branch = "master"
   name = "github.com/hattya/go.cli"
   packages = ["."]
-  revision = "f792289f80e31c0ae2033e6ccf6664ac4f5cf201"
+  revision = "24167262e882618e2367d8833c86e700e9aadc13"
 
 [[projects]]
   branch = "master"
   name = "github.com/hattya/go.notify"
   packages = [".","freedesktop","gntp","internal/sys","internal/util","windows"]
-  revision = "e2a6d94e270aad97152bd8b281080f07cf168e1d"
+  revision = "4c35e06002ad04f25227e695dc65c6bcbd94b5cf"
 
 [[projects]]
   branch = "master"
   name = "github.com/hattya/otto.module"
   packages = ["."]
-  revision = "f25ee222cf28268bc61612b2edf2614d921876f3"
+  revision = "563881dc57fa137fea2a2c0c687a84188b4efbdf"
 
 [[projects]]
   branch = "master"
   name = "github.com/robertkrimen/otto"
   packages = [".","ast","dbg","file","parser","registry","token"]
-  revision = "68a29f5e29b18d7367e686c43cf74eba1900f548"
+  revision = "3b44b4dcb6c00477273595c312908e2412d07da6"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "365904b0f3154c6e11a9cf541c9803d1dca0445a"
+  revision = "13931e22f9e72ea58bb73048bc752b48c6d4d4ac"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows"]
-  revision = "a204229cd828a74741ee7b5da9bf4794497f85ed"
+  revision = "810d7000345868fc619eb81f46307107118f4ae1"
 
 [[projects]]
   name = "gopkg.in/sourcemap.v1"

@@ -491,7 +491,7 @@ exports.prompt = '> ';
 	"os.js": []byte(`//
 // aster :: os.js
 //
-//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -570,6 +570,7 @@ function stat() {
 }
 
 module.exports = {
+  getenv: process.env.__get__,
   getwd: os.getwd,
   mkdir: os.mkdir,
   open: open,

@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -67,6 +67,22 @@ func TestBuiltin(t *testing.T) {
 				t.Errorf("%v = %v", strings.Trim(src, ";"), err)
 			}
 		}
+	}
+}
+
+func TestOS_Getenv(t *testing.T) {
+	vm := aster.NewVM()
+	k := "__ASTER__"
+	v := "getenv"
+	if err := os.Setenv(k, v); err != nil {
+		t.Fatal(err)
+	}
+
+	src := fmt.Sprintf(`require('os').getenv(%q)`, k)
+	if s, err := testString(vm, src); err != nil {
+		t.Fatal(err)
+	} else if g, e := s, v; g != e {
+		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 
