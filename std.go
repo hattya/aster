@@ -59,18 +59,14 @@ var os = require('os');
 var path = require('path');
 var language = require('language');
 
-function run(cmd, args, options) {
-  // exec
-  console.log(language.prompt + args.join(' '));
-  var rv = os.system(args, options);
-  // notify
-  var title = language.prefix + args[0];
-  if (!rv) {
-    aster.notify('success', title, cmd + ' passed');
-  } else {
-    aster.notify('failure', title, cmd + ' failed');
-  }
-  return rv;
+function system(cmd, args, options) {
+  return language.system({
+    args: args,
+    options: options,
+    title: args[0],
+    success: cmd + ' passed',
+    failure: cmd + ' failed',
+  });
 }
 
 function parse(a) {
@@ -92,27 +88,27 @@ var dep = exports.dep = function dep() {
     aster.notify('failure', exports.prefix + 'dep', 'dep not found!');
     return true;
   }
-  return run(arguments[0], ['dep'].concat(Array.prototype.slice.call(arguments)));
+  return system(arguments[0], ['dep'].concat(Array.prototype.slice.call(arguments)));
 };
 
 dep.ensure = function ensure() {
   return dep.apply(null, ['ensure'].concat(Array.prototype.slice.call(arguments)));
 };
 
-dep.prune = function prune() {
-  return dep.apply(null, ['prune'].concat(Array.prototype.slice.call(arguments)));
+dep.psysteme = function psysteme() {
+  return dep.apply(null, ['psysteme'].concat(Array.prototype.slice.call(arguments)));
 };
 
 var go = exports.go = function go() {
-  return run(arguments[arguments[0] !== 'tool' ? 0 : 1], ['go'].concat(Array.prototype.slice.call(arguments)));
+  return system(arguments[arguments[0] !== 'tool' ? 0 : 1], ['go'].concat(Array.prototype.slice.call(arguments)));
 };
 
 go.generate = function generate() {
-  return run('generate', ['go', 'generate'].concat(Array.prototype.slice.call(arguments)));
+  return go.apply(null, ['generate'].concat(Array.prototype.slice.call(arguments)));
 };
 
 go.get = function get() {
-  return run('get', ['go', 'get'].concat(Array.prototype.slice.call(arguments)));
+  return go.apply(null, ['get'].concat(Array.prototype.slice.call(arguments)));
 };
 
 go.list = function list() {
@@ -132,12 +128,12 @@ go.list = function list() {
     }
   }
   var out = [];
-  run('list', ['go', 'list', '-f', '{{.Dir}}'].concat(args), { stdout: out });
+  system('list', ['go', 'list', '-f', '{{.Dir}}'].concat(args), { stdout: out });
   return out;
 };
 
 go.test = function test() {
-  var args = ['go', 'test'];
+  var args = ['test'];
   for (var i = 0; i < arguments.length; i++) {
     var a = arguments[i];
     switch (parse(a)) {
@@ -151,7 +147,7 @@ go.test = function test() {
         args.push(a);
     }
   }
-  return run('test', args);
+  return go.apply(null, args);
 };
 
 go.tool = {
@@ -173,12 +169,12 @@ go.tool = {
       }
       args.push(a);
     }
-    return run(cmd, args);
+    return system(cmd, args);
   },
 };
 
 go.vet = function vet() {
-  return run('vet', ['go', 'vet'].concat(Array.prototype.slice.call(arguments)));
+  return go.apply(null, ['vet'].concat(Array.prototype.slice.call(arguments)));
 };
 
 exports.combine = function combine(object) {
@@ -307,19 +303,14 @@ var npm = exports.npm = function() {
     aster.notify('failure', language.prefix + 'npm', 'npm not found!');
     return true;
   }
-  // exec
-  var args = ['npm'].concat(Array.prototype.slice.call(arguments));
-  console.log(language.prompt + args.join(' '));
-  var rv = os.system(args);
-  // notify
-  var title = language.prefix + args[0];
-  var cmd = args[1] !== 'run' ? args[1] : args[2] + ' script';
-  if (!rv) {
-    aster.notify('success', title, cmd + ' passed');
-  } else {
-    aster.notify('failure', title, cmd + ' failed');
-  }
-  return rv;
+
+  var cmd = arguments[0] !== 'run' ? arguments[0] : arguments[1] + ' script';
+  return language.system({
+    args: ['npm'].concat(Array.prototype.slice.call(arguments)),
+    title: 'npm',
+    success: cmd + ' passed',
+    failure: cmd + ' failed',
+  });
 };
 
 npm.install = function install() {
@@ -380,20 +371,16 @@ exports.rst2html = function rst2html(object) {
     aster.notify('failure', language.prefix + 'rst2html', 'rst2html not found!');
     return true;
   }
-  // exec
+
   var args = [script].concat(object.options);
   args.push(object.src);
   args.push(object.dst || object.src.slice(0, -path.extname(object.src).length) + '.html');
-  console.log(language.prompt + args.join(' '));
-  var rv = os.system(args);
-  // notify
-  var title = language.prefix + 'rst2html';
-  if (!rv) {
-    aster.notify('success', title, object.src);
-  } else {
-    aster.notify('failure', title, object.src + ' failed');
-  }
-  return rv;
+  return language.system({
+    args: args,
+    title: 'rst2html',
+    success: object.src,
+    failure: object.src + ' failed',
+  });
 };
 `),
 	"language/vimscript.js": []byte(`//
@@ -429,7 +416,6 @@ var path = require('path');
 var language = require('language');
 
 exports.themis = function themis() {
-  var title = language.prefix + 'themis';
   var script = 'themis';
   if (!os.whence(script)) {
     var ok = ['.', '..'].some(function(e) {
@@ -437,27 +423,23 @@ exports.themis = function themis() {
       return os.whence(script);
     });
     if (!ok) {
-      aster.notify('failure', title, 'themis not found!');
+      aster.notify('failure', language.prefix + 'themis', 'themis not found!');
       return true;
     }
   }
-  // exec
-  var args = [script].concat(Array.prototype.slice.call(arguments));
-  console.log(language.prompt + args.join(' '));
-  var rv = os.system(args);
-  // notify
-  if (!rv) {
-    aster.notify('success', title, 'passed');
-  } else {
-    aster.notify('failure', title, 'failed');
-  }
-  return rv;
+
+  return language.system({
+    args: [script].concat(Array.prototype.slice.call(arguments)),
+    title: 'themis',
+    success: 'passed',
+    failure: 'failed',
+  });
 };
 `),
 	"language.js": []byte(`//
 // aster :: language.js
 //
-//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -487,6 +469,20 @@ var path = require('path');
 
 exports.prefix = path.basename(os.getwd()) + ': ';
 exports.prompt = '> ';
+
+exports.system = function system(object) {
+  // exec
+  console.log(exports.prompt + object.args.join(' '));
+  var rv = os.system(object.args, object.options);
+  // notify
+  var title = exports.prefix + object.title;
+  if (!rv) {
+    aster.notify('success', title, object.success);
+  } else {
+    aster.notify('failure', title, object.failure);
+  }
+  return rv;
+};
 `),
 	"os.js": []byte(`//
 // aster :: os.js
