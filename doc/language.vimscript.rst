@@ -7,8 +7,7 @@ language/vimscript
 vimscript.themis(...args)
 -------------------------
 
-``vimscript.themis`` represents the ``themis`` script.
+``vimscript.themis`` represents ``themis``.
 
-You need to install themis.vim_, before you can use it.
-
-.. _themis.vim: https://github.com/thinca/vim-themis
+Requirements
+  - `themis.vim <https://github.com/thinca/vim-themis>`_

@@ -1,7 +1,7 @@
 language
 ========
 
-``language`` module provides customizable options for ``language`` sub modules.
+``language`` module provides customizable options for ``language`` submodules.
 
 .. contents::
 
@@ -12,7 +12,8 @@ language.prefix
 ``language.prefix`` is a ``String``. It is used as the prefix of notifications
 title.
 
-Default value is the name of the current working directory with ``:_`` [#space]_.
+Default value is the name of the current working directory with ``:_``
+[#space]_.
 
 
 language.prompt

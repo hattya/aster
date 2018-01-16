@@ -7,12 +7,11 @@ language/javascript
 javascript.npm(...args)
 -----------------------
 
-``javascript.npm`` represents the ``npm`` command, and its commands are
-defined as properties of this function.
+``javascript.npm`` represents ``npm``, and its commands are defined as
+properties of this function.
 
-You need to install npm_, before you can use it.
-
-.. _npm: https://www.npmjs.com/
+Requirements
+  - `npm <https://www.npmjs.com/>`_
 
 
 npm.install(...args)

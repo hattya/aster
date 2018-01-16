@@ -41,14 +41,14 @@ aster.notify(event, title, body)
 ``-n`` flag are not specified to Aster.
 
 event
-    ``event`` is the event name of a notification, and which is either
-    ``success`` or ``failure``.
+  ``event`` is the event name of a notification, and which is either
+  ``success`` or ``failure``.
 
 title
-    ``title`` is the title of a notification.
+  ``title`` is the title of a notification.
 
 body
-    ``body`` is the body text of a notification.
+  ``body`` is the body text of a notification.
 
 
 aster.title(title)
@@ -64,15 +64,15 @@ aster.watch(pattern, callback)
 ``aster.watch`` defines which files should be watched by Aster.
 
 pattern
-    ``pattern`` is a ``RegExp``.
+  ``pattern`` is a ``RegExp``.
 
 callback
-    ``callback`` is a ``Function``. It is invoked on each file system
-    modifications when ``pattern`` is matched.
+  ``callback`` is a ``Function``. It is invoked on each file system
+  modifications when ``pattern`` is matched.
 
-    ``callback`` is invoked with one argument:
+  ``callback`` is invoked with one argument:
 
-    * ``Array`` of paths
+  * ``Array`` of paths
 
 
 .. _runtime: https://golang.org/pkg/runtime/#pkg-constants

@@ -7,11 +7,11 @@ language/go
 go.dep(...args)
 ---------------
 
-``go.dep`` represents the ``dep`` command, and its commands are defined as
-properties of this function.
+``go.dep`` represents ``dep``, and its commands are defined as properties of
+this function.
 
-You need to install the ``dep`` command from https://github.com/golang/dep,
-before you can use it.
+Requirements
+  - `dep <https://github.com/golang/dep>`_
 
 
 dep.ensure(...args)
@@ -29,8 +29,8 @@ dep.prune(...args)
 go.go(...args)
 --------------
 
-``go.go`` represents the ``go`` command, and its commands are defined as
-properties of this function.
+``go.go`` represents ``go``, and its commands are defined as properties of this
+function.
 
 
 go.generate(...args)
@@ -81,17 +81,17 @@ go.combine(object)
 of the combined coverage profile.
 
 object
-    ``object`` is an ``Object``.
+  ``object`` is an ``Object``.
 
-    packages
-        ``packages`` is an ``Array`` of package names.
+  packages
+    ``packages`` is an ``Array`` of package names.
 
-    profile
-        ``profile`` is a name of the coverage profile to be search.
+  profile
+    ``profile`` is a name of the coverage profile to be search.
 
-    out
-        ``out`` is a name of the combined coverage profile. It will be
-        overwritten if exists.
+  out
+    ``out`` is a name of the combined coverage profile. It will be overwritten
+    if exists.
 
 
 go.packagesOf(...files)
@@ -101,4 +101,4 @@ go.packagesOf(...files)
 in order of dependency.
 
 files
-    ``files`` is an ``Array`` of ``Stirng``.
+  ``files`` is an ``Array`` of ``Stirng``.

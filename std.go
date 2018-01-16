@@ -30,7 +30,7 @@ var files = map[string][]byte{
 	"language/go.js": []byte(`//
 // aster :: language/go.js
 //
-//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -89,7 +89,7 @@ function parse(a) {
 
 var dep = exports.dep = function dep() {
   if (!os.whence('dep')) {
-    aster.notify('failure', exports.prefix + 'dep', 'dep command not found!');
+    aster.notify('failure', exports.prefix + 'dep', 'dep not found!');
     return true;
   }
   return run(arguments[0], ['dep'].concat(Array.prototype.slice.call(arguments)));
@@ -181,12 +181,12 @@ go.vet = function vet() {
   return run('vet', ['go', 'vet'].concat(Array.prototype.slice.call(arguments)));
 };
 
-exports.combine = function combine(args) {
-  var out = os.open(args.out, 'w');
+exports.combine = function combine(object) {
+  var out = os.open(object.out, 'w');
   out.write('mode: atomic\n');
-  go.list.apply(null, args.packages).forEach(function(p) {
+  go.list.apply(null, object.packages).forEach(function(p) {
     try {
-      var f = os.open(path.join(p, args.profile));
+      var f = os.open(path.join(p, object.profile));
       f.readLine();
       for (;;) {
         var rv = f.readLine();
@@ -199,7 +199,7 @@ exports.combine = function combine(args) {
     }
   });
   out.close();
-  return args.out;
+  return object.out;
 };
 
 exports.packagesOf = function packagesOf(files) {
@@ -274,7 +274,7 @@ exports.packagesOf = function packagesOf(files) {
 	"language/javascript.js": []byte(`//
 // aster :: language/javascript.js
 //
-//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -304,7 +304,7 @@ var language = require('language');
 
 var npm = exports.npm = function() {
   if (!os.whence('npm')) {
-    aster.notify('failure', exports.prefix + 'npm', 'npm command not found!');
+    aster.notify('failure', language.prefix + 'npm', 'npm not found!');
     return true;
   }
   // exec
@@ -337,7 +337,7 @@ npm.test = function test() {
 	"language/restructuredtext.js": []byte(`//
 // aster :: language/restructuredtext.js
 //
-//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -377,7 +377,7 @@ exports.rst2html = function rst2html(object) {
     return os.whence(script);
   });
   if (!ok) {
-    aster.notify('failure', language.prefix + 'rst2html', 'rst2html script not found!');
+    aster.notify('failure', language.prefix + 'rst2html', 'rst2html not found!');
     return true;
   }
   // exec
@@ -399,7 +399,7 @@ exports.rst2html = function rst2html(object) {
 	"language/vimscript.js": []byte(`//
 // aster :: language/vimscript.js
 //
-//   Copyright (c) 2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -437,8 +437,8 @@ exports.themis = function themis() {
       return os.whence(script);
     });
     if (!ok) {
-      aster.notify('failure', title, 'themis script not found!');
-      return false;
+      aster.notify('failure', title, 'themis not found!');
+      return true;
     }
   }
   // exec

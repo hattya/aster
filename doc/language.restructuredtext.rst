@@ -7,22 +7,20 @@ language/restructuredtext
 restructuredtext.rst2html(object)
 ---------------------------------
 
-``restructuredtext.rst2html`` represents the ``rst2html5.py`` (or
-``rst2html.py``) script.
+``restructuredtext.rst2html`` represents ``rst2html5.py`` (or ``rst2html.py``).
 
-You need to install Docutils_, before you can use it.
+Requiremnets
+  - `Docutils <http://docutils.sourceforge.net/>`_
 
 object
-    ``object`` is an ``Object``.
+  ``object`` is an ``Object``.
 
-    options
-        ``options`` is an ``Array`` of options.
+  options
+    ``options`` is an ``Array`` of options.
 
-    src
-        ``src`` is a name of the reStructuredText file.
+  src
+    ``src`` is a name of the reStructuredText file.
 
-    dst
-        ``dst`` is a name of the output HTML file. *It will be overriten if
-        exists.*
-
-.. _Docutils: http://docutils.sourceforge.net/
+  dst
+    ``dst`` is a name of the output HTML file. *It will be overriten if
+    exists.*

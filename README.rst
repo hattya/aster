@@ -45,10 +45,10 @@ exist, and add specified template files to it.
 Template files are located in:
 
 UNIX
-    $XDG_CONFIG_HOME/aster/template/<template>
+  $XDG_CONFIG_HOME/aster/template/<template>
 
 Windows
-    %APPDATA%\\Aster\\template\\<template>
+  %APPDATA%\\Aster\\template\\<template>
 
 
 Asterfile
