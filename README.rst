@@ -84,6 +84,7 @@ Reference
 
   * `Go <doc/language.go.rst>`_
   * `JavaScript <doc/language.javascript.rst>`_
+  * `Python <doc/language.python.rst>`_
   * `reStructuredText <doc/language.restructuredtext.rst>`_
   * `Vim script <doc/language.vimscript.rst>`_
 
