@@ -21,3 +21,8 @@
 [[constraint]]
   name = "github.com/robertkrimen/otto"
   branch = "master"
+
+[prune]
+  unused-packages = true
+  non-go = true
+  go-tests = true
