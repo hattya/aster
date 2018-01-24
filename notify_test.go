@@ -1,7 +1,7 @@
 //
 // aster :: notify_test.go
 //
-//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2018 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -44,21 +44,21 @@ var gntpValueTests = []struct {
 
 func TestGNTPValue(t *testing.T) {
 	var v aster.GNTPValue
-	if g, e := v.IsBoolFlag(), true; g != e {
-		t.Errorf("IsBoolFlag() = %v, expected %v", g, e)
+	if !v.IsBoolFlag() {
+		t.Error("GNTPValue.IsBoolFlag() = false, expected true")
 	}
 	if g, e := v.String(), ""; g != e {
-		t.Errorf("String() = %q, expected %q", g, e)
+		t.Errorf("GNTPValue.String() = %q, expected %q", g, e)
 	}
 
 	for _, tt := range gntpValueTests {
 		var v aster.GNTPValue
 		v.Set(tt.in)
 		if g, e := v.String(), tt.out; g != e {
-			t.Errorf("String() = %q, expected %q", g, e)
+			t.Errorf("GNTPValue.String() = %q, expected %q", g, e)
 		}
 		if g, e := v.Get(), tt.out; g != e {
-			t.Errorf("Get() = %q, expected %q", g, e)
+			t.Errorf("GNTPValue.Get() = %q, expected %q", g, e)
 		}
 	}
 }
