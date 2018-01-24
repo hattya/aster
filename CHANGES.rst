@@ -4,6 +4,8 @@ Aster Changelog
 Version 0.2
 -----------
 
+Release date: 2018-01-24
+
 * Ignore CVS directory by default.
 * Move the aster command to ``github.com/hattya/aster/cmd/aster``.
 * Fix deadlock on Windows.
