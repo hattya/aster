@@ -16,6 +16,7 @@ rules:
   no-console: off
 
   # Best Practices
+  no-else-return: off
   no-param-reassign: off
   vars-on-top: off
   yoda: off

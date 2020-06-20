@@ -14,8 +14,17 @@ aster.ignore.push(/^vendor(?:\.orig)?$/);
 
 // js
 aster.watch(/.+\.js$/, function() {
-  if (npm.run('lint')) return;
+  try {
+    if (npm.run('lint')) return;
+  } finally {
+    aster.title(title);
+  }
   if (go.generate('./...')) return;
+});
+
+aster.watch(/^package\.json$/, function(files) {
+  npm.install();
+  aster.title(title);
 });
 
 // go
@@ -27,9 +36,11 @@ aster.watch(/.+\.go$/, function(files) {
   if (go.vet('./...')) return;
   // go test for each package
   var bad = go_.packagesOf(files).some(function(p) {
-    var rv = go.test('-v', '-race', '-covermode', 'atomic', '-coverprofile', p + '/cover.out', p);
-    aster.title(title);
-    return rv;
+    try {
+      return go.test('-v', '-race', '-covermode', 'atomic', '-coverprofile', p + '/cover.out', p);
+    } finally {
+      aster.title(title);
+    }
   });
   // combine coverage profiles
   if (!bad) {
