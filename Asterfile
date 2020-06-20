@@ -1,7 +1,6 @@
 var os = require('os');
 var path = require('path');
 var go_ = require('language/go');
-var dep = go_.dep;
 var go = go_.go;
 var npm = require('language/javascript').npm;
 var rst2html = require('language/restructuredtext').rst2html;
@@ -10,7 +9,6 @@ var title = 'Aster ☆ ' + path.basename(os.getwd());
 
 aster.title(title);
 aster.ignore.push(/^node_modules$/);
-aster.ignore.push(/^vendor(?:\.orig)?$/);
 
 // js
 aster.watch(/.+\.js$/, function() {
@@ -32,8 +30,6 @@ aster.watch(/.+\.go$/, function(files) {
   if (files.some(function(e) { return e === 'aster.go'; })) {
     if (go.generate('./...')) return;
   }
-  if (go.get('-t', '-v', './...')) return;
-  if (go.vet('./...')) return;
   // go test for each package
   var bad = go_.packagesOf(files).some(function(p) {
     try {
@@ -49,12 +45,7 @@ aster.watch(/.+\.go$/, function(files) {
     go.tool.cover('-html', out, '-o', 'coverage.html');
     os.remove(out);
   }
-});
-
-aster.watch(/^Gopkg\.(?:lock|toml)$/, function() {
-  if (os.stat('vendor')) {
-    dep.ensure('-v');
-  }
+  if (go.vet('./...')) return;
 });
 
 // rst
