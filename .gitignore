@@ -5,4 +5,3 @@
 *.test
 cmd/aster/aster
 node_modules/
-vendor/
