@@ -149,6 +149,10 @@ go.mod = {
   tidy: function tidy() {
     return go.apply(null, ['mod', 'tidy'].concat(Array.prototype.slice.call(arguments)));
   },
+
+  vendor: function vendor() {
+    return go.apply(null, ['mod', 'vendor'].concat(Array.prototype.slice.call(arguments)));
+  },
 };
 
 go.run = function run() {

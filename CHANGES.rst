@@ -14,6 +14,7 @@ Version 0.3
   * Add ``go.run`` function.
   * Add ``go.mod.download`` function.
   * Add ``go.mod.tidy`` function.
+  * Add ``go.mod.vendor`` function.
 
 
 Version 0.2

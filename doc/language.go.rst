@@ -90,6 +90,12 @@ go.mod.tidy(...args)
 ``go.mod tidy`` represents ``go mod tidy``.
 
 
+go.mod.vendor(...args)
+~~~~~~~~~~~~~~~~~~~~~~
+
+``go.mod vendor`` represents ``go mod vendor``.
+
+
 go.run(...args)
 ~~~~~~~~~~~~~~~
 
