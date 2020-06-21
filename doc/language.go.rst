@@ -39,6 +39,12 @@ go.build(...args)
 ``go.build`` represents ``go build``.
 
 
+go.fix(...args)
+~~~~~~~~~~~~~~~
+
+``go.fix`` represents ``go fix``.
+
+
 go.generate(...args)
 ~~~~~~~~~~~~~~~~~~~~
 

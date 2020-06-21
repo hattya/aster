@@ -8,6 +8,7 @@ Version 0.3
 
   * Fix ``dep.prune`` function.
   * Add ``go.build`` function.
+  * Add ``go.fix`` function.
 
 
 Version 0.2
