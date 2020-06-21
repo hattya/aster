@@ -39,6 +39,12 @@ go.build(...args)
 ``go.build`` represents ``go build``.
 
 
+go.env(...args)
+~~~~~~~~~~~~~~~
+
+``go.env`` represents ``go env``, and returns the output.
+
+
 go.fix(...args)
 ~~~~~~~~~~~~~~~
 
