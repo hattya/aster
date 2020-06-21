@@ -12,6 +12,7 @@ Version 0.3
   * Add ``go.fmt`` function.
   * Add ``go.install`` function.
   * Add ``go.run`` function.
+  * Add ``go.mod.download`` function.
 
 
 Version 0.2

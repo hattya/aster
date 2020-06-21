@@ -78,6 +78,12 @@ specified packages.
 It eliminates ``-f`` flag and ``-json`` flag.
 
 
+go.mod.download(...args)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+``go.mod download`` represents ``go mod download``.
+
+
 go.run(...args)
 ~~~~~~~~~~~~~~~
 
