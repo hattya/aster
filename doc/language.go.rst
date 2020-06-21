@@ -63,6 +63,12 @@ go.get(...args)
 ``go.get`` represents ``go get``.
 
 
+go.install(...args)
+~~~~~~~~~~~~~~~~~~~
+
+``go.install`` represents ``go install``.
+
+
 go.list(...args)
 ~~~~~~~~~~~~~~~~
 

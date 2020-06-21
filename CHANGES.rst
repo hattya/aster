@@ -10,6 +10,7 @@ Version 0.3
   * Add ``go.build`` function.
   * Add ``go.fix`` function.
   * Add ``go.fmt`` function.
+  * Add ``go.install`` function.
 
 
 Version 0.2

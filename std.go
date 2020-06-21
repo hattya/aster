@@ -105,6 +105,10 @@ go.get = function get() {
   return go.apply(null, ['get'].concat(Array.prototype.slice.call(arguments)));
 };
 
+go.install = function install() {
+  return go.apply(null, ['install'].concat(Array.prototype.slice.call(arguments)));
+};
+
 go.list = function list() {
   var args = [];
   for (var i = 0; i < arguments.length; i++) {
