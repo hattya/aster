@@ -130,6 +130,10 @@ go.list = function list() {
   return out;
 };
 
+go.run = function run() {
+  return go.apply(null, ['run'].concat(Array.prototype.slice.call(arguments)));
+};
+
 go.test = function test() {
   var args = ['test'];
   for (var i = 0; i < arguments.length; i++) {

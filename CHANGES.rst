@@ -11,6 +11,7 @@ Version 0.3
   * Add ``go.fix`` function.
   * Add ``go.fmt`` function.
   * Add ``go.install`` function.
+  * Add ``go.run`` function.
 
 
 Version 0.2

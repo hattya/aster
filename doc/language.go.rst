@@ -78,6 +78,12 @@ specified packages.
 It eliminates ``-f`` flag and ``-json`` flag.
 
 
+go.run(...args)
+~~~~~~~~~~~~~~~
+
+``go.run`` represents ``go run``.
+
+
 go.test(...args)
 ~~~~~~~~~~~~~~~~
 
