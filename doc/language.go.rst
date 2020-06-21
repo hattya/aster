@@ -33,6 +33,12 @@ go.go(...args)
 function.
 
 
+go.build(...args)
+~~~~~~~~~~~~~~~~~
+
+``go.build`` represents ``go build``.
+
+
 go.generate(...args)
 ~~~~~~~~~~~~~~~~~~~~
 

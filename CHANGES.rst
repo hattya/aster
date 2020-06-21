@@ -7,6 +7,7 @@ Version 0.3
 * Improve ``language/go`` module.
 
   * Fix ``dep.prune`` function.
+  * Add ``go.build`` function.
 
 
 Version 0.2
