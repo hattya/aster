@@ -45,6 +45,12 @@ go.fix(...args)
 ``go.fix`` represents ``go fix``.
 
 
+go.fmt(...args)
+~~~~~~~~~~~~~~~
+
+``go.fmt`` represents ``go fmt``.
+
+
 go.generate(...args)
 ~~~~~~~~~~~~~~~~~~~~
 

@@ -93,6 +93,10 @@ go.fix = function fix() {
   return go.apply(null, ['fix'].concat(Array.prototype.slice.call(arguments)));
 };
 
+go.fmt = function fmt() {
+  return go.apply(null, ['fmt'].concat(Array.prototype.slice.call(arguments)));
+};
+
 go.generate = function generate() {
   return go.apply(null, ['generate'].concat(Array.prototype.slice.call(arguments)));
 };
