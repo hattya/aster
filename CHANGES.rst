@@ -13,6 +13,7 @@ Version 0.3
   * Add ``go.install`` function.
   * Add ``go.run`` function.
   * Add ``go.mod.download`` function.
+  * Add ``go.mod.tidy`` function.
 
 
 Version 0.2

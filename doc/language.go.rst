@@ -84,6 +84,12 @@ go.mod.download(...args)
 ``go.mod download`` represents ``go mod download``.
 
 
+go.mod.tidy(...args)
+~~~~~~~~~~~~~~~~~~~~
+
+``go.mod tidy`` represents ``go mod tidy``.
+
+
 go.run(...args)
 ~~~~~~~~~~~~~~~
 

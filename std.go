@@ -145,6 +145,10 @@ go.mod = {
   download: function download() {
     return go.apply(null, ['mod', 'download'].concat(Array.prototype.slice.call(arguments)));
   },
+
+  tidy: function tidy() {
+    return go.apply(null, ['mod', 'tidy'].concat(Array.prototype.slice.call(arguments)));
+  },
 };
 
 go.run = function run() {
