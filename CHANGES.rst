@@ -1,6 +1,14 @@
 Aster Changelog
 ===============
 
+Version 0.3
+-----------
+
+* Improve ``language/go`` module.
+
+  * Fix ``dep.prune`` function.
+
+
 Version 0.2
 -----------
 
