@@ -1,0 +1,14 @@
+extends:
+  - eslint:recommended
+  - airbnb-base
+
+env:
+  jest: true
+
+rules:
+  # Stylistic Issues
+  no-plusplus: off
+
+settings:
+  import/core-modules:
+    - language

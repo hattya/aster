@@ -8,16 +8,22 @@ var rst2html = require('language/restructuredtext').rst2html;
 var title = 'Aster ☆ ' + path.basename(os.getwd());
 
 aster.title(title);
-aster.ignore.push(/^node_modules$/);
+aster.ignore.push(/^(coverage|node_modules)$/);
 
 // js
-aster.watch(/.+\.js$/, function() {
+aster.watch(/.+\.js$/, function(files) {
   try {
+    if (!os.stat('node_modules')) {
+      if (npm.install()) return;
+    }
+    if (npm.run('cover')) return;
     if (npm.run('lint')) return;
   } finally {
     aster.title(title);
   }
-  if (go.generate('./...')) return;
+  if (files.some(function(e) { return e.lastIndexOf('lib', 0) === 0; })) {
+    if (go.generate('./...')) return;
+  }
 });
 
 aster.watch(/^package\.json$/, function(files) {

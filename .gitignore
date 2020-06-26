@@ -4,4 +4,5 @@
 *.sw?
 *.test
 cmd/aster/aster
+coverage/
 node_modules/

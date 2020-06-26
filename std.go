@@ -67,7 +67,7 @@ function parse(a) {
 
 var dep = exports.dep = function dep() {
   if (!os.whence('dep')) {
-    aster.notify('failure', exports.prefix + 'dep', 'dep not found!');
+    aster.notify('failure', language.prefix + 'dep', 'dep not found!');
     return true;
   }
   return system(arguments[0], ['dep'].concat(Array.prototype.slice.call(arguments)));
@@ -355,7 +355,7 @@ var language = require('language');
 
 var coverage = exports.coverage = function coverage() {
   if (!os.whence('coverage')) {
-    aster.notify('failure', exports.prefix + 'coverage', 'coverage not found!');
+    aster.notify('failure', language.prefix + 'coverage', 'coverage not found!');
     return true;
   }
 
@@ -424,7 +424,10 @@ exports.rst2html = function rst2html(object) {
     return true;
   }
 
-  var args = [script].concat(object.options);
+  var args = [script];
+  if (Array.isArray(object.options)) {
+    args = args.concat(object.options);
+  }
   args.push(object.src);
   args.push(object.dst || object.src.slice(0, -path.extname(object.src).length) + '.html');
   return language.system({

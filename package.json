@@ -8,11 +8,19 @@
     "url": "https://github.com/hattya/aster"
   },
   "scripts": {
-    "lint": "eslint lib"
+    "test": "jest",
+    "cover": "jest --coverage",
+    "lint": "eslint lib test"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
     "eslint": "~7.2.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "latest"
+    "eslint-plugin-import": "latest",
+    "jest": "^26.0.0"
+  },
+  "jest": {
+    "verbose": true
   }
 }
