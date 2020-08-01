@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/saracen/walker"
 )
 
 type Watcher struct {
@@ -126,15 +127,9 @@ func (w *Watcher) remove(name string) error {
 }
 
 func (w *Watcher) walk(root string, fn func(string) error) error {
-	return filepath.Walk(filepath.Clean(root), func(path string, fi os.FileInfo, err error) error {
-		select {
-		case <-w.ctx.Done():
-			return w.ctx.Err()
-		default:
-		}
-
-		if err != nil || !fi.IsDir() {
-			return err
+	return walker.WalkWithContext(w.ctx, filepath.Clean(root), func(path string, fi os.FileInfo) error {
+		if !fi.IsDir() {
+			return nil
 		}
 		return fn(path)
 	})
