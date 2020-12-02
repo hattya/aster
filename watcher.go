@@ -131,7 +131,7 @@ func (w *Watcher) walk(root string, fn func(string) error) error {
 		if !fi.IsDir() {
 			return nil
 		}
-		return fn(path)
+		return fn(filepath.Clean(path))
 	})
 }
 
