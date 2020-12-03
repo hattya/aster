@@ -137,6 +137,7 @@ func (w *Watcher) walk(root string, fn func(string) error) error {
 
 func (w *Watcher) Watch() error {
 	var mu sync.Mutex
+	dirs := make(map[string]struct{})
 	files := make(map[string]int)
 	fire := make(chan struct{}, 1)
 	done := make(chan struct{}, 1)
@@ -163,7 +164,8 @@ func (w *Watcher) Watch() error {
 				ev.Name = ev.Name[2:]
 			}
 			// filter
-			if ev.Op&fsnotify.Create != 0 {
+			switch {
+			case ev.Op&fsnotify.Create != 0:
 				switch fi, err := os.Lstat(ev.Name); {
 				case err != nil:
 					// removed immediately?
@@ -174,16 +176,21 @@ func (w *Watcher) Watch() error {
 							warn(w.a.ui, err)
 						}
 					}()
+					dirs[ev.Name] = struct{}{}
 					continue
 				}
-			}
-			if ev.Op == fsnotify.Chmod {
+			case ev.Op == fsnotify.Chmod:
 				continue
+			default:
+				if _, ok := dirs[ev.Name]; ok {
+					continue
+				}
 			}
 
 			mu.Lock()
 			n := len(files)
 			if ev.Op&fsnotify.Remove != 0 || ev.Op&fsnotify.Rename != 0 {
+				delete(dirs, ev.Name)
 				delete(files, ev.Name)
 			} else {
 				files[ev.Name]++
