@@ -13,6 +13,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -42,13 +43,20 @@ func TestIgnore(t *testing.T) {
 			time.Sleep(d)
 		},
 		after: func(_ *aster.Aster, w *aster.Watcher) {
+			if g, e := w.Paths(), []string{".", "doc"}; !reflect.DeepEqual(g, e) {
+				t.Fatalf("expected %v, got %v", e, g)
+			}
 			for _, n := range []string{"a.go", "doc", "build"} {
+				n = "." + string(os.PathSeparator) + n
 				if err := w.Add(n); err != nil {
 					t.Error(err)
 				}
 				if err := w.Remove(n); err != nil {
 					t.Error(err)
 				}
+			}
+			if g, e := w.Paths(), []string{"."}; !reflect.DeepEqual(g, e) {
+				t.Fatalf("expected %v, got %v", e, g)
 			}
 		},
 	}
@@ -179,7 +187,7 @@ func TestWatch(t *testing.T) {
 	at := &asterTest{
 		src: cli.Dedent(`
 			aster.watch(/.+\.go$/, function(files) {
-			  cycles.push(files);
+				cycles.push(files);
 			});
 		`),
 		before: func(a *aster.Aster, _ context.CancelFunc) {

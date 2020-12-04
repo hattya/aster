@@ -8,6 +8,8 @@
 
 package aster
 
+import "sort"
+
 var (
 	NewBuffer = newBuffer
 	NewVM     = newVM
@@ -15,4 +17,18 @@ var (
 
 func (a *Aster) NumWatches() int {
 	return len(a.watches)
+}
+
+func (w *Watcher) Paths() []string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	paths := make(sort.StringSlice, len(w.paths))
+	i := 0
+	for k := range w.paths {
+		paths[i] = k
+		i++
+	}
+	paths.Sort()
+	return paths
 }
