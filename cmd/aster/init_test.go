@@ -136,7 +136,7 @@ func TestConfigDir(t *testing.T) {
 	for k := range environ {
 		os.Setenv(k, "")
 	}
-	if _, err := configDir(); err != ErrEnv {
-		t.Fatalf("expected ErrEnv, got %#v", err)
+	if _, err := configDir(); err == nil {
+		t.Fatal("expected error")
 	}
 }

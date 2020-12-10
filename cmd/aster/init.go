@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hattya/go.cli"
@@ -35,11 +36,26 @@ func init() {
 			  Template files are located in:
 
 			  UNIX:    $XDG_CONFIG_HOME/aster/template/<template>
+			  macOS:   ~/Library/Application Support/Aster/template/<template>
 			  Windows: %APPDATA%\Aster\template\<template>
 		`)),
 		Flags:  cli.NewFlagSet(),
 		Action: init_,
 	})
+
+	configDir = func() (dir string, err error) {
+		dir, err = os.UserConfigDir()
+		if err != nil {
+			return
+		}
+		switch runtime.GOOS {
+		case "darwin", "windows":
+			dir = filepath.Join(dir, "Aster")
+		default:
+			dir = filepath.Join(dir, "aster")
+		}
+		return
+	}
 }
 
 func init_(ctx *cli.Context) error {
