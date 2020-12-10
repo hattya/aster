@@ -287,7 +287,7 @@ func (b *buffer) Close() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if 0 < b.b.Len() {
+	if b.b.Len() > 0 {
 		b.ary.Call("push", b.b.String())
 	}
 	return nil

@@ -21,9 +21,9 @@ func warn(ui *cli.CLI, a ...interface{}) {
 
 func trimNewline(s string) string {
 	switch {
-	case 1 < len(s) && s[len(s)-2:] == "\r\n":
+	case len(s) > 1 && s[len(s)-2:] == "\r\n":
 		s = s[:len(s)-2]
-	case 0 < len(s) && s[len(s)-1:] == "\n":
+	case len(s) > 0 && s[len(s)-1:] == "\n":
 		s = s[:len(s)-1]
 	}
 	return s

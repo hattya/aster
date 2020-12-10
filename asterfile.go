@@ -40,7 +40,7 @@ func init() {
 		".svn",
 		"CVS",
 	} {
-		if 0 < i {
+		if i > 0 {
 			b.WriteRune('|')
 		}
 		b.WriteString(regexp.QuoteMeta(s))
@@ -193,7 +193,7 @@ func (a *Aster) Ignore(name string) bool {
 }
 
 func (a *Aster) Reloaded() bool {
-	return 0 < atomic.SwapInt32(&a.i, 0)
+	return atomic.SwapInt32(&a.i, 0) > 0
 }
 
 func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
@@ -218,7 +218,7 @@ L:
 			}
 		}
 		// call Function.call
-		if 0 < len(cl) {
+		if len(cl) > 0 {
 			ary, _ := a.vm.Call(`new Array`, nil, cl...)
 			_, err := w.fn.Call("call", nil, ary)
 			if err != nil {

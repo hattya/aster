@@ -21,6 +21,7 @@ import (
 
 const lf = "\n"
 
+// for testing
 var configDir func() (string, error)
 
 func init() {
@@ -75,9 +76,9 @@ func init_(ctx *cli.Context) error {
 	defer f.Close()
 
 	var newline []byte
-	if fi, err := f.Stat(); err == nil && 0 < fi.Size() {
+	if fi, err := f.Stat(); err == nil && fi.Size() > 0 {
 		var off int64
-		if 1 < fi.Size() {
+		if fi.Size() > 1 {
 			off = -2
 		} else {
 			off = -1
@@ -111,7 +112,7 @@ func init_(ctx *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("template '%v' is not found", a)
 		}
-		if 0 < len(newline) {
+		if len(newline) > 0 {
 			f.Write(newline)
 		} else {
 			newline = []byte(lf)

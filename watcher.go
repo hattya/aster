@@ -147,7 +147,7 @@ func (w *Watcher) Watch() error {
 		mu.Lock()
 		defer mu.Unlock()
 
-		if 0 < len(files) {
+		if len(files) > 0 {
 			select {
 			case fire <- struct{}{}:
 			default:
@@ -160,7 +160,7 @@ func (w *Watcher) Watch() error {
 		select {
 		case ev := <-w.w.Events:
 			// remove "./" prefix
-			if 2 < len(ev.Name) && ev.Name[0] == '.' && os.IsPathSeparator(ev.Name[1]) {
+			if len(ev.Name) > 2 && ev.Name[0] == '.' && os.IsPathSeparator(ev.Name[1]) {
 				ev.Name = ev.Name[2:]
 			}
 			// filter
@@ -227,7 +227,7 @@ func (w *Watcher) Watch() error {
 				}
 				done <- struct{}{}
 				// retry
-				if 0 < atomic.SwapInt32(&retry, 0) {
+				if atomic.SwapInt32(&retry, 0) > 0 {
 					select {
 					case fire <- struct{}{}:
 					default:
