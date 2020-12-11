@@ -4,6 +4,9 @@ Aster
 Aster is a command line tool to handle events on file system modifications. It
 is inspired by Guard_.
 
+.. image:: https://github.com/hattya/aster/workflows/CI/badge.svg
+   :target: https://github.com/hattya/aster/actions?query=workflow:CI
+
 .. image:: https://semaphoreci.com/api/v1/hattya/aster/branches/master/badge.svg
    :target: https://semaphoreci.com/hattya/aster
 
