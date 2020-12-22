@@ -17,6 +17,8 @@ Version 0.3
   * Add ``go.mod.tidy`` function.
   * Add ``go.mod.vendor`` function.
 
+* Add ``language/markdown`` module.
+
 
 Version 0.2
 -----------
