@@ -35,13 +35,13 @@ exist, and add specified template files to it.
 
 Template files are located in:
 
-* UNIX  
+- UNIX  
   `$XDG_CONFIG_HOME/aster/template/<template>`
 
-* macOS  
+- macOS  
   `~/Library/Application Support/Aster/template/<template>`
 
-* Windows  
+- Windows  
   `%APPDATA%\Aster\template\<template>`
 
 
@@ -70,14 +70,14 @@ aster.watch(/.+\.go$/, function() {
 
 ## Reference
 
-* [Global Objects](doc/global-objects.rst)
-* [OS](doc/os.rst)
-* [Language](doc/language.rst)
-  * [Go](doc/language.go.rst)
-  * [JavaScript](doc/language.javascript.rst)
-  * [Python](doc/language.python.rst)
-  * [reStructuredText](doc/language.restructuredtext.rst)
-  * [Vim script](doc/language.vimscript.rst)
+- [Global Objects](doc/global-objects.rst)
+- [OS](doc/os.rst)
+- [Language](doc/language.rst)
+  - [Go](doc/language.go.rst)
+  - [JavaScript](doc/language.javascript.rst)
+  - [Python](doc/language.python.rst)
+  - [reStructuredText](doc/language.restructuredtext.rst)
+  - [Vim script](doc/language.vimscript.rst)
 
 
 ## License
