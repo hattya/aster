@@ -8,8 +8,8 @@ github.com/hattya/go.cli v0.0.0-20201203130601-ce0f880dcc8b h1:s+bEG/K/HBVaJXUc2
 github.com/hattya/go.cli v0.0.0-20201203130601-ce0f880dcc8b/go.mod h1:MRKMr3qXoJPfXUUIUU6TZ3rKrfEHgBDnvdIy5KAhFUs=
 github.com/hattya/go.notify v0.0.0-20201207132218-f85fc95cf648 h1:Xg2UIpXXN+TsN54fEvwekl/CgMvYEvcyLEvTGrzfYRM=
 github.com/hattya/go.notify v0.0.0-20201207132218-f85fc95cf648/go.mod h1:lJopi7AD2HgknzoYY3fzqs5hodbG2unhdpzGs8AzjI0=
-github.com/hattya/otto.module v0.0.0-20201207132405-537e1a4434a3 h1:91hGv6+z/vp/Wv7J1XkotxVnOdhhxsaEFpbkp9WpcTs=
-github.com/hattya/otto.module v0.0.0-20201207132405-537e1a4434a3/go.mod h1:f4lY99aLQsEAOTMsl8epXYNid2WPDWxfT0UQMddVV5M=
+github.com/hattya/otto.module v0.0.0-20201223132946-c3fe36d90b4c h1:et78+5Hu8UP+zxyEC0bi5is0Tv5xVqRWsDYpiRxIsxY=
+github.com/hattya/otto.module v0.0.0-20201223132946-c3fe36d90b4c/go.mod h1:f4lY99aLQsEAOTMsl8epXYNid2WPDWxfT0UQMddVV5M=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac h1:kYPjbEN6YPYWWHI6ky1J813KzIq/8+Wg4TO4xU7A/KU=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac/go.mod h1:xvqspoSXJTIpemEonrMDFq6XzwHYYgToXWj5eRX1OtY=
 github.com/saracen/walker v0.1.1 h1:Ou2QIKTWqo0QxhtuHVmtObbmhjMCEUyJ82xp0uV+MGI=
