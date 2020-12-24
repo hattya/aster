@@ -4,6 +4,8 @@ Aster Changelog
 Version 0.3
 -----------
 
+Release date: 2020-12-24
+
 * Improve ``language/go`` module.
 
   * Fix ``dep.prune`` function.
