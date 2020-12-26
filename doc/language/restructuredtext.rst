@@ -10,7 +10,7 @@ restructuredtext.rst2html(object)
 ``restructuredtext.rst2html`` represents ``rst2html5.py`` (or ``rst2html.py``).
 
 Requiremnets
-  - `Docutils <http://docutils.sourceforge.net/>`_
+  - `Docutils <https://docutils.sourceforge.io/>`_
 
 object
   ``object`` is an ``Object``.

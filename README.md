@@ -73,12 +73,12 @@ aster.watch(/.+\.go$/, function() {
 - [Global Objects](doc/global-objects.rst)
 - [OS](doc/os.rst)
 - [Language](doc/language.rst)
-  - [Go](doc/language.go.rst)
-  - [JavaScript](doc/language.javascript.rst)
-  - [Markdown](doc/language.markdown.rst)
-  - [Python](doc/language.python.rst)
-  - [reStructuredText](doc/language.restructuredtext.rst)
-  - [Vim script](doc/language.vimscript.rst)
+  - [Go](doc/language/go.rst)
+  - [JavaScript](doc/language/javascript.rst)
+  - [Markdown](doc/language/markdown.rst)
+  - [Python](doc/language/python.rst)
+  - [reStructuredText](doc/language/restructuredtext.rst)
+  - [Vim script](doc/language/vimscript.rst)
 
 
 ## License
