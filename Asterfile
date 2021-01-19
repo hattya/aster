@@ -27,7 +27,7 @@ aster.watch(/.+\.js$/, function(files) {
   }
 });
 
-aster.watch(/^package\.json$/, function(files) {
+aster.watch(/^package\.json$/, function() {
   npm.install();
   aster.title(title);
 });
@@ -37,6 +37,7 @@ aster.watch(/.+\.go$/, function(files) {
   if (files.some(function(e) { return e === 'aster.go'; })) {
     if (go.generate('./...')) return;
   }
+  go.mod.tidy();
   // go test for each package
   var bad = go_.packagesOf(files).some(function(p) {
     try {
@@ -53,6 +54,10 @@ aster.watch(/.+\.go$/, function(files) {
     os.remove(out);
   }
   if (go.vet('./...')) return;
+});
+
+aster.watch(/go\.mod$/, function() {
+  go.mod.tidy();
 });
 
 // md
