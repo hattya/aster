@@ -1,7 +1,7 @@
 //
 // aster/internal/test :: test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -31,7 +31,7 @@ func Gen(src string) error {
 	if ci {
 		os.Remove("Asterfile")
 	}
-	return ioutil.WriteFile("Asterfile", []byte(src), 0666)
+	return ioutil.WriteFile("Asterfile", []byte(src), 0o666)
 }
 
 func New() (*aster.Aster, error) {

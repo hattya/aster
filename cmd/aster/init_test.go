@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: init_test.go
 //
-//   Copyright (c) 2015-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -38,7 +38,7 @@ func TestInit(t *testing.T) {
 		if err := sh.Mkdir("template"); err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(filepath.Join("template", "go"), []byte(tmpl+"\n"), 0666); err != nil {
+		if err := ioutil.WriteFile(filepath.Join("template", "go"), []byte(tmpl+"\n"), 0o666); err != nil {
 			return err
 		}
 		for _, tt := range initTests {

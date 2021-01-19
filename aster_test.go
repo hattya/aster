@@ -1,7 +1,7 @@
 //
 // aster :: aster_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -206,7 +206,7 @@ func TestWatch(t *testing.T) {
 			sh.Mkdir("dir.go")
 			time.Sleep(d)
 
-			os.Chmod("c.go", 0755)
+			os.Chmod("c.go", 0o755)
 			os.Rename("c.go", "c_.go")
 
 			os.Rename("dir.go", "dir_.go")

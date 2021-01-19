@@ -1,7 +1,7 @@
 //
 // aster :: otto.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -81,7 +81,7 @@ func (*os_) mkdir(call otto.FunctionCall) otto.Value {
 		perm = os.FileMode(i)
 	}
 	if perm == 0 {
-		perm = os.FileMode(0777)
+		perm = os.FileMode(0o777)
 	}
 	if os.MkdirAll(path, perm) != nil {
 		return otto.TrueValue()
@@ -111,7 +111,7 @@ func (*os_) open(call otto.FunctionCall) otto.Value {
 		flag = os.O_RDWR | os.O_CREATE | os.O_APPEND
 	}
 
-	f, err := os.OpenFile(name, flag, 0666)
+	f, err := os.OpenFile(name, flag, 0o666)
 	if err != nil {
 		return module.Throw(call.Otto, err)
 	}
@@ -274,7 +274,7 @@ func (b *buffer) Write(p []byte) (int, error) {
 	b.b.Write(p)
 	for {
 		if s, err := b.b.ReadString('\n'); err == nil {
-			b.ary.Call("push", trimNewline(s))
+			b.ary.Call("push", trim(s))
 		} else {
 			b.b.WriteString(s)
 			break
@@ -309,9 +309,7 @@ func newFile(vm *otto.Otto, f *os.File) *file {
 }
 
 func (f *file) Close(call otto.FunctionCall) otto.Value {
-	err := f.f.Close()
-
-	if err != nil {
+	if f.f.Close() != nil {
 		return otto.TrueValue()
 	}
 	return otto.UndefinedValue()
@@ -329,8 +327,8 @@ func (f *file) Read(call otto.FunctionCall) otto.Value {
 		n = 0
 	}
 	p := make([]byte, n)
-	n, err := f.br.Read(p)
 
+	n, err := f.br.Read(p)
 	if err != nil && err != io.EOF {
 		return module.Throw(f.vm, err)
 	}
@@ -342,21 +340,18 @@ func (f *file) Read(call otto.FunctionCall) otto.Value {
 
 func (f *file) ReadLine(call otto.FunctionCall) otto.Value {
 	s, err := f.br.ReadString('\n')
-
 	if err != nil && err != io.EOF {
 		return module.Throw(f.vm, err)
 	}
 	rv, _ := f.vm.Object(`({})`)
 	rv.Set("eof", err == io.EOF)
-	rv.Set("buffer", trimNewline(s))
+	rv.Set("buffer", trim(s))
 	return rv.Value()
 }
 
 func (f *file) Write(call otto.FunctionCall) otto.Value {
 	v, _ := call.Argument(0).ToString()
-	_, err := f.f.WriteString(v)
-
-	if err != nil {
+	if _, err := f.f.WriteString(v); err != nil {
 		return module.Throw(f.vm, err)
 	}
 	return otto.UndefinedValue()

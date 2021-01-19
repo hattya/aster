@@ -1,7 +1,7 @@
 //
 // aster/internal/sh :: sh.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -15,7 +15,7 @@ import (
 )
 
 func Mkdir(s ...string) error {
-	return os.MkdirAll(filepath.Join(s...), 0777)
+	return os.MkdirAll(filepath.Join(s...), 0o777)
 }
 
 func Mkdtemp() (string, error) {
@@ -35,5 +35,5 @@ func Pushd(s ...string) (func() error, error) {
 }
 
 func Touch(s ...string) error {
-	return ioutil.WriteFile(filepath.Join(s...), []byte{}, 0666)
+	return ioutil.WriteFile(filepath.Join(s...), []byte{}, 0o666)
 }

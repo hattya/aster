@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: init.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -69,7 +69,7 @@ func init_(ctx *cli.Context) error {
 		return nil
 	}
 
-	f, err := os.OpenFile("Asterfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	f, err := os.OpenFile("Asterfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 	if err != nil {
 		return err
 	}

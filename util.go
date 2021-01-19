@@ -1,7 +1,7 @@
 //
 // aster :: util.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -19,7 +19,7 @@ func warn(ui *cli.CLI, a ...interface{}) {
 	ui.Errorln(a...)
 }
 
-func trimNewline(s string) string {
+func trim(s string) string {
 	switch {
 	case len(s) > 1 && s[len(s)-2:] == "\r\n":
 		s = s[:len(s)-2]
