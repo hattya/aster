@@ -9,5 +9,5 @@ require (
 	github.com/hattya/go.notify v0.0.0-20201207132218-f85fc95cf648
 	github.com/hattya/otto.module v0.0.0-20201223132946-c3fe36d90b4c
 	github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac
-	github.com/saracen/walker v0.1.1
+	github.com/saracen/walker v0.1.2
 )

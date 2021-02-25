@@ -12,8 +12,8 @@ github.com/hattya/otto.module v0.0.0-20201223132946-c3fe36d90b4c h1:et78+5Hu8UP+
 github.com/hattya/otto.module v0.0.0-20201223132946-c3fe36d90b4c/go.mod h1:f4lY99aLQsEAOTMsl8epXYNid2WPDWxfT0UQMddVV5M=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac h1:kYPjbEN6YPYWWHI6ky1J813KzIq/8+Wg4TO4xU7A/KU=
 github.com/robertkrimen/otto v0.0.0-20200922221731-ef014fd054ac/go.mod h1:xvqspoSXJTIpemEonrMDFq6XzwHYYgToXWj5eRX1OtY=
-github.com/saracen/walker v0.1.1 h1:Ou2QIKTWqo0QxhtuHVmtObbmhjMCEUyJ82xp0uV+MGI=
-github.com/saracen/walker v0.1.1/go.mod h1:0oKYMsKVhSJ+ful4p/XbjvXbMgLEkLITZaxozsl4CGE=
+github.com/saracen/walker v0.1.2 h1:/o1TxP82n8thLvmL4GpJXduYaRmJ7qXp8u9dSlV0zmo=
+github.com/saracen/walker v0.1.2/go.mod h1:0oKYMsKVhSJ+ful4p/XbjvXbMgLEkLITZaxozsl4CGE=
 golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a h1:WXEvlFVvvGxCJLG6REjsT03iWnKLEWinaScsxF2Vm2o=
 golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20191005200804-aed5e4c7ecf9/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
