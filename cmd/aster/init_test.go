@@ -119,8 +119,9 @@ func TestInitError(t *testing.T) {
 
 func TestConfigDir(t *testing.T) {
 	environ := map[string]string{
-		"HOME":    os.Getenv("HOME"),
-		"APPDATA": os.Getenv("APPDATA"),
+		"APPDATA":         os.Getenv("APPDATA"),
+		"HOME":            os.Getenv("HOME"),
+		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
 	}
 	defer func() {
 		for k, v := range environ {
