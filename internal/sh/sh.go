@@ -19,7 +19,7 @@ func Mkdir(s ...string) error {
 }
 
 func Mkdtemp() (string, error) {
-	dir, err := ioutil.TempDir("", "aster.test")
+	dir, err := ioutil.TempDir("", "aster")
 	return filepath.ToSlash(dir), err
 }
 

@@ -1,7 +1,7 @@
 //
 // aster :: asterfile.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,12 +9,12 @@
 package aster
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"regexp"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -27,7 +27,7 @@ import (
 var defaultIgnore string
 
 func init() {
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteString(`(?:^|.+[/`)
 	if runtime.GOOS == "windows" {
 		b.WriteString(`\\`)
