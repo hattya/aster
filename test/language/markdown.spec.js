@@ -1,7 +1,7 @@
 //
 // aster :: language/markdown.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -18,7 +18,7 @@ const language = require('language');
 
 os.whence = jest.fn();
 
-const markdown = require('../../lib/language/markdown.js');
+const markdown = require('../../lib/language/markdown');
 
 describe('language', () => {
   describe('markdown', () => {

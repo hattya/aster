@@ -1,7 +1,7 @@
 //
 // aster :: language/restructuredtext.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -18,7 +18,7 @@ const language = require('language');
 
 os.whence = jest.fn();
 
-const restructuredtext = require('../../lib/language/restructuredtext.js');
+const restructuredtext = require('../../lib/language/restructuredtext');
 
 describe('language', () => {
   describe('restructuredtext', () => {

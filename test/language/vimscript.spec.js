@@ -1,7 +1,7 @@
 //
 // aster :: language/vimscript.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -19,7 +19,7 @@ const language = require('language');
 os.whence = jest.fn();
 
 const path = require('path');
-const vimscript = require('../../lib/language/vimscript.js');
+const vimscript = require('../../lib/language/vimscript');
 
 describe('language', () => {
   describe('vimscript', () => {
