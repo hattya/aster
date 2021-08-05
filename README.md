@@ -4,7 +4,7 @@ Aster is a command line tool to handle events on file system modifications. It
 is inspired by [Guard](https://guardgem.org/).
 
 [![pkg.go.dev](https://pkg.go.dev/badge/github.com/hattya/aster.svg)](https://pkg.go.dev/github.com/hattya/aster)
-[![GitHub Actions](https://github.com/hattya/aster/workflows/CI/badge.svg)](https://github.com/hattya/aster/actions?query=workflow:CI)
+[![GitHub Actions](https://github.com/hattya/aster/actions/workflows/ci.yml/badge.svg)](https://github.com/hattya/aster/actions/workflows/ci.yml)
 [![Semaphore](https://semaphoreci.com/api/v1/hattya/aster/branches/master/badge.svg)](https://semaphoreci.com/hattya/aster)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/qc3luxk7q7jmx2ut/branch/master?svg=true)](https://ci.appveyor.com/project/hattya/aster)
 [![Codecov](https://codecov.io/gh/hattya/aster/branch/master/graph/badge.svg)](https://codecov.io/gh/hattya/aster)
