@@ -39,7 +39,7 @@ func New() (*aster.Aster, error) {
 }
 
 func Sandbox(test interface{}) error {
-	dir, err := sh.Mkdtemp()
+	dir, err := ioutil.TempDir("", "aster")
 	if err != nil {
 		return err
 	}

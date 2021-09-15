@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -84,12 +84,7 @@ func TestOS_Getwd(t *testing.T) {
 }
 
 func TestOS_Mkdir(t *testing.T) {
-	dir, err := sh.Mkdtemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-
+	dir := t.TempDir()
 	vm := aster.NewVM()
 
 	for _, src := range []string{
@@ -393,12 +388,7 @@ var os_OpenTests = []struct {
 }
 
 func TestOS_Open(t *testing.T) {
-	dir, err := sh.Mkdtemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-
+	dir := t.TempDir()
 	vm := aster.NewVM()
 
 	src := fmt.Sprintf(`require('os').open()`)
@@ -407,7 +397,7 @@ func TestOS_Open(t *testing.T) {
 	}
 
 	src = fmt.Sprintf(`require('os').open(%q)`, filepath.Join(dir, "_"))
-	_, err = vm.Run(src)
+	_, err := vm.Run(src)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -481,12 +471,7 @@ func TestOS_Open(t *testing.T) {
 }
 
 func TestOS_Remove(t *testing.T) {
-	dir, err := sh.Mkdtemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-
+	dir := t.TempDir()
 	vm := aster.NewVM()
 	sh.Touch(dir, "file")
 
@@ -502,12 +487,7 @@ func TestOS_Remove(t *testing.T) {
 }
 
 func TestOS_Rename(t *testing.T) {
-	dir, err := sh.Mkdtemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
-
+	dir := t.TempDir()
 	vm := aster.NewVM()
 	sh.Touch(dir, "a")
 
@@ -612,11 +592,7 @@ func TestOS_Stat(t *testing.T) {
 }
 
 func TestOS_System(t *testing.T) {
-	dir, err := sh.Mkdtemp()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+	dir := t.TempDir()
 	// stdout
 	stdout, err := os.Create(filepath.Join(dir, "stdout"))
 	if err != nil {

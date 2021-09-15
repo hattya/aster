@@ -18,11 +18,6 @@ func Mkdir(s ...string) error {
 	return os.MkdirAll(filepath.Join(s...), 0o777)
 }
 
-func Mkdtemp() (string, error) {
-	dir, err := ioutil.TempDir("", "aster")
-	return filepath.ToSlash(dir), err
-}
-
 func Pushd(s ...string) (func() error, error) {
 	wd, err := os.Getwd()
 	popd := func() error {
