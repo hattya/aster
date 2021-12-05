@@ -35,7 +35,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
       - name: Download modules
         run: go mod download
       - name: Install dependencies
