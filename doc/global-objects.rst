@@ -75,4 +75,4 @@ callback
   * ``Array`` of paths
 
 
-.. _runtime: https://golang.org/pkg/runtime/#pkg-constants
+.. _runtime: https://pkg.go.dev/runtime#pkg-constants
