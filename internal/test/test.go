@@ -1,7 +1,7 @@
 //
 // aster/internal/test :: test.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -10,7 +10,6 @@ package test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"runtime"
 
@@ -31,7 +30,7 @@ func Gen(src string) error {
 	if ci {
 		os.Remove("Asterfile")
 	}
-	return ioutil.WriteFile("Asterfile", []byte(src), 0o666)
+	return os.WriteFile("Asterfile", []byte(src), 0o666)
 }
 
 func New() (*aster.Aster, error) {
@@ -39,7 +38,7 @@ func New() (*aster.Aster, error) {
 }
 
 func Sandbox(test interface{}) error {
-	dir, err := ioutil.TempDir("", "aster")
+	dir, err := os.MkdirTemp("", "aster")
 	if err != nil {
 		return err
 	}

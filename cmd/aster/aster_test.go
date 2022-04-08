@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: aster_test.go
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,7 +9,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net"
 	"runtime"
 	"testing"
@@ -72,6 +72,6 @@ func clone() *cli.CLI {
 	app.Flags.Reset()
 	app.Flags.VisitAll(ui.Flags.Add)
 	ui.Action = cli.Option(watch)
-	ui.Stderr = ioutil.Discard
+	ui.Stderr = io.Discard
 	return ui
 }

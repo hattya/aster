@@ -41,7 +41,7 @@ aster.watch(/.+\.go$/, function(files) {
   // go test for each package
   var bad = go_.packagesOf(files).some(function(p) {
     try {
-      return go.test('-v', '-race', '-covermode', 'atomic', '-coverprofile', p + '/cover.out', p);
+      return go.test('-v', '-race', '-coverprofile', p + '/cover.out', p);
     } finally {
       aster.title(title);
     }

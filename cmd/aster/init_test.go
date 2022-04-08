@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: init_test.go
 //
-//   Copyright (c) 2015-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2015-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -10,7 +10,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,7 +38,7 @@ func TestInit(t *testing.T) {
 		if err := sh.Mkdir("template"); err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(filepath.Join("template", "go"), []byte(tmpl+"\n"), 0o666); err != nil {
+		if err := os.WriteFile(filepath.Join("template", "go"), []byte(tmpl+"\n"), 0o666); err != nil {
 			return err
 		}
 		for _, tt := range initTests {
@@ -48,7 +48,7 @@ func TestInit(t *testing.T) {
 			if err := app.Run([]string{"init", "go"}); err != nil {
 				return err
 			}
-			data, err := ioutil.ReadFile("Asterfile")
+			data, err := os.ReadFile("Asterfile")
 			if err != nil {
 				return err
 			}
@@ -67,7 +67,7 @@ func TestInitError(t *testing.T) {
 	save := configDir
 	defer func() { configDir = save }()
 
-	app.Stderr = ioutil.Discard
+	app.Stderr = io.Discard
 	defer func() { app.Stderr = nil }()
 
 	args := []string{"init", "go"}

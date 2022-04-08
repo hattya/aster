@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -10,7 +10,7 @@ package aster_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -460,7 +460,7 @@ func TestOS_Open(t *testing.T) {
 			t.Errorf("%v typeof rv = %v, expected %v", label, g, e)
 		}
 		// teardown
-		b, err := ioutil.ReadFile(filepath.Join(dir, "file"))
+		b, err := os.ReadFile(filepath.Join(dir, "file"))
 		if err != nil {
 			t.Fatal(label, err)
 		}
@@ -623,7 +623,7 @@ func TestOS_System(t *testing.T) {
 		t.Error(err)
 	}
 	stdout.Seek(0, os.SEEK_SET)
-	data, err := ioutil.ReadAll(stdout)
+	data, err := io.ReadAll(stdout)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -641,7 +641,7 @@ func TestOS_System(t *testing.T) {
 		t.Error("expected true, got false")
 	}
 	stderr.Seek(0, os.SEEK_SET)
-	data, err = ioutil.ReadAll(stderr)
+	data, err = io.ReadAll(stderr)
 	if err != nil {
 		t.Fatal(err)
 	}
