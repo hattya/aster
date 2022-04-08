@@ -4,10 +4,10 @@ go 1.16
 
 require (
 	github.com/fsnotify/fsnotify v1.5.1
-	github.com/hattya/go.binfmt v0.0.0-20210906132632-5adb6c8946c8
-	github.com/hattya/go.cli v0.0.0-20210908132550-ae86b1f54045
-	github.com/hattya/go.notify v0.0.0-20210910131829-9dfa69593e44
-	github.com/hattya/otto.module v0.0.0-20210912132518-3f7b14948879
-	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452
+	github.com/hattya/go.binfmt v0.0.0-20220327123938-c5791c2439fb
+	github.com/hattya/go.cli v0.0.0-20220328120704-5245e45808f2
+	github.com/hattya/go.notify v0.0.0-20220331123206-66d525c98650
+	github.com/hattya/otto.module v0.0.0-20220407121228-93108deda731
+	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
 	github.com/saracen/walker v0.1.2
 )
