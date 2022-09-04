@@ -123,11 +123,6 @@ func TestConfigDir(t *testing.T) {
 		"HOME":            os.Getenv("HOME"),
 		"XDG_CONFIG_HOME": os.Getenv("XDG_CONFIG_HOME"),
 	}
-	defer func() {
-		for k, v := range environ {
-			os.Setenv(k, v)
-		}
-	}()
 
 	if _, err := configDir(); err != nil {
 		t.Fatal(err)
@@ -135,7 +130,7 @@ func TestConfigDir(t *testing.T) {
 
 	// error
 	for k := range environ {
-		os.Setenv(k, "")
+		t.Setenv(k, "")
 	}
 	if _, err := configDir(); err == nil {
 		t.Fatal("expected error")

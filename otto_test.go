@@ -56,9 +56,7 @@ func TestOS_Getenv(t *testing.T) {
 	vm := aster.NewVM()
 	k := "__ASTER__"
 	v := "getenv"
-	if err := os.Setenv(k, v); err != nil {
-		t.Fatal(err)
-	}
+	t.Setenv(k, v)
 
 	src := fmt.Sprintf(`require('os').getenv(%q)`, k)
 	if s, err := testString(vm, src); err != nil {
@@ -513,6 +511,7 @@ func TestOS_Setenv(t *testing.T) {
 	vm := aster.NewVM()
 	k := "__ASTER__"
 	v := "setenv"
+	t.Setenv(k, v)
 
 	src := fmt.Sprintf(`require('os').setenv(%q, %q)`, k, v)
 	if err := testUndefined(vm, src); err != nil {
