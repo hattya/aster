@@ -7,8 +7,8 @@ require (
 	github.com/hattya/go.binfmt v0.0.0-20220820003416-4c100a3a0642
 	github.com/hattya/go.cli v0.0.0-20220820004708-c913fccaa66d
 	github.com/hattya/go.notify v0.0.0-20220823125811-0471ff07ec22
-	github.com/hattya/otto.module v0.0.0-20220826132404-6e1d44756178
-	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f
+	github.com/hattya/otto.module v0.0.0-20221215121650-20fe7df18ac4
+	github.com/robertkrimen/otto v0.1.0
 	github.com/saracen/walker v0.1.3
 )
 

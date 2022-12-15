@@ -1,4 +1,4 @@
-github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
+github.com/chzyer/logex v1.2.1/go.mod h1:JLbx6lG2kDbNRFnfkgvh4eRJRPX1QCoOIWomwysCBrQ=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -12,12 +12,12 @@ github.com/hattya/go.cli v0.0.0-20220820004708-c913fccaa66d h1:W4Cmg42/+UMS1ASqz
 github.com/hattya/go.cli v0.0.0-20220820004708-c913fccaa66d/go.mod h1:+TRuUC6M7HO4quiV0Lfd2yVBW/iP8p/8LZi+1A0j44M=
 github.com/hattya/go.notify v0.0.0-20220823125811-0471ff07ec22 h1:I2isIfxx/CP0WRuBjt8gGz8wP4xVBhjTttoZhgrPia4=
 github.com/hattya/go.notify v0.0.0-20220823125811-0471ff07ec22/go.mod h1:RKldOMHOVg9nhYCBo3DzglLwCCZ9dwAZ1VD2g7INBGc=
-github.com/hattya/otto.module v0.0.0-20220826132404-6e1d44756178 h1:VHz5FaLvyXwh98p6cztu6auxy912P25rV3yBXFULHss=
-github.com/hattya/otto.module v0.0.0-20220826132404-6e1d44756178/go.mod h1:tnToHJVGjd0cIr2g73/9RMYvJA9ttrxZbd0fWhhMFDc=
+github.com/hattya/otto.module v0.0.0-20221215121650-20fe7df18ac4 h1:V+XLlW8GlQy+OsLPAI/W2MJ9ReOSJ7RbcrzloVbS5FE=
+github.com/hattya/otto.module v0.0.0-20221215121650-20fe7df18ac4/go.mod h1:rMMHAFQNNW8eFVNaxwqrW96sQWWBi8NcEwt8Qx6njek=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f h1:a7clxaGmmqtdNTXyvrp/lVO/Gnkzlhc/+dLs5v965GM=
-github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f/go.mod h1:/mK7FZ3mFYEn9zvNPhpngTyatyehSwte5bJZ4ehL5Xw=
+github.com/robertkrimen/otto v0.1.0 h1:kYQdfpIZzkWFePLc95fP+l3UsJ8h9zROnwpd9azJk7s=
+github.com/robertkrimen/otto v0.1.0/go.mod h1:nuq0maJQz2rTj3sA9EtJleKkkP0QIihFANdtAgTvmyc=
 github.com/saracen/walker v0.1.3 h1:YtcKKmpRPy6XJTHJ75J2QYXXZYWnZNQxPCVqZSHVV/g=
 github.com/saracen/walker v0.1.3/go.mod h1:FU+7qU8DeQQgSZDmmThMJi93kPkLFgy0oVAcLxurjIk=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
