@@ -9,12 +9,12 @@ require (
 	github.com/hattya/go.notify v0.0.0-20230903140651-c149c5ab2f77
 	github.com/hattya/otto.module v0.0.0-20231225121616-843806186137
 	github.com/robertkrimen/otto v0.3.0
-	github.com/saracen/walker v0.1.3
+	github.com/saracen/walker v0.1.4
 )
 
 require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
+	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.11.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
