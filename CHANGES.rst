@@ -33,7 +33,7 @@ Release date: 2018-01-24
 * Introduce the Node.js module loading system.
 * Add ``-n`` flag to the aster command.
 * ``os`` is now as a module. ``os`` global object is still present for
-  backward compatiblity.
+  backward compatibility.
 * Add ``language`` module.
 * Add ``language/go`` module.
 * Add ``language/javascript`` module.

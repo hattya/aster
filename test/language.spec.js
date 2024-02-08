@@ -1,7 +1,7 @@
 //
 // aster :: language.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -44,7 +44,7 @@ describe('language', () => {
       failure: 'failed',
     };
 
-    it('should notify sucess', () => {
+    it('should notify success', () => {
       const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
       os.system.mockReturnValueOnce(false);
 

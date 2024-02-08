@@ -155,4 +155,4 @@ go.packagesOf(...files)
 in order of dependency.
 
 files
-  ``files`` is an ``Array`` of ``Stirng``.
+  ``files`` is an ``Array`` of ``String``.

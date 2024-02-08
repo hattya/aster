@@ -12,7 +12,7 @@ is inspired by [Guard](https://guardgem.org/).
 ## Installation
 
 ```console
-$ go get -u github.com/hattya/aster/cmd/aster
+$ go install github.com/hattya/aster/cmd/aster@latest
 ```
 
 
