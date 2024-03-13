@@ -1,6 +1,17 @@
 Aster Changelog
 ===============
 
+Version 0.4
+-----------
+
+* Drop Go 1.13 support.
+* Drop Go 1.14 support.
+* Drop Go 1.15 support.
+* Drop Go 1.16 support.
+* Drop Go 1.17 support.
+* Drop Go 1.18 support.
+
+
 Version 0.3
 -----------
 
@@ -19,6 +30,7 @@ Release date: 2020-12-24
   * Add ``go.mod.tidy`` function.
   * Add ``go.mod.vendor`` function.
 
+* Drop Go 1.12 support.
 * Add ``language/markdown`` module.
 
 
