@@ -4,6 +4,8 @@ Aster Changelog
 Version 0.4
 -----------
 
+Release date: 2024-03-13
+
 * Drop Go 1.13 support.
 * Drop Go 1.14 support.
 * Drop Go 1.15 support.

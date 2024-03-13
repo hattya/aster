@@ -1,7 +1,7 @@
 //
 // aster :: aster.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -10,4 +10,4 @@
 
 package aster
 
-const Version = "0.3+"
+const Version = "0.4"
