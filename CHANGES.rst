@@ -10,6 +10,7 @@ Version 0.4
 * Drop Go 1.16 support.
 * Drop Go 1.17 support.
 * Drop Go 1.18 support.
+* Drop Go 1.19 support.
 
 
 Version 0.3
