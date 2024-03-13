@@ -10,4 +10,4 @@
 
 package aster
 
-const Version = "0.4"
+const Version = "0.4+"
