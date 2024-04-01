@@ -9,6 +9,18 @@ Version 0.5
   * Add ``coverage.json`` function.
   * Add ``coverage.lcov`` function.
 
+* Improve ``language/vimscript`` module.
+
+  * Add ``primula.annotate`` function.
+  * Add ``primula.combine`` function.
+  * Add ``primula.erase`` function.
+  * Add ``primula.html`` function.
+  * Add ``primula.json`` function.
+  * Add ``primula.lcov`` function.
+  * Add ``primula.report`` function.
+  * Add ``primula.run`` function.
+  * Add ``primula.xml`` function.
+
 
 Version 0.4
 -----------

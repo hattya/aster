@@ -1,7 +1,7 @@
 //
 // aster :: language/vimscript.spec.js
 //
-//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -95,6 +95,75 @@ describe('language', () => {
             title: 'covimerage',
             success: 'write_coverage passed',
             failure: 'write_coverage failed',
+          });
+        });
+      });
+    });
+
+    describe('.primula()', () => {
+      it('should notify "primula not found"', () => {
+        os.whence.mockReturnValueOnce(false);
+
+        expect(vimscript.primula('--version')).toBe(true);
+        expect(os.whence).lastCalledWith('primula');
+        expect(aster.notify).lastCalledWith('failure', 'aster: primula', 'primula not found!');
+      });
+
+      it('should execute `primula --version`', () => {
+        os.whence.mockReturnValueOnce(true);
+        language.system.mockReturnValueOnce(false);
+
+        expect(vimscript.primula('--version')).toBe(false);
+        expect(language.system).lastCalledWith({
+          args: ['primula', '--version'],
+          options: undefined,
+          title: 'primula',
+          success: '--version passed',
+          failure: '--version failed',
+        });
+      });
+    });
+
+    describe('.primula', () => {
+      describe.each([
+        ['annotate'],
+        ['combine'],
+        ['erase'],
+        ['html'],
+        ['json'],
+        ['lcov'],
+        ['report'],
+        ['xml'],
+      ])('.%s()', (cmd) => {
+        it(`should execute \`primula ${cmd}\``, () => {
+          os.whence.mockReturnValueOnce(true);
+          language.system.mockReturnValueOnce(false);
+
+          expect(vimscript.primula[cmd]()).toBe(false);
+          expect(os.whence).lastCalledWith('primula');
+          expect(language.system).lastCalledWith({
+            args: ['primula', cmd],
+            options: undefined,
+            title: 'primula',
+            success: `${cmd} passed`,
+            failure: `${cmd} failed`,
+          });
+        });
+      });
+
+      describe('.run()', () => {
+        it('should execute `primula run themis --reporter dot`', () => {
+          os.whence.mockReturnValueOnce(true);
+          language.system.mockReturnValueOnce(false);
+
+          expect(vimscript.primula.run('themis', '--reporter', 'dot')).toBe(false);
+          expect(os.whence).lastCalledWith('primula');
+          expect(language.system).lastCalledWith({
+            args: ['primula', 'run', 'themis', '--reporter', 'dot'],
+            options: undefined,
+            title: 'primula',
+            success: 'run passed',
+            failure: 'run failed',
           });
         });
       });
