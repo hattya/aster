@@ -1,6 +1,15 @@
 Aster Changelog
 ===============
 
+Version 0.5
+-----------
+
+* Improve ``language/python`` module.
+
+  * Add ``coverage.json`` function.
+  * Add ``coverage.lcov`` function.
+
+
 Version 0.4
 -----------
 

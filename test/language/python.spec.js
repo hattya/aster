@@ -1,7 +1,7 @@
 //
 // aster :: language/python.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -53,6 +53,8 @@ describe('language', () => {
         ['combine'],
         ['erase'],
         ['html'],
+        ['json'],
+        ['lcov'],
         ['report'],
         ['xml'],
       ])('.%s()', (cmd) => {

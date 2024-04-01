@@ -377,7 +377,7 @@ exports.md2html = function md2html(object) {
 	"language/python.js": []byte(`//
 // aster :: language/python.js
 //
-//   Copyright (c) 2018-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2018-2024 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -415,6 +415,14 @@ coverage.erase = function erase() {
 
 coverage.html = function html() {
   return coverage.apply(null, ['html'].concat(Array.prototype.slice.call(arguments)));
+};
+
+coverage.json = function json() {
+  return coverage.apply(null, ['json'].concat(Array.prototype.slice.call(arguments)));
+};
+
+coverage.lcov = function lcov() {
+  return coverage.apply(null, ['lcov'].concat(Array.prototype.slice.call(arguments)));
 };
 
 coverage.report = function report() {

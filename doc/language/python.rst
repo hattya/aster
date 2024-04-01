@@ -11,7 +11,7 @@ python.coverage(...args)
 properties of this function.
 
 Requirements
-  - `coverage.py <https://bitbucket.org/ned/coveragepy>`_
+  - `coverage.py <https://github.com/nedbat/coveragepy>`_
 
 
 coverage.annotate(...args)
@@ -36,6 +36,18 @@ coverage.html(...args)
 ~~~~~~~~~~~~~~~~~~~~~~
 
 ``coverage.html`` represents ``coverage html``.
+
+
+coverage.json(...args)
+~~~~~~~~~~~~~~~~~~~~~~
+
+``coverage.json`` represents ``coverage json``.
+
+
+coverage.lcov(...args)
+~~~~~~~~~~~~~~~~~~~~~~
+
+``coverage.lcov`` represents ``coverage lcov``.
 
 
 coverage.report(...args)
