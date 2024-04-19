@@ -9,11 +9,11 @@ github.com/hattya/go.cli v0.0.0-20240224134234-a3d968fc2105 h1:elVFwpYd4Aogt2IFt
 github.com/hattya/go.cli v0.0.0-20240224134234-a3d968fc2105/go.mod h1:D1iOybTnGw3fgxlL3j1ho7PQ+/elh2g9BwEo3mOp/tw=
 github.com/hattya/go.notify v0.0.0-20240226125912-955f7ed0ca53 h1:ESnKwgS6CDwvS4Pj+ZobHXAmtyCHhNV3s4RJkiZ5Wh0=
 github.com/hattya/go.notify v0.0.0-20240226125912-955f7ed0ca53/go.mod h1:rZREGauDiyveCd3DTiAq1nKxANbUDHTTj0WrtmB78N4=
-github.com/hattya/otto.module v0.0.0-20240226130518-7876e7d43d06 h1:9Q2PbvM0gXlFPtZ4I6ROs3HLvZ1E8IqKK4gDx5Klku4=
-github.com/hattya/otto.module v0.0.0-20240226130518-7876e7d43d06/go.mod h1:Iz4vtnPi7LQfQv+pdS9Eq+HLzsLZ7bVzML0ibRl2ACM=
+github.com/hattya/otto.module v0.0.0-20240419123743-b4433d1d083f h1:7VBgkJQfxb6aMe1Im00w9arC0mI0JeHLy5tFjbaFrDQ=
+github.com/hattya/otto.module v0.0.0-20240419123743-b4433d1d083f/go.mod h1:JV2zTaLFni2RlSyNBM2xbkKzJqRyMxxp4b59u5HLxoM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
-github.com/robertkrimen/otto v0.3.0 h1:5RI+8860NSxvXywDY9ddF5HcPw0puRsd8EgbXV0oqRE=
-github.com/robertkrimen/otto v0.3.0/go.mod h1:uW9yN1CYflmUQYvAMS0m+ZiNo3dMzRUDQJX0jWbzgxw=
+github.com/robertkrimen/otto v0.4.0 h1:/c0GRrK1XDPcgIasAsnlpBT5DelIeB9U/Z/JCQsgr7E=
+github.com/robertkrimen/otto v0.4.0/go.mod h1:uW9yN1CYflmUQYvAMS0m+ZiNo3dMzRUDQJX0jWbzgxw=
 github.com/saracen/walker v0.1.4 h1:/WCOt98GRkQ0KgL6hXJFBpoH21XY6iCD2N6LQWBFiaU=
 github.com/saracen/walker v0.1.4/go.mod h1:2F+hfOidTHfXP2AmlKOqpO+yewf8fIvNUDBNJogpJbk=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
