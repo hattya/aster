@@ -21,6 +21,8 @@ Version 0.5
   * Add ``primula.run`` function.
   * Add ``primula.xml`` function.
 
+* Drop Go 1.20 support.
+
 
 Version 0.4
 -----------
