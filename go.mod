@@ -3,7 +3,7 @@ module github.com/hattya/aster
 go 1.21
 
 require (
-	github.com/fsnotify/fsnotify v1.7.0
+	github.com/fsnotify/fsnotify v1.8.0
 	github.com/hattya/go.binfmt v0.0.0-20240817085338-2a7dd8776fe7
 	github.com/hattya/go.cli v0.0.0-20240818060721-7cbd2f418d5e
 	github.com/hattya/go.notify v0.0.0-20240821132239-b1b5eec769aa
