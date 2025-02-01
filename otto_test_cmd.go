@@ -1,13 +1,12 @@
 //
 // aster :: otto_test_cmd.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
 
 //go:build ignore
-// +build ignore
 
 package main
 
