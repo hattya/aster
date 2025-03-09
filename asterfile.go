@@ -1,7 +1,7 @@
 //
 // aster :: asterfile.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -179,7 +179,7 @@ func (a *Aster) Ignore(name string) bool {
 		v, _ := ary.Get("length")
 		n, _ := v.ToInteger()
 
-		for i := int64(0); i < n; i++ {
+		for i := range n {
 			v, _ := ary.Get(strconv.FormatInt(i, 10))
 			if v.Class() == "RegExp" {
 				v, _ = v.Object().Call("test", name)

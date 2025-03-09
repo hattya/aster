@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -772,7 +772,7 @@ func TestBuffer(t *testing.T) {
 	if g, e := n, int64(3); g != e {
 		t.Errorf("ary.length = %v, expected %v", g, e)
 	}
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		e := strconv.FormatInt(i, 10)
 		v, _ = ary.Get(e)
 		if g, _ := v.ToString(); g != e {

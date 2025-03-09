@@ -1,7 +1,7 @@
 //
 // aster :: otto.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -177,7 +177,7 @@ func (*os_) system(call otto.FunctionCall) otto.Value {
 	v, _ = ary.Get("length")
 	n, _ := v.ToInteger()
 	args := make([]string, n)
-	for i := int64(0); i < n; i++ {
+	for i := range n {
 		v, _ := ary.Get(strconv.FormatInt(i, 10))
 		if !v.IsString() {
 			return otto.UndefinedValue()
