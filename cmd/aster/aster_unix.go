@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: aster_unix.go
 //
-//   Copyright (c) 2017-2023 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -15,7 +15,7 @@ import (
 	"github.com/hattya/go.notify/freedesktop"
 )
 
-var impls = map[string]interface{}{
+var impls = map[string]any{
 	"fdo":         "freedesktop",
 	"freedesktop": "freedesktop",
 	"gntp":        "gntp",

@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: aster.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -66,7 +66,7 @@ func init() {
 
 var (
 	icon = make(map[string]notify.Icon)
-	opts = map[string]interface{}{
+	opts = map[string]any{
 		"freedesktop:timeout": -1,
 		"gntp:enabled":        true,
 		"windows:sound":       true,

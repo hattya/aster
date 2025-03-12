@@ -109,8 +109,8 @@ var os_OpenTests = []struct {
 	in, out string
 	mode    string
 	method  string
-	args    []interface{}
-	rv      interface{}
+	args    []any
+	rv      any
 	err     string
 }{
 	// mode: r
@@ -119,8 +119,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "r",
 		method: "read",
-		args:   []interface{}{-1},
-		rv: map[string]interface{}{
+		args:   []any{-1},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "",
 		},
@@ -130,8 +130,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "r",
 		method: "read",
-		args:   []interface{}{1},
-		rv: map[string]interface{}{
+		args:   []any{1},
+		rv: map[string]any{
 			"eof":    true,
 			"buffer": "",
 		},
@@ -141,8 +141,8 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "r",
 		method: "read",
-		args:   []interface{}{11},
-		rv: map[string]interface{}{
+		args:   []any{11},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1\n",
 		},
@@ -152,7 +152,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\nline 2\n",
 		mode:   "r",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -162,7 +162,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\r\nline 2\r\n",
 		mode:   "r",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -172,7 +172,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "r",
 		method: "write",
-		args:   []interface{}{""},
+		args:   []any{""},
 		err:    "Error: write ",
 	},
 	// mode: r+
@@ -181,8 +181,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "r+",
 		method: "read",
-		args:   []interface{}{-1},
-		rv: map[string]interface{}{
+		args:   []any{-1},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "",
 		},
@@ -192,8 +192,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "r+",
 		method: "read",
-		args:   []interface{}{1},
-		rv: map[string]interface{}{
+		args:   []any{1},
+		rv: map[string]any{
 			"eof":    true,
 			"buffer": "",
 		},
@@ -203,8 +203,8 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "r+",
 		method: "read",
-		args:   []interface{}{11},
-		rv: map[string]interface{}{
+		args:   []any{11},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1\n",
 		},
@@ -214,7 +214,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\nline 2\n",
 		mode:   "r+",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -224,7 +224,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\r\nline 2\r\n",
 		mode:   "r+",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -234,7 +234,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "r+",
 		method: "write",
-		args:   []interface{}{"line 1\n"},
+		args:   []any{"line 1\n"},
 	},
 	// mode: w
 	{
@@ -242,7 +242,7 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "w",
 		method: "read",
-		args:   []interface{}{11},
+		args:   []any{11},
 		err:    "Error: read ",
 	},
 	{
@@ -257,7 +257,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "w",
 		method: "write",
-		args:   []interface{}{"line 1\n"},
+		args:   []any{"line 1\n"},
 	},
 	// mode: w+
 	{
@@ -265,8 +265,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "w+",
 		method: "read",
-		args:   []interface{}{-1},
-		rv: map[string]interface{}{
+		args:   []any{-1},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "",
 		},
@@ -276,8 +276,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "w+",
 		method: "read",
-		args:   []interface{}{11},
-		rv: map[string]interface{}{
+		args:   []any{11},
+		rv: map[string]any{
 			"eof":    true,
 			"buffer": "",
 		},
@@ -287,7 +287,7 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "w+",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    true,
 			"buffer": "",
 		},
@@ -297,7 +297,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "w+",
 		method: "write",
-		args:   []interface{}{"line 1\n"},
+		args:   []any{"line 1\n"},
 	},
 	// mode: a
 	{
@@ -305,7 +305,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "a",
 		method: "read",
-		args:   []interface{}{11},
+		args:   []any{11},
 		err:    "Error: read ",
 	},
 	{
@@ -320,7 +320,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\nline 2\n",
 		mode:   "a",
 		method: "write",
-		args:   []interface{}{"line 2\n"},
+		args:   []any{"line 2\n"},
 	},
 	// mode: a+
 	{
@@ -328,8 +328,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "a+",
 		method: "read",
-		args:   []interface{}{-1},
-		rv: map[string]interface{}{
+		args:   []any{-1},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "",
 		},
@@ -339,8 +339,8 @@ var os_OpenTests = []struct {
 		out:    "",
 		mode:   "a+",
 		method: "read",
-		args:   []interface{}{1},
-		rv: map[string]interface{}{
+		args:   []any{1},
+		rv: map[string]any{
 			"eof":    true,
 			"buffer": "",
 		},
@@ -350,8 +350,8 @@ var os_OpenTests = []struct {
 		out:    "line 1\n",
 		mode:   "a+",
 		method: "read",
-		args:   []interface{}{11},
-		rv: map[string]interface{}{
+		args:   []any{11},
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1\n",
 		},
@@ -361,7 +361,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\nline 2\n",
 		mode:   "a+",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -371,7 +371,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\r\nline 2\r\n",
 		mode:   "a+",
 		method: "readLine",
-		rv: map[string]interface{}{
+		rv: map[string]any{
 			"eof":    false,
 			"buffer": "line 1",
 		},
@@ -381,7 +381,7 @@ var os_OpenTests = []struct {
 		out:    "line 1\nline 2\n",
 		mode:   "a+",
 		method: "write",
-		args:   []interface{}{"line 2\n"},
+		args:   []any{"line 2\n"},
 	},
 }
 

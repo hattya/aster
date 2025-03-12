@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: aster_windows.go
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -14,7 +14,7 @@ import (
 	"github.com/hattya/go.notify/windows"
 )
 
-var impls = map[string]interface{}{
+var impls = map[string]any{
 	"fdo":         "freedesktop",
 	"freedesktop": "freedesktop",
 	"gntp":        "gntp",

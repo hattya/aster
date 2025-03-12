@@ -162,7 +162,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 	return v
 }
 
-func (a *Aster) Eval(src interface{}) (otto.Value, error) {
+func (a *Aster) Eval(src any) (otto.Value, error) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
@@ -209,7 +209,7 @@ L:
 		default:
 		}
 		// call RegExp.test
-		var cl []interface{}
+		var cl []any
 		for n := range files {
 			v, _ := w.rx.Call("test", n)
 			if b, _ := v.ToBoolean(); b {

@@ -1,7 +1,7 @@
 //
 // aster/internal/test :: test.go
 //
-//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -37,7 +37,7 @@ func New() (*aster.Aster, error) {
 	return aster.New(cli.NewCLI(), nil)
 }
 
-func Sandbox(test interface{}) error {
+func Sandbox(test any) error {
 	dir, err := os.MkdirTemp("", "aster")
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (p *Notifier) Close() error {
 	return p.mock("Close")
 }
 
-func (p *Notifier) Register(string, notify.Icon, map[string]interface{}) error {
+func (p *Notifier) Register(string, notify.Icon, map[string]any) error {
 	return p.mock("Register")
 }
 
@@ -94,6 +94,6 @@ func (p *Notifier) mock(method string) error {
 	return err
 }
 
-func (p *Notifier) Sys() interface{} {
+func (p *Notifier) Sys() any {
 	return nil
 }

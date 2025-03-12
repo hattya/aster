@@ -1,7 +1,7 @@
 //
 // aster :: util.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -14,7 +14,7 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-func warn(ui *cli.CLI, a ...interface{}) {
+func warn(ui *cli.CLI, a ...any) {
 	ui.Errorf("%v: ", ui.Name)
 	ui.Errorln(a...)
 }

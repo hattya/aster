@@ -1,7 +1,7 @@
 //
 // aster :: notify.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -31,6 +31,6 @@ func (g *GNTPValue) Set(s string) error {
 	return nil
 }
 
-func (g *GNTPValue) Get() interface{} { return string(*g) }
+func (g *GNTPValue) Get() any         { return string(*g) }
 func (g *GNTPValue) String() string   { return string(*g) }
 func (g *GNTPValue) IsBoolFlag() bool { return true }
