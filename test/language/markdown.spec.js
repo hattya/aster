@@ -1,7 +1,7 @@
 //
 // aster :: language/markdown.spec.js
 //
-//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -29,8 +29,8 @@ describe('language', () => {
     describe('.md2html()', () => {
       it('should notify "md2html not found"', () => {
         expect(markdown.md2html()).toBe(true);
-        expect(os.whence).lastCalledWith('md2html');
-        expect(aster.notify).lastCalledWith('failure', 'aster: md2html', 'md2html not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('md2html');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: md2html', 'md2html not found!');
       });
 
       it(`should execute \`md2html ${src} ${dst}\``, () => {
@@ -38,7 +38,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(markdown.md2html({ src })).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['md2html', src, dst],
           title: 'md2html',
           success: `${src}`,
@@ -51,7 +51,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(markdown.md2html({ options, src, dst })).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['md2html', '-m', src, dst],
           title: 'md2html',
           success: `${src}`,

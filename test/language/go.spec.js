@@ -1,7 +1,7 @@
 //
 // aster :: language/go.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -32,8 +32,8 @@ describe('language', () => {
         os.whence.mockReturnValueOnce(false);
 
         expect(go.dep('version')).toBe(true);
-        expect(os.whence).lastCalledWith('dep');
-        expect(aster.notify).lastCalledWith('failure', 'aster: dep', 'dep not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('dep');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: dep', 'dep not found!');
       });
 
       it('should execute `dep version`', () => {
@@ -41,7 +41,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(go.dep('version')).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['dep', 'version'],
           options: undefined,
           title: 'dep',
@@ -61,7 +61,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(go.dep[cmd]()).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['dep', cmd],
             options: undefined,
             title: 'dep',
@@ -81,7 +81,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(go.go.apply(null, args)).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['go'].concat(args),
           options: undefined,
           title: 'go',
@@ -106,7 +106,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(go.go[cmd]('./...')).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['go', cmd, './...'],
             options: undefined,
             title: 'go',
@@ -119,7 +119,7 @@ describe('language', () => {
       describe('.env()', () => {
         it('should execute `go env`, and return an array', () => {
           expect(go.go.env()).toStrictEqual([]);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['go', 'env'],
             options: { stdout: [] },
             title: 'go',
@@ -139,7 +139,7 @@ describe('language', () => {
             ['-json=true'],
           ].forEach((args) => {
             expect(go.go.list.apply(null, args)).toStrictEqual([]);
-            expect(language.system).lastCalledWith({
+            expect(language.system).toHaveBeenLastCalledWith({
               args: ['go', 'list', '-f', '{{.Dir}}'],
               options: { stdout: [] },
               title: 'go',
@@ -151,7 +151,7 @@ describe('language', () => {
 
         it('should execute `go list -f {{.Dir}} ./...`, and return an array', () => {
           expect(go.go.list('./...')).toStrictEqual([]);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['go', 'list', '-f', '{{.Dir}}', './...'],
             options: { stdout: [] },
             title: 'go',
@@ -171,7 +171,7 @@ describe('language', () => {
             language.system.mockReturnValueOnce(false);
 
             expect(go.go.mod[cmd]()).toBe(false);
-            expect(language.system).lastCalledWith({
+            expect(language.system).toHaveBeenLastCalledWith({
               args: ['go', 'mod', cmd],
               options: undefined,
               title: 'go',
@@ -188,7 +188,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(go.go.test('-race', './...')).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['go', 'test', '-race', './...'],
             options: undefined,
             title: 'go',
@@ -204,7 +204,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(go.go.test('-race', './...')).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['go', 'test', './...'],
             options: undefined,
             title: 'go',
@@ -226,7 +226,7 @@ describe('language', () => {
             language.system.mockReturnValueOnce(false);
 
             expect(go.go.tool.cover.apply(null, args)).toBe(false);
-            expect(language.system).lastCalledWith({
+            expect(language.system).toHaveBeenLastCalledWith({
               args: ['go', 'tool', 'cover'].concat(args),
               options: undefined,
               title: 'go',
@@ -271,7 +271,7 @@ describe('language', () => {
         os.system.mockReturnValueOnce(true);
 
         expect(go.packagesOf(['aster.go'])).toHaveLength(0);
-        expect(os.system).toBeCalled();
+        expect(os.system).toHaveBeenCalled();
       });
 
       it('should return an array of packages', () => {
@@ -317,8 +317,8 @@ describe('language', () => {
           path.join('_', '_.go'),
           'aster.go',
         ])).toHaveLength(4);
-        expect(os.getwd).toBeCalled();
-        expect(os.system).toBeCalled();
+        expect(os.getwd).toHaveBeenCalled();
+        expect(os.system).toHaveBeenCalled();
       });
     });
   });

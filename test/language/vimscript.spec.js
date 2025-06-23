@@ -1,7 +1,7 @@
 //
 // aster :: language/vimscript.spec.js
 //
-//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -28,8 +28,8 @@ describe('language', () => {
         os.whence.mockReturnValueOnce(false);
 
         expect(vimscript.covimerage('--version')).toBe(true);
-        expect(os.whence).lastCalledWith('covimerage');
-        expect(aster.notify).lastCalledWith('failure', 'aster: covimerage', 'covimerage not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('covimerage');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: covimerage', 'covimerage not found!');
       });
 
       it('should execute `covimerage --version`', () => {
@@ -37,7 +37,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(vimscript.covimerage('--version')).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['covimerage', '--version'],
           options: undefined,
           title: 'covimerage',
@@ -57,7 +57,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(vimscript.covimerage[cmd]()).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['covimerage', cmd],
             options: undefined,
             title: 'covimerage',
@@ -73,7 +73,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(vimscript.covimerage.run('vim', '-Nu', 'test/vimrc', '-c', "'Vader! test/**'")).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['covimerage', 'run', 'vim', '-Nu', 'test/vimrc', '-c', "'Vader! test/**'"],
             options: undefined,
             title: 'covimerage',
@@ -89,7 +89,7 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(vimscript.covimerage.write_coverage('profile.txt')).toBe(false);
-          expect(language.system).lastCalledWith({
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['covimerage', 'write_coverage', 'profile.txt'],
             options: undefined,
             title: 'covimerage',
@@ -105,8 +105,8 @@ describe('language', () => {
         os.whence.mockReturnValueOnce(false);
 
         expect(vimscript.primula('--version')).toBe(true);
-        expect(os.whence).lastCalledWith('primula');
-        expect(aster.notify).lastCalledWith('failure', 'aster: primula', 'primula not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('primula');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: primula', 'primula not found!');
       });
 
       it('should execute `primula --version`', () => {
@@ -114,7 +114,7 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(vimscript.primula('--version')).toBe(false);
-        expect(language.system).lastCalledWith({
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['primula', '--version'],
           options: undefined,
           title: 'primula',
@@ -140,8 +140,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(vimscript.primula[cmd]()).toBe(false);
-          expect(os.whence).lastCalledWith('primula');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('primula');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['primula', cmd],
             options: undefined,
             title: 'primula',
@@ -157,8 +157,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(vimscript.primula.run('themis', '--reporter', 'dot')).toBe(false);
-          expect(os.whence).lastCalledWith('primula');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('primula');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['primula', 'run', 'themis', '--reporter', 'dot'],
             options: undefined,
             title: 'primula',
@@ -174,10 +174,10 @@ describe('language', () => {
         os.whence.mockClear().mockReturnValue(false);
 
         expect(vimscript.themis()).toBe(true);
-        expect(os.whence).nthCalledWith(1, 'themis');
-        expect(os.whence).nthCalledWith(2, path.join('.', 'vim-themis', 'bin', 'themis'));
-        expect(os.whence).nthCalledWith(3, path.join('..', 'vim-themis', 'bin', 'themis'));
-        expect(aster.notify).lastCalledWith('failure', 'aster: themis', 'themis not found!');
+        expect(os.whence).toHaveBeenNthCalledWith(1, 'themis');
+        expect(os.whence).toHaveBeenNthCalledWith(2, path.join('.', 'vim-themis', 'bin', 'themis'));
+        expect(os.whence).toHaveBeenNthCalledWith(3, path.join('..', 'vim-themis', 'bin', 'themis'));
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: themis', 'themis not found!');
       });
 
       it.each([
@@ -189,8 +189,8 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(vimscript.themis('--reporter', 'dot')).toBe(false);
-        expect(os.whence).lastCalledWith(script);
-        expect(language.system).lastCalledWith({
+        expect(os.whence).toHaveBeenLastCalledWith(script);
+        expect(language.system).toHaveBeenLastCalledWith({
           args: [script, '--reporter', 'dot'],
           title: 'themis',
           success: 'passed',

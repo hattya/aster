@@ -1,7 +1,7 @@
 //
 // aster :: language/javascript.spec.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -27,8 +27,8 @@ describe('language', () => {
         os.whence.mockReturnValueOnce(false);
 
         expect(javascript.npm('prefix')).toBe(true);
-        expect(os.whence).lastCalledWith('npm');
-        expect(aster.notify).lastCalledWith('failure', 'aster: npm', 'npm not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('npm');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: npm', 'npm not found!');
       });
 
       it('should execute `npm prefix`', () => {
@@ -36,8 +36,8 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(javascript.npm('prefix')).toBe(false);
-        expect(os.whence).lastCalledWith('npm');
-        expect(language.system).lastCalledWith({
+        expect(os.whence).toHaveBeenLastCalledWith('npm');
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['npm', 'prefix'],
           options: undefined,
           title: 'npm',
@@ -57,8 +57,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(javascript.npm[cmd]()).toBe(false);
-          expect(os.whence).lastCalledWith('npm');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('npm');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['npm', cmd],
             options: undefined,
             title: 'npm',
@@ -77,8 +77,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(javascript.npm.run(script)).toBe(false);
-          expect(os.whence).lastCalledWith('npm');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('npm');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['npm', 'run', script],
             options: undefined,
             title: 'npm',

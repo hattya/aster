@@ -1,7 +1,7 @@
 //
 // aster :: language/restructuredtext.spec.js
 //
-//   Copyright (c) 2020-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -31,11 +31,11 @@ describe('language', () => {
         os.whence.mockClear().mockReturnValue(false);
 
         expect(restructuredtext.rst2html()).toBe(true);
-        expect(os.whence).nthCalledWith(1, 'rst2html5.py');
-        expect(os.whence).nthCalledWith(2, 'rst2html5');
-        expect(os.whence).nthCalledWith(3, 'rst2html.py');
-        expect(os.whence).nthCalledWith(4, 'rst2html');
-        expect(aster.notify).lastCalledWith('failure', 'aster: rst2html', 'rst2html not found!');
+        expect(os.whence).toHaveBeenNthCalledWith(1, 'rst2html5.py');
+        expect(os.whence).toHaveBeenNthCalledWith(2, 'rst2html5');
+        expect(os.whence).toHaveBeenNthCalledWith(3, 'rst2html.py');
+        expect(os.whence).toHaveBeenNthCalledWith(4, 'rst2html');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: rst2html', 'rst2html not found!');
       });
 
       it.each([
@@ -48,8 +48,8 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(restructuredtext.rst2html({ src })).toBe(false);
-        expect(os.whence).lastCalledWith(script);
-        expect(language.system).lastCalledWith({
+        expect(os.whence).toHaveBeenLastCalledWith(script);
+        expect(language.system).toHaveBeenLastCalledWith({
           args: [script, src, dst],
           title: 'rst2html',
           success: `${src}`,
@@ -67,8 +67,8 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(restructuredtext.rst2html({ options, src, dst })).toBe(false);
-        expect(os.whence).lastCalledWith(script);
-        expect(language.system).lastCalledWith({
+        expect(os.whence).toHaveBeenLastCalledWith(script);
+        expect(language.system).toHaveBeenLastCalledWith({
           args: [script].concat(options, [src, dst]),
           title: 'rst2html',
           success: `${src}`,

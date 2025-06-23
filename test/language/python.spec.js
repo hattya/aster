@@ -1,7 +1,7 @@
 //
 // aster :: language/python.spec.js
 //
-//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -27,8 +27,8 @@ describe('language', () => {
         os.whence.mockReturnValueOnce(false);
 
         expect(python.coverage('help')).toBe(true);
-        expect(os.whence).lastCalledWith('coverage');
-        expect(aster.notify).lastCalledWith('failure', 'aster: coverage', 'coverage not found!');
+        expect(os.whence).toHaveBeenLastCalledWith('coverage');
+        expect(aster.notify).toHaveBeenLastCalledWith('failure', 'aster: coverage', 'coverage not found!');
       });
 
       it('should execute `coverage help`', () => {
@@ -36,8 +36,8 @@ describe('language', () => {
         language.system.mockReturnValueOnce(false);
 
         expect(python.coverage('help')).toBe(false);
-        expect(os.whence).lastCalledWith('coverage');
-        expect(language.system).lastCalledWith({
+        expect(os.whence).toHaveBeenLastCalledWith('coverage');
+        expect(language.system).toHaveBeenLastCalledWith({
           args: ['coverage', 'help'],
           options: undefined,
           title: 'coverage',
@@ -63,8 +63,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(python.coverage[cmd]()).toBe(false);
-          expect(os.whence).lastCalledWith('coverage');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('coverage');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['coverage', cmd],
             options: undefined,
             title: 'coverage',
@@ -84,8 +84,8 @@ describe('language', () => {
           language.system.mockReturnValueOnce(false);
 
           expect(python.coverage.run.apply(null, args)).toBe(false);
-          expect(os.whence).lastCalledWith('coverage');
-          expect(language.system).lastCalledWith({
+          expect(os.whence).toHaveBeenLastCalledWith('coverage');
+          expect(language.system).toHaveBeenLastCalledWith({
             args: ['coverage', 'run'].concat(args),
             options: undefined,
             title: 'coverage',

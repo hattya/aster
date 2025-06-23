@@ -1,7 +1,7 @@
 //
 // aster :: language.spec.js
 //
-//   Copyright (c) 2020-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -49,9 +49,9 @@ describe('language', () => {
       os.system.mockReturnValueOnce(false);
 
       language.system(obj);
-      expect(spy).lastCalledWith(`> ${obj.args.join(' ')}`);
-      expect(os.system).lastCalledWith(obj.args, obj.options);
-      expect(aster.notify).lastCalledWith('success', `aster: ${obj.title}`, obj.success);
+      expect(spy).toHaveBeenLastCalledWith(`> ${obj.args.join(' ')}`);
+      expect(os.system).toHaveBeenLastCalledWith(obj.args, obj.options);
+      expect(aster.notify).toHaveBeenLastCalledWith('success', `aster: ${obj.title}`, obj.success);
 
       spy.mockRestore();
     });
@@ -67,9 +67,9 @@ describe('language', () => {
         success: 'passed',
         failure: 'failed',
       });
-      expect(spy).lastCalledWith(`> ${obj.args.join(' ')}`);
-      expect(os.system).lastCalledWith(obj.args, obj.options);
-      expect(aster.notify).lastCalledWith('failure', `aster: ${obj.title}`, obj.failure);
+      expect(spy).toHaveBeenLastCalledWith(`> ${obj.args.join(' ')}`);
+      expect(os.system).toHaveBeenLastCalledWith(obj.args, obj.options);
+      expect(aster.notify).toHaveBeenLastCalledWith('failure', `aster: ${obj.title}`, obj.failure);
 
       spy.mockRestore();
     });
