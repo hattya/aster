@@ -15,10 +15,18 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
-    "eslint": "^8.0.0",
+    "@eslint/eslintrc": "^3.0.0",
+    "@eslint/js": "^9.22.0",
+    "eslint": "^9.22.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "latest",
+    "globals": "latest",
     "jest": "^30.0.0"
+  },
+  "overrides": {
+    "eslint-config-airbnb-base": {
+      "eslint": "^9.0.0"
+    }
   },
   "jest": {
     "verbose": true
