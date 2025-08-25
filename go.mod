@@ -1,13 +1,13 @@
 module github.com/hattya/aster
 
-go 1.22
+go 1.23.0
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/hattya/go.binfmt v0.0.0-20250302122735-a5ee89a1ae23
-	github.com/hattya/go.cli v0.0.0-20250305133601-498452532936
-	github.com/hattya/go.notify v0.0.0-20250305134742-5a0dd4bc3031
-	github.com/hattya/otto.module v0.0.0-20250306132819-f94cedff5023
+	github.com/hattya/go.binfmt v0.0.0-20250818134204-f2f15c814c0e
+	github.com/hattya/go.cli v0.0.0-20250819131330-9b83e89f8859
+	github.com/hattya/go.notify v0.0.0-20250819132837-7d70a5d12dfa
+	github.com/hattya/otto.module v0.0.0-20250820130758-f4d92bd83107
 	github.com/robertkrimen/otto v0.5.1
 	github.com/saracen/walker v0.1.4
 )
@@ -15,8 +15,8 @@ require (
 require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/term v0.29.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 )
