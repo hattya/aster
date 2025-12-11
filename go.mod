@@ -6,14 +6,14 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/hattya/go.binfmt v0.0.0-20250818134204-f2f15c814c0e
 	github.com/hattya/go.cli v0.0.0-20250819131330-9b83e89f8859
-	github.com/hattya/go.notify v0.0.0-20250819132837-7d70a5d12dfa
+	github.com/hattya/go.notify v0.0.0-20251122085128-2e1c5a891633
 	github.com/hattya/otto.module v0.0.0-20250820130758-f4d92bd83107
 	github.com/robertkrimen/otto v0.5.1
 	github.com/saracen/walker v0.1.4
 )
 
 require (
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/godbus/dbus/v5 v5.2.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
