@@ -1,7 +1,7 @@
 //
 // aster :: otto_test.go
 //
-//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -389,7 +389,7 @@ func TestOS_Open(t *testing.T) {
 	dir := t.TempDir()
 	vm := aster.NewVM()
 
-	src := fmt.Sprintf(`require('os').open()`)
+	src := `require('os').open()`
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
@@ -442,7 +442,7 @@ func TestOS_Open(t *testing.T) {
 		o := v.Object()
 		// call method
 		v, err = o.Call(tt.method, tt.args...)
-		if err != nil && (tt.err == "" || strings.Index(err.Error(), tt.err) == -1) {
+		if err != nil && (tt.err == "" || !strings.Contains(err.Error(), tt.err)) {
 			t.Fatal(label, err)
 		}
 		rv, err := v.Export()
@@ -621,7 +621,7 @@ func TestOS_System(t *testing.T) {
 	if err := testUndefined(vm, src); err != nil {
 		t.Error(err)
 	}
-	stdout.Seek(0, os.SEEK_SET)
+	stdout.Seek(0, io.SeekStart)
 	data, err := io.ReadAll(stdout)
 	if err != nil {
 		t.Fatal(err)
@@ -639,7 +639,7 @@ func TestOS_System(t *testing.T) {
 	case !b:
 		t.Error("expected true, got false")
 	}
-	stderr.Seek(0, os.SEEK_SET)
+	stderr.Seek(0, io.SeekStart)
 	data, err = io.ReadAll(stderr)
 	if err != nil {
 		t.Fatal(err)

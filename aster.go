@@ -1,12 +1,12 @@
 //
 // aster :: aster.go
 //
-//   Copyright (c) 2014-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
 
-//go:generate modulizer -l std -o std.go lib
+//go:generate go tool modulizer -l std -o std.go lib
 
 package aster
 

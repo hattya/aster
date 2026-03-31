@@ -1,7 +1,7 @@
 //
 // aster/cmd/aster :: init.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -11,6 +11,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -83,7 +84,7 @@ func init_(ctx *cli.Context) error {
 		} else {
 			off = -1
 		}
-		if _, err := f.Seek(off, os.SEEK_END); err == nil {
+		if _, err := f.Seek(off, io.SeekEnd); err == nil {
 			b := make([]byte, -off)
 			if n, err := f.Read(b); err == nil {
 				switch n {

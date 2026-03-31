@@ -1,7 +1,7 @@
 //
 // aster :: otto.go
 //
-//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -322,11 +322,7 @@ func (f *file) Name(call otto.FunctionCall) otto.Value {
 
 func (f *file) Read(call otto.FunctionCall) otto.Value {
 	v, _ := call.Argument(0).ToInteger()
-	n := int(v)
-	if n < 0 {
-		n = 0
-	}
-	p := make([]byte, n)
+	p := make([]byte, max(v, 0))
 
 	n, err := f.br.Read(p)
 	if err != nil && err != io.EOF {
