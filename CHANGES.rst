@@ -22,6 +22,9 @@ Version 0.5
   * Add ``primula.xml`` function.
 
 * Drop Go 1.20 support.
+* Drop Go 1.21 support.
+* Drop Go 1.22 support.
+* Drop Go 1.23 support.
 
 
 Version 0.4
