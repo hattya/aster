@@ -30,7 +30,7 @@ var files = map[string][]byte{
 	"language/go.js": []byte(`//
 // aster :: language/go.js
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -65,7 +65,7 @@ function parse(a) {
   return a;
 }
 
-var dep = exports.dep = function dep() {
+var dep = exports.dep = function() {
   if (!os.whence('dep')) {
     aster.notify('failure', language.prefix + 'dep', 'dep not found!');
     return true;
@@ -73,15 +73,15 @@ var dep = exports.dep = function dep() {
   return system(arguments[0], ['dep'].concat(Array.prototype.slice.call(arguments)));
 };
 
-dep.ensure = function ensure() {
+dep.ensure = function() {
   return dep.apply(null, ['ensure'].concat(Array.prototype.slice.call(arguments)));
 };
 
-dep.prune = function prune() {
+dep.prune = function() {
   return dep.apply(null, ['prune'].concat(Array.prototype.slice.call(arguments)));
 };
 
-var go = exports.go = function go() {
+var go = exports.go = function() {
   var cmd;
   switch (arguments[0]) {
     case 'mod':
@@ -96,37 +96,37 @@ var go = exports.go = function go() {
   return system(cmd, ['go'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.build = function build() {
+go.build = function() {
   return go.apply(null, ['build'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.env = function env() {
+go.env = function() {
   var out = [];
   system('env', ['go', 'env'].concat(Array.prototype.slice.call(arguments)), { stdout: out });
   return out;
 };
 
-go.fix = function fix() {
+go.fix = function() {
   return go.apply(null, ['fix'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.fmt = function fmt() {
+go.fmt = function() {
   return go.apply(null, ['fmt'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.generate = function generate() {
+go.generate = function() {
   return go.apply(null, ['generate'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.get = function get() {
+go.get = function() {
   return go.apply(null, ['get'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.install = function install() {
+go.install = function() {
   return go.apply(null, ['install'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.list = function list() {
+go.list = function() {
   var args = [];
   for (var i = 0; i < arguments.length; i++) {
     var a = arguments[i];
@@ -148,24 +148,24 @@ go.list = function list() {
 };
 
 go.mod = {
-  download: function download() {
+  download: function() {
     return go.apply(null, ['mod', 'download'].concat(Array.prototype.slice.call(arguments)));
   },
 
-  tidy: function tidy() {
+  tidy: function() {
     return go.apply(null, ['mod', 'tidy'].concat(Array.prototype.slice.call(arguments)));
   },
 
-  vendor: function vendor() {
+  vendor: function() {
     return go.apply(null, ['mod', 'vendor'].concat(Array.prototype.slice.call(arguments)));
   },
 };
 
-go.run = function run() {
+go.run = function() {
   return go.apply(null, ['run'].concat(Array.prototype.slice.call(arguments)));
 };
 
-go.test = function test() {
+go.test = function() {
   var args = ['test'];
   for (var i = 0; i < arguments.length; i++) {
     var a = arguments[i];
@@ -184,7 +184,7 @@ go.test = function test() {
 };
 
 go.tool = {
-  cover: function cover() {
+  cover: function() {
     var cmd = 'cover';
     var args = ['go', 'tool', 'cover'];
     for (var i = 0; i < arguments.length; i++) {
@@ -206,11 +206,11 @@ go.tool = {
   },
 };
 
-go.vet = function vet() {
+go.vet = function() {
   return go.apply(null, ['vet'].concat(Array.prototype.slice.call(arguments)));
 };
 
-exports.combine = function combine(object) {
+exports.combine = function(object) {
   var out = os.open(object.out, 'w');
   out.write('mode: atomic\n');
   go.list.apply(null, object.packages).forEach(function(p) {
@@ -231,7 +231,7 @@ exports.combine = function combine(object) {
   return object.out;
 };
 
-exports.packagesOf = function packagesOf(files) {
+exports.packagesOf = function(files) {
   // changed packages
   var pkgs = files.map(function(f) {
     return ('./' + f.split(/[/\\]+/).slice(0, -1).join('/')).replace(/\/+$/, '');
@@ -303,7 +303,7 @@ exports.packagesOf = function packagesOf(files) {
 	"language/javascript.js": []byte(`//
 // aster :: language/javascript.js
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -328,22 +328,22 @@ var npm = exports.npm = function() {
   });
 };
 
-npm.install = function install() {
+npm.install = function() {
   return npm.apply(null, ['install'].concat(Array.prototype.slice.call(arguments)));
 };
 
-npm.run = function run() {
+npm.run = function() {
   return npm.apply(null, ['run'].concat(Array.prototype.slice.call(arguments)));
 };
 
-npm.test = function test() {
+npm.test = function() {
   return npm.apply(null, ['test'].concat(Array.prototype.slice.call(arguments)));
 };
 `),
 	"language/markdown.js": []byte(`//
 // aster :: language/markdown.js
 //
-//   Copyright (c) 2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2020-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -354,7 +354,7 @@ var os = require('os');
 var path = require('path');
 var language = require('language');
 
-exports.md2html = function md2html(object) {
+exports.md2html = function(object) {
   if (!os.whence('md2html')) {
     aster.notify('failure', language.prefix + 'md2html', 'md2html not found!');
     return true;
@@ -377,7 +377,7 @@ exports.md2html = function md2html(object) {
 	"language/python.js": []byte(`//
 // aster :: language/python.js
 //
-//   Copyright (c) 2018-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2018-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -387,7 +387,7 @@ exports.md2html = function md2html(object) {
 var os = require('os');
 var language = require('language');
 
-var coverage = exports.coverage = function coverage() {
+var coverage = exports.coverage = function() {
   if (!os.whence('coverage')) {
     aster.notify('failure', language.prefix + 'coverage', 'coverage not found!');
     return true;
@@ -401,46 +401,46 @@ var coverage = exports.coverage = function coverage() {
   });
 };
 
-coverage.annotate = function annotate() {
+coverage.annotate = function() {
   return coverage.apply(null, ['annotate'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.combine = function combine() {
+coverage.combine = function() {
   return coverage.apply(null, ['combine'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.erase = function erase() {
+coverage.erase = function() {
   return coverage.apply(null, ['erase'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.html = function html() {
+coverage.html = function() {
   return coverage.apply(null, ['html'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.json = function json() {
+coverage.json = function() {
   return coverage.apply(null, ['json'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.lcov = function lcov() {
+coverage.lcov = function() {
   return coverage.apply(null, ['lcov'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.report = function report() {
+coverage.report = function() {
   return coverage.apply(null, ['report'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.run = function run() {
+coverage.run = function() {
   return coverage.apply(null, ['run'].concat(Array.prototype.slice.call(arguments)));
 };
 
-coverage.xml = function xml() {
+coverage.xml = function() {
   return coverage.apply(null, ['xml'].concat(Array.prototype.slice.call(arguments)));
 };
 `),
 	"language/restructuredtext.js": []byte(`//
 // aster :: language/restructuredtext.js
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -451,7 +451,7 @@ var os = require('os');
 var path = require('path');
 var language = require('language');
 
-exports.rst2html = function rst2html(object) {
+exports.rst2html = function(object) {
   var script;
   var ok = ['rst2html5.py', 'rst2html.py'].some(function(s) {
     script = s;
@@ -483,7 +483,7 @@ exports.rst2html = function rst2html(object) {
 	"language/vimscript.js": []byte(`//
 // aster :: language/vimscript.js
 //
-//   Copyright (c) 2017-2024 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -494,7 +494,7 @@ var os = require('os');
 var path = require('path');
 var language = require('language');
 
-var covimerage = exports.covimerage = function covimerage() {
+var covimerage = exports.covimerage = function() {
   if (!os.whence('covimerage')) {
     aster.notify('failure', language.prefix + 'covimerage', 'covimerage not found!');
     return true;
@@ -524,7 +524,7 @@ covimerage.xml = function() {
   return covimerage.apply(null, ['xml'].concat(Array.prototype.slice.call(arguments)));
 };
 
-var primula = exports.primula = function primula() {
+var primula = exports.primula = function() {
   if (!os.whence('primula')) {
     aster.notify('failure', language.prefix + 'primula', 'primula not found!');
     return true;
@@ -538,43 +538,43 @@ var primula = exports.primula = function primula() {
   });
 };
 
-primula.annotate = function annotate() {
+primula.annotate = function() {
   return primula.apply(null, ['annotate'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.combine = function combine() {
+primula.combine = function() {
   return primula.apply(null, ['combine'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.erase = function erase() {
+primula.erase = function() {
   return primula.apply(null, ['erase'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.html = function html() {
+primula.html = function() {
   return primula.apply(null, ['html'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.json = function json() {
+primula.json = function() {
   return primula.apply(null, ['json'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.lcov = function lcov() {
+primula.lcov = function() {
   return primula.apply(null, ['lcov'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.report = function report() {
+primula.report = function() {
   return primula.apply(null, ['report'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.run = function run() {
+primula.run = function() {
   return primula.apply(null, ['run'].concat(Array.prototype.slice.call(arguments)));
 };
 
-primula.xml = function xml() {
+primula.xml = function() {
   return primula.apply(null, ['xml'].concat(Array.prototype.slice.call(arguments)));
 };
 
-exports.themis = function themis() {
+exports.themis = function() {
   var script = 'themis';
   if (!os.whence(script)) {
     var ok = ['.', '..'].some(function(e) {
@@ -598,7 +598,7 @@ exports.themis = function themis() {
 	"language.js": []byte(`//
 // aster :: language.js
 //
-//   Copyright (c) 2017-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2017-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -611,7 +611,7 @@ var path = require('path');
 exports.prefix = path.basename(os.getwd()) + ': ';
 exports.prompt = '> ';
 
-exports.system = function system(object) {
+exports.system = function(object) {
   // exec
   console.log(exports.prompt + object.args.join(' '));
   var rv = os.system(object.args, object.options);
@@ -628,7 +628,7 @@ exports.system = function system(object) {
 	"os.js": []byte(`//
 // aster :: os.js
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -641,23 +641,23 @@ function File(impl) {
   this._impl = impl;
 }
 
-File.prototype.close = function close() {
+File.prototype.close = function() {
   return this._impl.Close.apply(this, arguments);
 };
 
-File.prototype.name = function name() {
+File.prototype.name = function() {
   return this._impl.Name.apply(this, arguments);
 };
 
-File.prototype.read = function read() {
+File.prototype.read = function() {
   return this._impl.Read.apply(this, arguments);
 };
 
-File.prototype.readLine = function readLine() {
+File.prototype.readLine = function() {
   return this._impl.ReadLine.apply(this, arguments);
 };
 
-File.prototype.write = function write() {
+File.prototype.write = function() {
   return this._impl.Write.apply(this, arguments);
 };
 
@@ -672,15 +672,15 @@ function FileInfo(name, size, mode, mtime) {
   this.mtime = mtime;
 }
 
-FileInfo.prototype.isDir = function isDir() {
+FileInfo.prototype.isDir = function() {
   return (this.mode & os.MODE_DIR) !== 0;
 };
 
-FileInfo.prototype.isRegular = function isRegular() {
+FileInfo.prototype.isRegular = function() {
   return (this.mode & os.MODE_TYPE) === 0;
 };
 
-FileInfo.prototype.perm = function perm() {
+FileInfo.prototype.perm = function() {
   return this.mode & os.MODE_PERM;
 };
 
