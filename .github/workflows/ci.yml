@@ -41,7 +41,7 @@ jobs:
       - name: Setup Git
         run: git config --global core.autocrlf false
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Setup Go
@@ -63,7 +63,7 @@ jobs:
       - name: Lint core modules
         run: npm run lint
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: GO
