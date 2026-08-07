@@ -13,8 +13,6 @@
     "lint": "eslint lib test"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
     "@eslint/eslintrc": "^3.0.0",
     "@eslint/js": "^10.0.0",
     "eslint": "^10.0.0",
