@@ -51,7 +51,7 @@ func init() {
 
 type Aster struct {
 	ui *cli.CLI
-	i  int32
+	i  atomic.Int32
 	n  notify.Notifier
 
 	mu      sync.Mutex
@@ -151,7 +151,7 @@ func (a *Aster) reload(otto.FunctionCall) otto.Value {
 		name = "failure"
 		text = "Error occurred while reloading Asterfile"
 	} else {
-		atomic.AddInt32(&a.i, 1)
+		a.i.Add(1)
 
 		name = "success"
 		text = "Asterfile has been reloaded"
@@ -193,14 +193,14 @@ func (a *Aster) Ignore(name string) bool {
 }
 
 func (a *Aster) Reloaded() bool {
-	return atomic.SwapInt32(&a.i, 0) > 0
+	return a.i.Swap(0) > 0
 }
 
 func (a *Aster) OnChange(ctx context.Context, files map[string]int) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	i := atomic.LoadInt32(&a.i)
+	i := a.i.Load()
 L:
 	for _, w := range a.watches {
 		select {
@@ -228,7 +228,7 @@ L:
 
 		if len(files) == 0 {
 			break
-		} else if v := atomic.LoadInt32(&a.i); i != v {
+		} else if v := a.i.Load(); i != v {
 			// Asterfile has been reloaded
 			i = v
 			goto L

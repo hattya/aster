@@ -141,7 +141,7 @@ func (w *Watcher) Watch() error {
 	files := make(map[string]int)
 	fire := make(chan struct{}, 1)
 	done := make(chan struct{}, 1)
-	var retry int32
+	var retry atomic.Int32
 
 	timer := time.AfterFunc(0, func() {
 		mu.Lock()
@@ -206,7 +206,7 @@ func (w *Watcher) Watch() error {
 				case <-done:
 				default:
 					// retry later
-					atomic.AddInt32(&retry, 1)
+					retry.Add(1)
 					return
 				}
 
@@ -227,7 +227,7 @@ func (w *Watcher) Watch() error {
 				}
 				done <- struct{}{}
 				// retry
-				if atomic.SwapInt32(&retry, 0) > 0 {
+				if retry.Swap(0) > 0 {
 					select {
 					case fire <- struct{}{}:
 					default:
@@ -241,7 +241,7 @@ func (w *Watcher) Watch() error {
 		case <-w.quit:
 			<-done
 			timer.Stop()
-			atomic.SwapInt32(&retry, 0)
+			retry.Swap(0)
 			close(w.done)
 			return w.ctx.Err()
 		case <-w.ctx.Done():
