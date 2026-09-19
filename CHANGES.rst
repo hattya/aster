@@ -4,6 +4,8 @@ Aster Changelog
 Version 0.5
 -----------
 
+Release date: 2026-09-19
+
 * Improve ``language/python`` module.
 
   * Add ``coverage.json`` function.
